@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
     }
 });
 
-// --- SERVER BELLEĞİ ---
+// --- SUNUCU HAFIZASI ---
 let serverPartyData = []; 
 let serverEnemies = [];
 let currentMapUrl = null; 
@@ -36,7 +36,7 @@ function logToDM(type, sender, target, message) {
 }
 
 io.on('connection', (socket) => {
-  // GİRİŞ PAKETİ
+  // GİRİŞ
   socket.emit('party_update_client', serverPartyData);
   socket.emit('enemy_update_client', serverEnemies);
   if (currentMapUrl) socket.emit('map_update_client', currentMapUrl);
@@ -60,12 +60,7 @@ io.on('connection', (socket) => {
   
   socket.on('enemy_update', (enemies) => {
       serverEnemies = enemies;
-      io.emit('enemy_update_client', serverEnemies); // Herkese düşmanları yay
-  });
-
-  // GÖRSEL HASAR EFEKTİ (YENİ)
-  socket.on('show_damage_effect', (data) => {
-      io.emit('trigger_damage_effect', data); // {targetId, amount, type}
+      io.emit('enemy_update_client', serverEnemies);
   });
 
   socket.on('map_change', (url) => { currentMapUrl = url; io.emit('map_update_client', url); });
