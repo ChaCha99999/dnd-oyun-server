@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Master V3.2 (Combat Manager)</title>
+    <title>D&D Master V3.3 (Final Night)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -25,18 +25,27 @@
 
         /* --- KARAKTER KARTI --- */
         .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; transition: 0.3s; }
-        /* AKTİF SIRA GÖSTERGESİ (YENİ) */
-        .char-card.active-turn { border: 2px solid #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); background: rgba(46, 204, 113, 0.05); transform: scale(1.02); }
+        
+        /* AKTİF SIRA GÖSTERGESİ (GÜÇLÜ YEŞİL) */
+        .char-card.active-turn { border: 2px solid #2ecc71; box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); background: rgba(46, 204, 113, 0.1); transform: scale(1.02); z-index: 10; }
         
         .char-header { display: flex; gap: 10px; align-items: center; } 
         .char-avatar-container { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #555; overflow: hidden; position: relative; cursor: pointer; background: #222; display: flex; justify-content: center; align-items: center; flex-shrink: 0;} .char-avatar-container img { width: 100%; height: 100%; object-fit: cover; }
         .char-details { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; } 
         .inp-name { background: transparent; border: none; color: #f1c40f; font-family: 'Cinzel', serif; font-weight: bold; font-size: 14px; width: 100%; border-bottom: 1px solid transparent; }
-        .stat-row { display: flex; gap: 4px; } .stat-box { display: flex; align-items: center; justify-content: center; gap: 2px; padding: 4px; border-radius: 4px; flex: 1; font-size: 10px; color:#aaa; flex-direction: column;}
-        .box-hp { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; } .box-lvl { background: rgba(52, 152, 219, 0.2); border: 1px solid #3498db; } .box-init { background: rgba(155, 89, 182, 0.2); border: 1px solid #9b59b6; } .box-gold { background: rgba(241, 196, 15, 0.1); border: 1px solid #f39c12; }
+        
+        .stat-row { display: flex; gap: 4px; } 
+        .stat-box { display: flex; align-items: center; justify-content: center; gap: 2px; padding: 4px; border-radius: 4px; flex: 1; font-size: 9px; color:#aaa; flex-direction: column;}
+        .box-hp { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; } 
+        .box-lvl { background: rgba(52, 152, 219, 0.2); border: 1px solid #3498db; } 
+        .box-init { background: rgba(155, 89, 182, 0.2); border: 1px solid #9b59b6; } 
+        .box-gold { background: rgba(241, 196, 15, 0.1); border: 1px solid #f39c12; }
         .stat-input { width: 100%; background: transparent; border: none; color: #fff; text-align: center; font-weight: bold; font-family: 'Lato', sans-serif; font-size: 14px; }
-        .hp-bar-container { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-top: 2px; }
-        .hp-bar-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.5s, background 0.5s; }
+        
+        /* HP BAR */
+        .hp-bar-container { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-top: 4px; border: 1px solid #444; }
+        .hp-bar-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.3s ease, background-color 0.3s ease; }
+        
         .card-actions { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);} .icon-btn { cursor: pointer; color: #666; font-size: 14px; padding: 5px; transition: 0.2s; } .icon-btn:hover { color: #fff; }
 
         /* --- DM TOOLS --- */
@@ -45,14 +54,15 @@
         .dm-btn { width: 100%; padding: 10px; margin-top: 5px; background: #333; border: 1px solid #555; color: #ddd; cursor: pointer; font-family: 'Lato', sans-serif; border-radius: 4px; transition: 0.2s; } .dm-btn:hover { background: #444; border-color: #e74c3c; color: #fff; }
         .dm-input { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: 'Lato', sans-serif;}
 
-        /* --- VISUALS --- */
+        /* --- VISUALS (WHEEL, MODALS, LOG) --- */
+        /* ... Eski CSS kodları aynen korunuyor ... */
         #wheelOverlayContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 6000; justify-content: center; align-items: center; flex-direction: column; }
         .wheel-container { position: relative; width: 300px; height: 300px; }
         .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #dcdde1; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: conic-gradient(#e74c3c 0% 12.5%, #f1c40f 12.5% 25%, #3498db 25% 37.5%, #9b59b6 37.5% 50%, #2ecc71 50% 62.5%, #e67e22 62.5% 75%, #1abc9c 75% 87.5%, #95a5a6 87.5% 100%); transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1); transform: rotate(0deg); }
         .wheel-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 30px solid #fff; z-index: 10; }
         .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: #222; border-radius: 50%; border: 3px solid #fff; z-index: 5; display:flex; justify-content:center; align-items:center; color:#fff; font-size:24px;}
         #wheelResultText { margin-top: 30px; font-size: 28px; color: #f1c40f; font-weight: bold; opacity: 0; transition: opacity 0.5s; text-align: center; }
-
+        
         #timerOverlay { display: none; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); font-size: 80px; font-weight: 900; color: #e74c3c; text-shadow: 0 0 20px red; z-index: 3000; pointer-events: none; font-family: 'Courier New', monospace; letter-spacing: 5px; animation: pulseTimer 1s infinite; }
         @keyframes pulseTimer { 0% { opacity: 1; transform: translateX(-50%) scale(1); } 50% { opacity: 0.8; transform: translateX(-50%) scale(0.95); } 100% { opacity: 1; transform: translateX(-50%) scale(1); } }
         
@@ -66,7 +76,6 @@
         #currentIdentityDisplay { font-size: 10px; position: absolute; bottom: -20px; width: 100%; text-align: center; color: #3498db; pointer-events: none;}
         @keyframes popIn { 0% { transform: translate(-50%, -50%) scale(0.5); } 80% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
 
-        /* Log Panel */
         .log-panel { position: fixed; right: 20px; bottom: 20px; width: 220px; max-height: 300px; height: auto; padding: 10px; z-index: 1000; display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .log-panel.collapsed { height: 40px !important; overflow: hidden; opacity: 0.7; }
         .panel-header { font-size: 12px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 5px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
@@ -95,7 +104,6 @@
         @keyframes rotateCircle { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } 
         .crit-success { color: #f1c40f !important; text-shadow: 0 0 30px #f1c40f; } .crit-fail { color: #e74c3c !important; text-shadow: 0 0 30px #c0392b; }
 
-        /* HARİTA */
         #activeMapContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; display: none; justify-content: center; align-items: center; background: #000; }
         #activeMapImg { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 0 50px rgba(0,0,0,0.9); }
         .map-mode .dice-container { transform: scale(0.6) translateZ(10px); filter: drop-shadow(0 0 10px #000); }
@@ -129,7 +137,7 @@
         </div>
         
         <div class="dm-tool-row">
-            <div class="dm-tool-title"><i class="fas fa-sort-numeric-down"></i> SAVAŞ YÖNETİMİ</div>
+            <div class="dm-tool-title"><i class="fas fa-sort-numeric-down"></i> SAVAŞ BAŞLADI (INIT)</div>
             <button class="dm-btn" style="color:#fff;" onclick="rollAllInitiative()">1. HERKES İÇİN AT</button>
             <button class="dm-btn" style="color:#9b59b6; border-color:#9b59b6;" onclick="sortInitiative()">2. SIRALA (MANUEL)</button>
             <button class="dm-btn" style="color:#2ecc71; border-color:#2ecc71;" onclick="nextTurn()">3. SIRADAKİ KİŞİ</button>
@@ -179,32 +187,12 @@
         </div>
     </div>
 
-    <div id="wheelOverlayContainer">
-        <div class="wheel-pointer"></div>
-        <div class="wheel-container"><div class="wheel" id="theWheel"></div><div class="wheel-center"><i class="fas fa-star"></i></div></div>
-        <div id="wheelResultText">SONUÇ</div>
-    </div>
+    <div id="wheelOverlayContainer"><div class="wheel-pointer"></div><div class="wheel-container"><div class="wheel" id="theWheel"></div><div class="wheel-center"><i class="fas fa-star"></i></div></div><div id="wheelResultText">SONUÇ</div></div>
     <div id="timerOverlay">00:00</div>
-    <div id="whisperModal">
-        <div style="color:#9b59b6; font-size:20px; border-bottom:1px solid #555; padding-bottom:10px;"><i class="fas fa-user-secret"></i> GİZLİ MESAJ</div>
-        <div class="whisper-text" id="whisperContent">...</div>
-        <button class="dm-btn" onclick="document.getElementById('whisperModal').style.display='none'">KAPAT</button>
-    </div>
-    <div id="identityModal">
-        <div style="color:#3498db; font-size:20px; border-bottom:1px solid #555; padding-bottom:10px;">SEN KİMSİN?</div>
-        <div id="identityList" style="max-height:200px; overflow-y:auto; margin:10px 0;"></div>
-        <button class="dm-btn" onclick="document.getElementById('identityModal').style.display='none'">KAPAT</button>
-    </div>
-    <div id="voteModal">
-        <h2 style="color:#f1c40f; font-family:'Cinzel',serif;">GÜNÜN KAHRAMANI</h2>
-        <div class="vote-grid" id="voteGrid"></div>
-    </div>
-    <div id="winnerModal">
-        <h1 style="color:#f1c40f; font-family:'Cinzel',serif; margin:0;">KAZANAN</h1>
-        <div id="winnerName" style="font-size:40px; font-weight:bold; color:#fff; margin:20px 0;">İSİM</div>
-        <div style="color:#aaa;" id="voteCountDisplay">0 Oy ile</div>
-        <button class="dm-btn" onclick="document.getElementById('winnerModal').style.display='none'">KAPAT</button>
-    </div>
+    <div id="whisperModal"><div style="color:#9b59b6; font-size:20px; border-bottom:1px solid #555; padding-bottom:10px;"><i class="fas fa-user-secret"></i> GİZLİ MESAJ</div><div class="whisper-text" id="whisperContent">...</div><button class="dm-btn" onclick="document.getElementById('whisperModal').style.display='none'">KAPAT</button></div>
+    <div id="identityModal"><div style="color:#3498db; font-size:20px; border-bottom:1px solid #555; padding-bottom:10px;">SEN KİMSİN?</div><div id="identityList" style="max-height:200px; overflow-y:auto; margin:10px 0;"></div><button class="dm-btn" onclick="document.getElementById('identityModal').style.display='none'">KAPAT</button></div>
+    <div id="voteModal"><h2 style="color:#f1c40f; font-family:'Cinzel',serif;">GÜNÜN KAHRAMANI</h2><div class="vote-grid" id="voteGrid"></div></div>
+    <div id="winnerModal"><h1 style="color:#f1c40f; font-family:'Cinzel',serif; margin:0;">KAZANAN</h1><div id="winnerName" style="font-size:40px; font-weight:bold; color:#fff; margin:20px 0;">İSİM</div><div style="color:#aaa;" id="voteCountDisplay">0 Oy ile</div><button class="dm-btn" onclick="document.getElementById('winnerModal').style.display='none'">KAPAT</button></div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -212,7 +200,7 @@
         let partyData = [];
         let audioCtx;
         let myIdentityId = null;
-        let currentTurnIndex = -1; // Sıra kimde?
+        let currentTurnIndex = -1;
 
         // --- IDENTITY ---
         function openIdentityModal() {
@@ -233,12 +221,9 @@
         }
 
         // --- SOCKETS ---
-        socket.on('party_update_client', (data) => {
-            partyData = data; renderParty();
-        });
+        socket.on('party_update_client', (data) => { partyData = data; renderParty(); });
         socket.on('herkes_icin_zar', (veri) => {
-            const btn = document.getElementById('btn');
-            const resDiv = document.getElementById('result');
+            const btn = document.getElementById('btn'); const resDiv = document.getElementById('result');
             if (!document.body.classList.contains('rolling')) { document.body.classList.add('rolling'); playClickSound(); }
             setTimeout(() => {
                 document.body.classList.remove('rolling');
@@ -250,8 +235,7 @@
             }, 800);
         });
         socket.on('map_update_client', (url) => {
-            const div = document.getElementById('activeMapContainer');
-            const img = document.getElementById('activeMapImg');
+            const div = document.getElementById('activeMapContainer'); const img = document.getElementById('activeMapImg');
             if (url) { img.src = url; div.style.display = 'flex'; document.body.classList.add('map-mode'); } 
             else { div.style.display = 'none'; document.body.classList.remove('map-mode'); }
         });
@@ -274,22 +258,19 @@
         function setMap() { const url = document.getElementById('mapUrlInput').value; socket.emit('map_change', url); }
         function closeMap() { socket.emit('map_change', null); }
         
-        // YENİ İNİSİYATİF MANTIĞI
+        // INIT
         function rollAllInitiative() {
-            partyData.forEach(c => {
-                c.init = Math.floor(Math.random() * 20) + 1; // Otomatik d20
-            });
-            sortInitiative(); // Otomatik sırala ve kaydet
+            partyData.forEach(c => { c.init = Math.floor(Math.random() * 20) + 1; });
+            sortInitiative();
         }
         function sortInitiative() {
             partyData.sort((a, b) => (parseInt(b.init) || 0) - (parseInt(a.init) || 0));
-            currentTurnIndex = -1; // Sırayı sıfırla
-            saveData(); renderParty();
+            currentTurnIndex = -1; saveData(); renderParty();
         }
         function nextTurn() {
             currentTurnIndex++;
             if (currentTurnIndex >= partyData.length) currentTurnIndex = 0;
-            renderParty(); // Kartları güncelle (Highlight için)
+            renderParty();
         }
 
         function startTimer() { const s=document.getElementById('timerInput').value; if(s) socket.emit('timer_start', s); }
@@ -303,8 +284,7 @@
         function roll(sides) {
             playClickSound(); const btn = document.getElementById('btn'); btn.disabled = true; document.body.classList.add('rolling');
             const num = Math.floor(Math.random() * sides) + 1; 
-            let type = 'normal';
-            if (sides === 20) { if(num === 20) type = 'crit'; else if(num === 1) type = 'fail'; }
+            let type = 'normal'; if (sides === 20) { if(num === 20) type = 'crit'; else if(num === 1) type = 'fail'; }
             const senderName = getMyName();
             socket.emit('zar_atildi', { sonuc: num, tur: type, zaman: new Date().getHours()+":"+new Date().getMinutes(), atan: senderName, zarTipi: sides });
             setTimeout(() => {
@@ -333,11 +313,16 @@
         function renderParty() {
             const list = document.getElementById('characterList'); list.innerHTML = '';
             partyData.forEach((c, index) => {
-                const hp = parseInt(c.hp) || 0; const max = parseInt(c.maxHp) || hp || 10;
+                // HP BAR HESABI (FIXED)
+                const hp = parseInt(c.hp) || 0;
+                const max = parseInt(c.maxHp) || parseInt(c.hp) || 10; // Max yoksa current al
                 const percent = Math.min(100, Math.max(0, (hp / max) * 100));
-                let barColor = '#2ecc71'; if(percent < 50) barColor = '#f1c40f'; if(percent < 25) barColor = '#e74c3c';
                 
-                // Highlight active turn
+                let barColor = '#2ecc71'; // Yeşil
+                if(percent < 50) barColor = '#f1c40f'; // Sarı
+                if(percent < 25) barColor = '#e74c3c'; // Kırmızı
+                if(hp <= 0) barColor = '#7f8fa6'; // Ölü (Gri)
+
                 const activeClass = (index === currentTurnIndex) ? 'active-turn' : '';
 
                 const html = `
@@ -352,7 +337,7 @@
                                 <div class="stat-box box-init">INIT <input class="stat-input" value="${c.init || 0}" oninput="upd(${c.id},'init',this.value)"></div>
                                 <div class="stat-box box-gold"><i class="fas fa-coins" style="color:#f1c40f"></i> <input class="stat-input" value="${c.gold}" oninput="upd(${c.id},'gold',this.value)"></div>
                             </div>
-                            <div class="hp-bar-container"><div class="hp-bar-fill" style="width:${percent}%; background:${barColor}"></div></div>
+                            <div class="hp-bar-container"><div class="hp-bar-fill" style="width:${percent}%; background-color:${barColor}"></div></div>
                         </div>
                     </div>
                     <div class="card-actions"><i class="fas fa-eye icon-btn whisper-btn" onclick="sendWhisper(${c.id}, '${c.name}')" title="Fısılda"></i><i class="fas fa-trash icon-btn" onclick="delChar(${c.id})"></i></div>
@@ -360,6 +345,7 @@
                 list.insertAdjacentHTML('beforeend', html);
             });
         }
+        
         function upd(id,k,v){ const c=partyData.find(x=>x.id==id); if(c){c[k]=v; saveData();} }
         function saveData(){ socket.emit('party_update', partyData); } 
         function addCharacter(){ partyData.push({id:Date.now(), name:'', hp:10, maxHp:10, level:1, init:0, gold:0, avatar:null}); saveData(); renderParty(); }
@@ -384,6 +370,22 @@
             const myId = localStorage.getItem('dnd_my_identity');
             if(myId) { myIdentityId = myId; setTimeout(() => { const c = partyData.find(x => x.id == myId); if(c) document.getElementById('currentIdentityDisplay').innerText = c.name; }, 1000); }
         };
+        
+        // ANIMATION HELPER
+        function runVisualTimer(seconds) {
+            const el = document.getElementById('timerOverlay'); el.style.display = 'block'; let left = seconds;
+            const intv = setInterval(() => { left--; el.innerText = Math.floor(left/60)+":"+(left%60<10?'0':'')+(left%60); if (left <= 0) { clearInterval(intv); el.innerText="SÜRE BİTTİ!"; setTimeout(()=>el.style.display='none',3000); } }, 1000);
+        }
+        function showWheelResult(data) {
+             const overlay = document.getElementById('wheelOverlayContainer'); const wheel = document.getElementById('theWheel'); const resText = document.getElementById('wheelResultText');
+             overlay.style.display = 'flex'; resText.style.opacity = '0'; wheel.style.transition = 'none'; wheel.style.transform = 'rotate(0deg)';
+             setTimeout(() => { wheel.style.transition = 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)'; wheel.style.transform = `rotate(${data.angle}deg)`; }, 50);
+             setTimeout(() => {
+                 resText.innerText = data.text; resText.style.opacity = '1'; playClickSound();
+                 document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-fate"><span class="log-time">KADER</span><span>${data.text}</span></div>`);
+                 setTimeout(() => { overlay.style.display = 'none'; }, 4000);
+             }, 4000);
+        }
     </script>
 </body>
 </html>
