@@ -19,6 +19,7 @@ app.get('/', (req, res) => {
 });
 
 let serverPartyData = []; 
+let serverEnemies = []; 
 let currentMapUrl = null; 
 let takenIdentities = []; 
 let dmLogHistory = [];
@@ -34,6 +35,7 @@ function logToDM(type, sender, target, message) {
 
 io.on('connection', (socket) => {
   socket.emit('party_update_client', serverPartyData);
+  socket.emit('enemy_update_client', serverEnemies);
   if (currentMapUrl) socket.emit('map_update_client', currentMapUrl);
   socket.emit('update_taken_identities', takenIdentities);
   socket.emit('dm_log_history_load', dmLogHistory);
@@ -45,10 +47,17 @@ io.on('connection', (socket) => {
   });
 
   socket.on('zar_atildi', (veri) => socket.broadcast.emit('herkes_icin_zar', veri));
+  
   socket.on('party_update', (yeniVeri) => {
       serverPartyData = yeniVeri;
       socket.broadcast.emit('party_update_client', serverPartyData);
   });
+  
+  socket.on('enemy_update', (enemies) => {
+      serverEnemies = enemies;
+      io.emit('enemy_update_client', serverEnemies);
+  });
+
   socket.on('map_change', (url) => { currentMapUrl = url; io.emit('map_update_client', url); });
   socket.on('dm_whisper', (d) => { io.emit('receive_whisper', d); logToDM('dm-sent', 'DM', d.targetName, d.message); });
   socket.on('player_whisper', (d) => { io.emit('dm_receive_player_msg', d); logToDM('dm-received', d.sender, 'DM', d.message); });
@@ -56,7 +65,7 @@ io.on('connection', (socket) => {
   socket.on('timer_start', (s) => io.emit('timer_update', s));
   socket.on('wheel_spin', (d) => io.emit('wheel_result', d));
   socket.on('start_vote', () => { io.emit('show_vote_screen'); });
-  socket.on('cast_vote', (name) => { }); 
+  socket.on('cast_vote', (name) => { });
   socket.on('end_vote', () => { io.emit('vote_result_announce', {winner: 'Kazanan', votes: 0}); });
 });
 
