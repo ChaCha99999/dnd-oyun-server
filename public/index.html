@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Master V4.4 (Stable RPG)</title>
+    <title>D&D Master V4.5 (Final Fixes)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -25,7 +25,7 @@
         .side-drawer.open { left: 0; }
         .drawer-header { font-size: 18px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;}
 
-        /* --- KARAKTER KARTI --- */
+        /* --- KARAKTER KARTI (DÜZELTİLDİ: HP/MAX Girişi) --- */
         .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; transition: 0.3s; }
         .char-card.active-turn { border: 2px solid #2ecc71; box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); background: rgba(46, 204, 113, 0.1); transform: scale(1.02); z-index: 10; }
         .char-header { display: flex; gap: 10px; align-items: center; } 
@@ -35,88 +35,70 @@
         
         .stat-row { display: flex; gap: 4px; } 
         .stat-box { display: flex; align-items: center; justify-content: center; gap: 2px; padding: 4px; border-radius: 4px; flex: 1; font-size: 9px; color:#aaa; flex-direction: column;}
+        
         .box-hp { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; } 
         .box-sp { background: rgba(52, 152, 219, 0.2); border: 1px solid #3498db; }
         .box-lvl { background: rgba(52, 152, 219, 0.2); border: 1px solid #3498db; } 
         .box-init { background: rgba(155, 89, 182, 0.2); border: 1px solid #9b59b6; }
-        .stat-input { width: 100%; background: transparent; border: none; color: #fff; text-align: center; font-weight: bold; font-family: 'Lato', sans-serif; font-size: 14px; }
         
-        /* Barlar */
-        .hp-bar-container { width: 100%; height: 6px; background: #222; border-radius: 3px; overflow: hidden; margin-top: 3px; border: 1px solid #444; }
+        /* Stat Input Düzeni (Yan yana) */
+        .stat-dual { display: flex; align-items: center; gap: 2px; }
+        .stat-input { width: 100%; background: transparent; border: none; color: #fff; text-align: center; font-weight: bold; font-family: 'Lato', sans-serif; font-size: 14px; }
+        .stat-sep { color: #555; font-size: 12px; }
+
+        .hp-bar-container { width: 100%; height: 6px; background: #222; border-radius: 3px; overflow: hidden; margin-top: 3px; }
         .hp-bar-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.3s ease; }
         .sp-bar-fill { height: 100%; background: #3498db; width: 100%; transition: width 0.3s ease; }
 
-        .card-actions { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);} 
-        .icon-btn { cursor: pointer; color: #666; font-size: 14px; padding: 5px; transition: 0.2s; } .icon-btn:hover { color: #fff; }
+        .card-actions { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);} .icon-btn { cursor: pointer; color: #666; font-size: 14px; padding: 5px; transition: 0.2s; } .icon-btn:hover { color: #fff; }
+
+        /* --- SAHNE & ZAR --- */
+        .scene { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; } 
+        .dice-container { width: 250px; height: 250px; position: relative; transform-style: preserve-3d; transition: transform 0.8s; } 
+        .toad-svg { width: 100%; height: 100%; filter: contrast(1.15) saturate(1.1); } 
+        .rune-container { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); } 
+        .magic-circle { position: absolute; width: 100%; height: 100%; border: 3px dotted rgba(158, 212, 123, 0.4); border-radius: 50%; animation: rotateCircle 15s linear infinite; } 
+        .dice-number { 
+            font-size: 46px; font-weight: 900; color: #e1e6e2; 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); 
+            text-shadow: 0 0 20px rgba(106, 176, 76, 0.4); 
+            display:flex; justify-content:center; align-items:center; flex-direction:column; width:100%; z-index:10;
+        }
+        .roller-name { font-size: 16px; color: #f1c40f; font-family: 'Cinzel', serif; margin-bottom: 5px; text-shadow: 2px 2px 4px #000; }
+        .dice-bar { display: flex; gap: 10px; margin-top: 20px; }
+        .mini-dice-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid #777; color: #ccc; cursor: pointer; font-family: 'Lato', sans-serif; font-weight: bold; transition: 0.2s; }
+        .mini-dice-btn:hover { border-color: #f1c40f; color: #f1c40f; transform: scale(1.1); background: rgba(0,0,0,0.9); }
+        button.roll-btn { padding: 12px 50px; font-family: 'Cinzel', serif; font-size: 20px; font-weight: 800; color: #dcdde1; background: linear-gradient(180deg, #3a423b 0%, #1a1d1a 100%); border: 1px solid #57606f; border-radius: 4px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s ease; z-index: 20;} 
+        button.roll-btn:disabled { opacity: 0.6; cursor: not-allowed; } 
+        .rolling .dice-container { animation: shakeDice 0.6s ease-in-out infinite; } .rolling .dice-number { display: none; }
+        @keyframes rotateCircle { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes shakeDice { 0% { transform: rotateX(0); } 25% { transform: rotateX(10deg); } 50% { transform: rotateX(-5deg); } 75% { transform: rotateX(5deg); } 100% { transform: rotateX(0); } }
+        .crit-success { color: #f1c40f !important; text-shadow: 0 0 30px #f1c40f; } .crit-fail { color: #e74c3c !important; text-shadow: 0 0 30px #c0392b; }
 
         /* --- DM TOOLS --- */
         .dm-tool-row { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; } .dm-tool-title { font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: bold; }
         .dm-btn { width: 100%; padding: 10px; margin-top: 5px; background: #333; border: 1px solid #555; color: #ddd; cursor: pointer; font-family: 'Lato', sans-serif; border-radius: 4px; transition: 0.2s; } .dm-btn:hover { background: #444; border-color: #e74c3c; color: #fff; }
         .dm-input { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: 'Lato', sans-serif;}
 
-        /* --- ZAR & SAHNE --- */
-        .scene { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; } 
-        .dice-container { width: 250px; height: 250px; position: relative; transform-style: preserve-3d; transition: transform 0.8s; } 
-        .toad-svg { width: 100%; height: 100%; filter: contrast(1.15) saturate(1.1); } 
-        .rune-container { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); } 
-        .magic-circle { position: absolute; width: 100%; height: 100%; border: 3px dotted rgba(158, 212, 123, 0.4); border-radius: 50%; animation: rotateCircle 15s linear infinite; } 
-        
-        /* ZAR YAZISI MERKEZLEME (Düzeltildi) */
-        .dice-number { 
-            font-size: 46px; font-weight: 900; color: #e1e6e2; 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); 
-            text-shadow: 0 0 20px rgba(106, 176, 76, 0.4); 
-            width:100%; text-align:center; z-index: 10;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-        .roller-name { font-size: 16px; color: #f1c40f; font-family: 'Cinzel', serif; margin-bottom: 5px; text-shadow: 2px 2px 4px #000; }
-        
-        .dice-bar { display: flex; gap: 10px; margin-top: 20px; }
-        .mini-dice-btn { width: 45px; height: 45px; border-radius: 50%; background: rgba(0,0,0,0.7); border: 1px solid #777; color: #ccc; cursor: pointer; font-weight: bold; }
-        .mini-dice-btn:hover { border-color: #f1c40f; color: #f1c40f; transform: scale(1.1); background: #000; }
-        button.roll-btn { padding: 12px 50px; font-family: 'Cinzel', serif; font-size: 20px; font-weight: 800; color: #dcdde1; background: linear-gradient(180deg, #3a423b 0%, #1a1d1a 100%); border: 1px solid #57606f; border-radius: 4px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s ease; z-index: 20;} 
-        button.roll-btn:disabled { opacity: 0.6; cursor: not-allowed; } 
-
-        .rolling .dice-container { animation: shakeDice 0.6s ease-in-out infinite; } .rolling .dice-number { display: none; }
-        @keyframes rotateCircle { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes shakeDice { 0% { transform: rotateX(0); } 25% { transform: rotateX(10deg); } 50% { transform: rotateX(-5deg); } 75% { transform: rotateX(5deg); } 100% { transform: rotateX(0); } }
-        .crit-success { color: #f1c40f !important; text-shadow: 0 0 30px #f1c40f; } .crit-fail { color: #e74c3c !important; text-shadow: 0 0 30px #c0392b; }
-
         /* --- MODALS --- */
-        #wheelOverlayContainer, #timerOverlay, #whisperModal, #identityModal, #voteModal, #winnerModal, #dmLogModal, #charDetailModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 6000; justify-content: center; align-items: center; background: rgba(0,0,0,0.8); }
+        #wheelOverlayContainer, #timerOverlay, #whisperModal, #identityModal, #voteModal, #winnerModal, #dmLogModal, #charDetailModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 6000; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); }
         #voteModal > div, #winnerModal > div, #whisperModal > div, #identityModal > div { background: #1a1a1a; padding: 20px; border-radius: 10px; border: 2px solid #555; text-align: center; width: 350px; }
         .identity-option { padding: 10px; margin: 5px 0; background: #222; border: 1px solid #444; color: #fff; cursor: pointer; } 
         .identity-option:hover { background: #3498db; } .identity-option.taken { opacity: 0.5; background: #444; pointer-events: none; }
         
-        /* TIMER FIX: TAM ORTALAMA */
-        #timerOverlay { 
-            position: fixed; 
-            top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); 
-            font-size: 120px; 
-            font-weight: 900; 
-            color: #e74c3c; 
-            pointer-events: none; 
-            text-shadow: 0 0 30px red;
-            font-family: 'Courier New', monospace;
+        /* ÇARK DÜZENLEMESİ (FIX) */
+        .wheel-container { position: relative; width: 300px; height: 300px; z-index: 6001;}
+        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #dcdde1; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: conic-gradient(#e74c3c 0% 12.5%, #f1c40f 12.5% 25%, #3498db 25% 37.5%, #9b59b6 37.5% 50%, #2ecc71 50% 62.5%, #e67e22 62.5% 75%, #1abc9c 75% 87.5%, #95a5a6 87.5% 100%); transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1); }
+        .wheel-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 30px solid #fff; z-index: 6002; }
+        /* Sonuç Yazısı ÖNDE */
+        #wheelResultText { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            font-size: 40px; color: #fff; font-weight: 900; 
+            text-shadow: 0 0 20px #000, 0 0 10px #f1c40f; 
+            z-index: 6005; opacity: 0; transition: opacity 0.5s; 
+            background: rgba(0,0,0,0.6); padding: 20px; border-radius: 10px; border: 2px solid #f1c40f;
         }
 
-        /* KARAKTER DETAY PENCERESİ STİLLERİ */
-        #charDetailModal { z-index: 7000; }
-        .detail-window { width: 500px; max-width: 90%; height: 600px; background: #1a1a1a; border: 2px solid #f1c40f; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
-        .detail-header { padding: 15px; background: #222; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center; font-family: 'Cinzel'; font-size: 18px; color: #f1c40f; }
-        .detail-tabs { display: flex; background: #111; }
-        .tab-btn { flex: 1; padding: 15px; background: transparent; border: none; color: #777; cursor: pointer; border-bottom: 3px solid transparent; font-family: 'Lato'; font-weight: bold; transition: 0.2s; }
-        .tab-btn.active { color: #fff; border-bottom-color: #f1c40f; background: #222; }
-        .detail-content { flex: 1; padding: 20px; overflow-y: auto; font-family: 'Lato'; text-align: left; }
-        .tab-pane { display: none; } .tab-pane.active { display: block; }
-        
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .stat-group { background: #222; padding: 10px; border-radius: 5px; border: 1px solid #444; }
-        .stat-label { font-size: 11px; color: #aaa; margin-bottom: 5px; display: block; }
-        .item-list { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
-        .list-item { background: #2d3436; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #777; }
-        .add-row { display: flex; gap: 5px; margin-bottom: 10px; }
-        
+        #timerOverlay { font-size: 80px; font-weight: 900; color: #e74c3c; pointer-events: none; }
         #dmLogModal > div { background:#111; padding:20px; border:1px solid #e84393; width:500px; height:400px; display:flex; flex-direction:column; }
         #dmLogList { flex:1; overflow-y:auto; border:1px solid #333; margin:10px 0; text-align:left; padding:5px; font-size:12px; }
         .secret-entry { margin-bottom: 5px; border-left: 2px solid #555; padding: 2px; }
@@ -127,11 +109,18 @@
         .log-entry { padding: 5px; border-radius: 4px; background: rgba(255,255,255,0.08); display: flex; justify-content: space-between; }
         #activeMapContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; display: none; justify-content: center; align-items: center; background: #000; }
         #activeMapImg { max-width: 100%; max-height: 100%; object-fit: contain; }
-        #wheelOverlayContainer { z-index: 6000; }
-        .wheel-container { position: relative; width: 300px; height: 300px; }
-        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #dcdde1; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: conic-gradient(#e74c3c 0% 12.5%, #f1c40f 12.5% 25%, #3498db 25% 37.5%, #9b59b6 37.5% 50%, #2ecc71 50% 62.5%, #e67e22 62.5% 75%, #1abc9c 75% 87.5%, #95a5a6 87.5% 100%); transition: transform 4s; }
-        .wheel-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 30px solid #fff; z-index: 10; }
-        #wheelResultText { margin-top: 30px; font-size: 28px; color: #f1c40f; font-weight: bold; }
+
+        /* DETAY MODAL STİL */
+        .detail-window { width: 500px; max-width: 90%; height: 600px; background: #1a1a1a; border: 2px solid #f1c40f; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        .detail-header { padding: 15px; background: #222; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center; font-family: 'Cinzel'; font-size: 18px; color: #f1c40f; }
+        .detail-tabs { display: flex; background: #111; }
+        .tab-btn { flex: 1; padding: 15px; background: transparent; border: none; color: #777; cursor: pointer; border-bottom: 3px solid transparent; font-family: 'Lato'; font-weight: bold; transition: 0.2s; }
+        .tab-btn.active { color: #fff; border-bottom-color: #f1c40f; background: #222; }
+        .detail-content { flex: 1; padding: 20px; overflow-y: auto; font-family: 'Lato'; text-align: left; }
+        .tab-pane { display: none; } .tab-pane.active { display: block; }
+        .item-list { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+        .list-item { background: #2d3436; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #777; }
+        .add-row { display: flex; gap: 5px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -159,7 +148,7 @@
     <div id="activeMapContainer"><img id="activeMapImg" src=""></div>
 
     <div class="scene">
-        <div class="dice-container" id="dice"><svg class="toad-svg" viewBox="0 0 200 200"><defs><radialGradient id="skinGrad" cx="50%" cy="40%" r="65%"><stop offset="0%" style="stop-color:#596248;stop-opacity:1"/><stop offset="100%" style="stop-color:#0f120d;stop-opacity:1"/></radialGradient></defs><ellipse cx="100" cy="165" rx="80" ry="15" fill="#000" opacity="0.7" filter="blur(8px)"/><path d="M 40 130 Q 10 100, 50 80 Q 80 100, 70 140 Z" fill="#465239"/><path d="M 160 130 Q 190 100, 150 80 Q 120 100, 130 140 Z" fill="#465239"/><path d="M 50 110 C 40 40, 160 40, 150 110 C 160 170, 40 170, 50 110" fill="url(#skinGrad)" stroke="#1e2316" stroke-width="1.5"/></svg><div class="rune-container"><div class="magic-circle"></div><div class="dice-number" id="result"><div style="font-size:16px;">d20</div></div></div></div>
+        <div class="dice-container" id="dice"><svg class="toad-svg" viewBox="0 0 200 200"><defs><radialGradient id="skinGrad" cx="50%" cy="40%" r="65%"><stop offset="0%" style="stop-color:#596248;stop-opacity:1"/><stop offset="100%" style="stop-color:#0f120d;stop-opacity:1"/></radialGradient></defs><ellipse cx="100" cy="165" rx="80" ry="15" fill="#000" opacity="0.7" filter="blur(8px)"/><path d="M 40 130 Q 10 100, 50 80 Q 80 100, 70 140 Z" fill="#465239"/><path d="M 160 130 Q 190 100, 150 80 Q 120 100, 130 140 Z" fill="#465239"/><path d="M 50 110 C 40 40, 160 40, 150 110 C 160 170, 40 170, 50 110" fill="url(#skinGrad)" stroke="#1e2316" stroke-width="1.5"/></svg><div class="rune-container"><div class="magic-circle"></div><div class="dice-number" id="result">d20</div></div></div>
         <button class="roll-btn" id="btn" onclick="roll(20)">d20 AT</button>
         <div class="dice-bar"><button class="mini-dice-btn" onclick="roll(4)">d4</button><button class="mini-dice-btn" onclick="roll(6)">d6</button><button class="mini-dice-btn" onclick="roll(8)">d8</button><button class="mini-dice-btn" onclick="roll(10)">d10</button><button class="mini-dice-btn" onclick="roll(12)">d12</button></div>
     </div>
@@ -168,39 +157,29 @@
         <div class="detail-window">
             <div class="detail-header"><span id="detailName">...</span> <i class="fas fa-times" style="cursor:pointer" onclick="closeDetailModal()"></i></div>
             <div class="detail-tabs">
-                <button class="tab-btn active" onclick="switchTab('stats')">ÖZELLİK</button>
-                <button class="tab-btn" onclick="switchTab('inventory')">ÇANTA</button>
+                <button class="tab-btn active" onclick="switchTab('inventory')">ÇANTA</button>
                 <button class="tab-btn" onclick="switchTab('skills')">YETENEK</button>
             </div>
             <div class="detail-content">
-                <div id="tab-stats" class="tab-pane active">
-                    <div class="stat-grid">
-                        <div class="stat-group"><label class="stat-label">STR</label><input type="number" class="dm-input" id="detStr" onchange="saveDetailStat()"></div>
-                        <div class="stat-group"><label class="stat-label">DEX</label><input type="number" class="dm-input" id="detDex" onchange="saveDetailStat()"></div>
-                        <div class="stat-group"><label class="stat-label">Max HP</label><input type="number" class="dm-input" id="detMaxHp" onchange="saveDetailStat()"></div>
-                        <div class="stat-group"><label class="stat-label">Max SP</label><input type="number" class="dm-input" id="detMaxSp" onchange="saveDetailStat()"></div>
-                        <div class="stat-group"><label class="stat-label">Altın</label><input type="number" class="dm-input" id="detGold" onchange="saveDetailStat()"></div>
-                    </div>
-                </div>
-                <div id="tab-inventory" class="tab-pane">
-                    <div class="add-row"><input type="text" id="newInvItem" class="dm-input" placeholder="Eşya"><button class="dm-btn" style="width:auto;" onclick="addItem('inventory')">+</button></div>
+                <div id="tab-inventory" class="tab-pane active">
+                    <div class="add-row"><input type="text" id="newInvItem" class="dm-input" placeholder="Eşya Adı"><button class="dm-btn" style="width:auto;" onclick="addItem('inventory')">+</button></div>
                     <div id="invList" class="item-list"></div>
                 </div>
                 <div id="tab-skills" class="tab-pane">
-                    <div class="add-row"><input type="text" id="newSkillItem" class="dm-input" placeholder="Yetenek"><button class="dm-btn" style="width:auto;" onclick="addItem('skills')">+</button></div>
+                    <div class="add-row"><input type="text" id="newSkillItem" class="dm-input" placeholder="Yetenek Adı"><button class="dm-btn" style="width:auto;" onclick="addItem('skills')">+</button></div>
                     <div id="skillList" class="item-list"></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="wheelOverlayContainer"><div class="wheel-pointer"></div><div class="wheel-container"><div class="wheel" id="theWheel"></div></div><div id="wheelResultText">SONUÇ</div></div>
+    <div id="timerOverlay">00:00</div>
     <div id="whisperModal"><div><div style="color:#9b59b6; margin-bottom:10px;">GİZLİ MESAJ</div><div id="whisperContent">...</div><button class="dm-btn" onclick="document.getElementById('whisperModal').style.display='none'">KAPAT</button></div></div>
     <div id="identityModal"><div><div style="color:#3498db; margin-bottom:10px;">SEN KİMSİN?</div><div id="identityList" style="max-height:200px; overflow-y:auto;"></div><button class="dm-btn" onclick="document.getElementById('identityModal').style.display='none'">KAPAT</button></div></div>
+    <div id="dmLogModal" style="display:none;"><div style="background:#111; padding:20px; border:1px solid #e84393; width:500px; height:400px; display:flex; flex-direction:column;"><div style="color:#e84393;">GİZLİ LOG</div><div id="dmLogList" style="flex:1; overflow-y:auto; border:1px solid #333; margin:10px 0; text-align:left; padding:5px; font-size:12px;"></div><button class="dm-btn" onclick="document.getElementById('dmLogModal').style.display='none'">KAPAT</button></div></div>
     <div id="voteModal"><div><h2 style="color:#f1c40f;">GÜNÜN KAHRAMANI</h2><div class="vote-grid" id="voteGrid"></div></div></div>
     <div id="winnerModal"><div><h1 style="color:#f1c40f;">KAZANAN</h1><div id="winnerName" style="font-size:30px;">İSİM</div><div id="voteCountDisplay"></div><button class="dm-btn" onclick="document.getElementById('winnerModal').style.display='none'">KAPAT</button></div></div>
-    <div id="dmLogModal" style="display:none;"><div style="background:#111; padding:20px; border:1px solid #e84393; width:500px; height:400px; display:flex; flex-direction:column;"><div style="color:#e84393;">GİZLİ LOG</div><div id="dmLogList" style="flex:1; overflow-y:auto; border:1px solid #333; margin:10px 0; text-align:left; padding:5px; font-size:12px;"></div><button class="dm-btn" onclick="document.getElementById('dmLogModal').style.display='none'">KAPAT</button></div></div>
-    <div id="wheelOverlayContainer"><div class="wheel-container"><div class="wheel" id="theWheel"></div></div><div id="wheelResultText">SONUÇ</div></div>
-    <div id="timerOverlay">00:00</div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -229,18 +208,14 @@
         enableDrag('dmLogBtn', () => document.getElementById('dmLogModal').style.display='flex');
         function toggleDrawer(id) { document.querySelectorAll('.side-drawer').forEach(d => { if(d.id!==id) d.classList.remove('open'); }); document.getElementById(id).classList.toggle('open'); }
 
-        // --- NEW FEATURES: DETAIL MODAL ---
+        // --- DETAIL MODAL ---
         function openDetailModal(id) {
             activeDetailId = id; const c = partyData.find(x=>x.id===id); if(!c)return;
             document.getElementById('detailName').innerText = c.name;
-            document.getElementById('detStr').value = c.str||10; document.getElementById('detDex').value = c.dex||10;
-            document.getElementById('detMaxHp').value = c.maxHp||10; document.getElementById('detMaxSp').value = c.maxSp||10;
-            document.getElementById('detGold').value = c.gold||0;
             renderDetailLists(c); document.getElementById('charDetailModal').style.display = 'flex';
         }
-        function closeDetailModal() { document.getElementById('charDetailModal').style.display = 'none'; activeDetailId = null; }
+        function closeDetailModal() { document.getElementById('charDetailModal').style.display='none'; activeDetailId=null; }
         function switchTab(t) { document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active')); event.target.classList.add('active'); document.getElementById('tab-'+t).classList.add('active'); }
-        function saveDetailStat() { if(!activeDetailId)return; const c=partyData.find(x=>x.id===activeDetailId); if(c){ c.str=parseInt(document.getElementById('detStr').value); c.dex=parseInt(document.getElementById('detDex').value); c.maxHp=parseInt(document.getElementById('detMaxHp').value); c.maxSp=parseInt(document.getElementById('detMaxSp').value); c.gold=parseInt(document.getElementById('detGold').value); socket.emit('party_update', partyData); } }
         function addItem(type) { if(!activeDetailId)return; const i=document.getElementById(type==='inventory'?'newInvItem':'newSkillItem'); if(!i.value)return; const c=partyData.find(x=>x.id===activeDetailId); if(!c[type])c[type]=[]; c[type].push(i.value); i.value=''; socket.emit('party_update', partyData); renderDetailLists(c); }
         function removeItem(type, idx) { const c=partyData.find(x=>x.id===activeDetailId); if(c&&c[type]){c[type].splice(idx,1); socket.emit('party_update', partyData); renderDetailLists(c);} }
         function renderDetailLists(c) {
@@ -264,10 +239,16 @@
                         <div class="char-details">
                             <input class="inp-name" value="${c.name}" oninput="upd(${c.id},'name',this.value)" placeholder="İsim">
                             <div class="stat-row">
-                                <div class="stat-box box-hp">HP <input class="stat-input" value="${c.hp}" oninput="upd(${c.id},'hp',this.value)"></div>
-                                <div class="stat-box box-sp">SP <input class="stat-input" value="${c.sp||0}" oninput="upd(${c.id},'sp',this.value)"></div>
-                                <div class="stat-box box-lvl">LVL <input class="stat-input" value="${c.level||1}" oninput="upd(${c.id},'level',this.value)"></div>
-                                <div class="stat-box box-init">INIT <input class="stat-input" value="${c.init||0}" oninput="upd(${c.id},'init',this.value)"></div>
+                                <div class="stat-box box-hp" title="HP / Max HP">HP 
+                                    <div class="stat-dual"><input class="stat-input" value="${c.hp}" oninput="upd(${c.id},'hp',this.value)"><span class="stat-sep">/</span><input class="stat-input" value="${c.maxHp}" oninput="upd(${c.id},'maxHp',this.value)"></div>
+                                </div>
+                                <div class="stat-box box-sp" title="SP / Max SP">SP 
+                                    <div class="stat-dual"><input class="stat-input" value="${c.sp||0}" oninput="upd(${c.id},'sp',this.value)"><span class="stat-sep">/</span><input class="stat-input" value="${c.maxSp||10}" oninput="upd(${c.id},'maxSp',this.value)"></div>
+                                </div>
+                            </div>
+                            <div class="stat-row" style="margin-top:2px;">
+                                <div class="stat-box box-lvl">INIT <input class="stat-input" value="${c.init||0}" oninput="upd(${c.id},'init',this.value)"></div>
+                                <div class="stat-box box-init">AC <input class="stat-input" value="${c.ac||10}" oninput="upd(${c.id},'ac',this.value)"></div>
                             </div>
                             <div class="hp-bar-container"><div class="hp-bar-fill" style="width:${pctHp}%; background-color:${colorHp}"></div></div>
                             <div class="hp-bar-container" style="height:3px; margin-top:2px;"><div class="sp-bar-fill" style="width:${pctSp}%"></div></div>
@@ -275,7 +256,7 @@
                     </div>
                     <div class="card-actions">
                          <i class="fas fa-eye icon-btn" onclick="sendWhisper(${c.id}, '${c.name}')" title="Fısılda"></i>
-                         <i class="fas fa-suitcase icon-btn" onclick="openDetailModal(${c.id})" title="Çanta ve Özellikler"></i>
+                         <i class="fas fa-suitcase icon-btn" onclick="openDetailModal(${c.id})" title="Çanta/Detay"></i>
                          <i class="fas fa-trash icon-btn" onclick="delChar(${c.id})"></i>
                     </div>
                 </div>`;
@@ -283,61 +264,68 @@
             });
         }
 
-        // --- STANDART FONKSIYONLAR ---
         function upd(id,k,v){ const c=partyData.find(x=>x.id==id); if(c){c[k]=v; saveData();} }
         function saveData(){ socket.emit('party_update', partyData); } 
-        // YENİ EKLEME: addCharacter varsayılan statlarla başlatıyor
         function addCharacter(){ 
             partyData.push({
-                id:Date.now(), name:'', hp:10, maxHp:10, sp:10, maxSp:10, str:10, dex:10, level:1, init:0, gold:0, inventory:[], skills:[]
+                id:Date.now(), name:'', hp:10, maxHp:10, sp:10, maxSp:10, ac:10, init:0, inventory:[], skills:[]
             }); 
             saveData(); renderParty(); 
         }
         function delChar(id){ if(confirm('Sil?')){partyData=partyData.filter(x=>x.id!==id); saveData(); renderParty();} }
         function changeAvatar(id){ const i=document.createElement('input'); i.type='file'; i.onchange=e=>{const r=new FileReader(); r.onload=ev=>{upd(id,'avatar',ev.target.result); renderParty();}; r.readAsDataURL(e.target.files[0]);}; i.click(); }
         function resetPartyData(){ if(confirm('Tüm karakterleri sil?')){partyData=[]; saveData(); renderParty();} }
-        
-        // --- İLETİŞİM, ZAR, KİMLİK (V4.1 Aynen Korundu) ---
+
+        // --- ZAR ---
+        function roll(sides) {
+            playClickSound(); document.body.classList.add('rolling'); const n = Math.floor(Math.random() * sides) + 1; let t = 'normal'; if (sides === 20) { if(n === 20) t = 'crit'; else if(n === 1) t = 'fail'; }
+            const senderName = getMyName(); socket.emit('zar_atildi', { sonuc: n, tur: t, zaman: new Date().getHours()+":"+new Date().getMinutes(), atan: senderName, zarTipi: sides });
+            setTimeout(() => { document.body.classList.remove('rolling'); const res = document.getElementById('result'); res.innerHTML = `<div class="roller-name">${senderName}</div>${n}`; let c = 'dice-number'; if(t === 'crit') c += ' crit-success'; else if(t === 'fail') c += ' crit-fail'; res.className = c; addLog(n, t, new Date().getHours()+":"+new Date().getMinutes(), senderName, sides); }, 800);
+        }
+        function addLog(res, type, time, name, sides) { document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry ${type==='crit'?'log-crit':type==='fail'?'log-fail':''}"><span class="log-time">${time}</span><span>${name}: <strong>${res}</strong> (d${sides})</span></div>`); }
+        function playClickSound() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.frequency.value = 200; o.type = 'triangle'; g.gain.setValueAtTime(0.1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.1); }
+
+        // --- IDENTITY & CHAT ---
         function openIdentityModal() { const list = document.getElementById('identityList'); list.innerHTML = ''; let dmTaken = takenIdentities.includes('DM') && myIdentityId !== 'DM'; list.insertAdjacentHTML('beforeend', `<div class="identity-option ${dmTaken?'taken':''}" onclick="${dmTaken?'':'selectIdentity(\'DM\', \'DM\')'}">DM (Oyun Yöneticisi)${dmTaken?' (DOLU)':''}</div>`); partyData.forEach(c => { let takenClass = (takenIdentities.includes(c.id) && c.id !== myIdentityId) ? 'taken' : ''; list.insertAdjacentHTML('beforeend', `<div class="identity-option ${takenClass}" onclick="${takenClass?'':`selectIdentity(${c.id}, '${c.name}')`}">${c.name}${takenClass?' (Dolu)':''}</div>`); }); document.getElementById('identityModal').style.display = 'block'; }
         function selectIdentity(id, name) { let oldId = myIdentityId; myIdentityId = id; localStorage.setItem('dnd_my_identity', id); document.getElementById('currentIdentityDisplay').innerText = name || "Bilinmiyor"; document.getElementById('identityModal').style.display = 'none'; socket.emit('claim_identity', { oldId: oldId, newId: id }); updateInterfaceForIdentity(); }
         function updateInterfaceForIdentity() { const isDM = (myIdentityId === 'DM'); document.getElementById('dmLogBtn').style.display = isDM ? 'flex' : 'none'; document.getElementById('msgDmBtn').style.display = isDM ? 'none' : 'flex'; document.getElementById('dmToolsBtn').style.display = isDM ? 'flex' : 'none'; }
         function getMyName() { return myIdentityId === 'DM' ? "DM" : (partyData.find(c => c.id == myIdentityId)?.name || "Bilinmiyor"); }
         function sendMsgToDM() { const msg = prompt("DM'e ne fısıldamak istiyorsun?"); if (msg) { socket.emit('player_whisper', { sender: getMyName(), message: msg }); alert("Mesajın DM'e iletildi."); } }
-        
+        function sendWhisper(id, name) { const msg = prompt(`"${name}" kişisine ne fısıldamak istersin?`); if (msg) { if(myIdentityId === 'DM') socket.emit('dm_whisper', {targetId: id, targetName: name, message: msg}); else socket.emit('p2p_whisper', { senderId: myIdentityId, senderName: getMyName(), targetId: id, targetName: name, message: msg }); } }
+
+        // SOCKET LISTENERS
         socket.on('party_update_client', (data) => { partyData = data; renderParty(); if(activeDetailId) openDetailModal(activeDetailId); });
         socket.on('update_taken_identities', (list) => { takenIdentities = list; });
         socket.on('dm_log_history_load', (h) => { const l=document.getElementById('dmLogList'); l.innerHTML=''; h.forEach(e=>addDmLogEntry(e)); });
         socket.on('dm_log_update', (e) => addDmLogEntry(e));
         function addDmLogEntry(e) { const l = document.getElementById('dmLogList'); let cls = e.type === 'dm-sent' ? 'secret-dm-sent' : (e.type === 'dm-received' ? 'secret-dm-received' : 'secret-p2p'); l.insertAdjacentHTML('beforeend', `<div class="secret-entry ${cls}"><div style="font-size:10px; color:#aaa;">${e.time} | <strong>${e.sender}</strong> -> <strong>${e.target}</strong></div><div style="margin-top:3px;">${e.message}</div></div>`); l.scrollTop = l.scrollHeight; }
-        
         socket.on('herkes_icin_zar', (veri) => { const btn = document.getElementById('btn'); const resDiv = document.getElementById('result'); if (!document.body.classList.contains('rolling')) { document.body.classList.add('rolling'); playClickSound(); } setTimeout(() => { document.body.classList.remove('rolling'); resDiv.innerHTML = `<div class="roller-name">${veri.atan}</div>${veri.sonuc}`; let cls = 'dice-number'; if(veri.zarTipi == 20) { if(veri.tur === 'crit') cls += ' crit-success'; else if(veri.tur === 'fail') cls += ' crit-fail'; } resDiv.className = cls; addLog(veri.sonuc, veri.tur, veri.zaman, veri.atan, veri.zarTipi); }, 800); });
         socket.on('map_update_client', (url) => { const div = document.getElementById('activeMapContainer'); const img = document.getElementById('activeMapImg'); if (url) { img.src = url; div.style.display = 'flex'; document.body.classList.add('map-mode'); } else { div.style.display = 'none'; document.body.classList.remove('map-mode'); } });
         socket.on('receive_whisper', (d) => { if(myIdentityId && myIdentityId == d.targetId) { playClickSound(); document.getElementById('whisperContent').innerText = d.message; document.getElementById('whisperModal').style.display = 'block'; } else { document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span>DM, <strong>${d.targetName}</strong> ile fısıldaşıyor...</span></div>`); } });
         socket.on('dm_receive_player_msg', (d) => { if (myIdentityId === 'DM') { playClickSound(); document.getElementById('whisperContent').innerText = `GÖNDEREN: ${d.sender}\n\n${d.message}`; document.getElementById('whisperModal').style.display = 'block'; } document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span><strong>${d.sender}</strong>, DM ile fısıldaşıyor...</span></div>`); });
         socket.on('p2p_whisper_relay', (d) => { if (myIdentityId == d.targetId) { playClickSound(); document.getElementById('whisperContent').innerText = `GÖNDEREN: ${d.senderName}\n\n${d.message}`; document.getElementById('whisperModal').style.display = 'block'; } let t = (myIdentityId == d.senderId) ? `Sen, <strong>${d.targetName}</strong> kişisine fısıldadın.` : (myIdentityId == d.targetId ? `<strong>${d.senderName}</strong> sana fısıldadı.` : `<strong>${d.senderName}</strong>, <strong>${d.targetName}</strong> ile fısıldaşıyor...`); document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span>${t}</span></div>`); });
+        
         socket.on('timer_update', (s) => runVisualTimer(s));
         socket.on('wheel_result', (d) => showWheelResult(d));
         socket.on('show_vote_screen', () => { const g = document.getElementById('voteGrid'); g.innerHTML = ''; partyData.forEach(c => { g.insertAdjacentHTML('beforeend', `<div class="vote-card" onclick="castVote('${c.name}')"><h3>${c.name}</h3></div>`); }); document.getElementById('voteModal').style.display = 'flex'; });
         socket.on('vote_result_announce', (d) => { document.getElementById('voteModal').style.display = 'none'; document.getElementById('winnerName').innerText = d.winner; document.getElementById('voteCountDisplay').innerText = d.votes + " Oy ile"; document.getElementById('winnerModal').style.display = 'block'; playClickSound(); });
 
+        // TOOLS
         function setMap() { const url = document.getElementById('mapUrlInput').value; socket.emit('map_change', url); }
         function closeMap() { socket.emit('map_change', null); }
         function rollAllInitiative() { partyData.forEach(c => { c.init = Math.floor(Math.random() * 20) + 1; }); sortInitiative(); }
         function sortInitiative() { partyData.sort((a, b) => (parseInt(b.init) || 0) - (parseInt(a.init) || 0)); currentTurnIndex = -1; saveData(); renderParty(); }
         function nextTurn() { currentTurnIndex++; if (currentTurnIndex >= partyData.length) currentTurnIndex = 0; renderParty(); }
         function startTimer() { const s=document.getElementById('timerInput').value; if(s) socket.emit('timer_start', s); }
-        function spinWheel() { const f=["DOST ATEŞİ!", "SİLAHIN FIRLADI!", "ADRENALİN!", "KÖRLÜK!", "TANRISAL ŞİFA", "DÜŞMAN TÖKEZLEDİ", "BÜYÜ GERİ TEPTİ!", "YERE KAPAKLANDIN!"]; const text = f[Math.floor(Math.random()*f.length)]; const angle = 1800 + Math.floor(Math.random() * 360); socket.emit('wheel_spin', {text, angle}); }
+        function spinWheel() { const f=["DOST ATEŞİ!", "SİLAHIN FIRLADI!", "ADRENALİN!", "KÖRLÜK!", "TANRISAL ŞİFA", "DÜŞMAN TÖKEZLEDİ", "BÜYÜ GERİ TEPTİ!", "YERE KAPAKLANDIN!", "ZIRHIN ÇATLADI!", "KAFAN KARIŞTI!", "ZEHİRLENDİN!", "LANETLENDİN!", "TAM İSABET!", "ŞANS MELEĞİ!", "İKİNCİ ŞANS!"]; const text = f[Math.floor(Math.random()*f.length)]; const angle = 1800 + Math.floor(Math.random() * 360); socket.emit('wheel_spin', {text, angle}); }
         function startMVPVote() { socket.emit('start_vote'); }
         function endMVPVote() { socket.emit('end_vote'); }
         function castVote(n) { socket.emit('cast_vote', n); document.getElementById('voteModal').style.display='none'; alert("Oyunuz alındı: " + n); }
-        function sendWhisper(id, name) { const msg = prompt(`"${name}" kişisine ne fısıldamak istersin?`); if (msg) { if(myIdentityId === 'DM') { socket.emit('dm_whisper', {targetId: id, targetName: name, message: msg}); } else { socket.emit('p2p_whisper', { senderId: myIdentityId, senderName: getMyName(), targetId: id, targetName: name, message: msg }); } } }
-        function roll(sides) { playClickSound(); const btn = document.getElementById('btn'); btn.disabled = true; document.body.classList.add('rolling'); const num = Math.floor(Math.random() * sides) + 1; let type = 'normal'; if (sides === 20) { if(num === 20) type = 'crit'; else if(num === 1) type = 'fail'; } const senderName = getMyName(); socket.emit('zar_atildi', { sonuc: num, tur: type, zaman: new Date().getHours()+":"+new Date().getMinutes(), atan: senderName, zarTipi: sides }); setTimeout(() => { document.body.classList.remove('rolling'); const resDiv = document.getElementById('result'); resDiv.innerHTML = `<div class="roller-name">${senderName}</div>${num}`; let cls = 'dice-number'; if(type === 'crit') cls += ' crit-success'; else if(type === 'fail') cls += ' crit-fail'; resDiv.className = cls; btn.disabled = false; addLog(num, type, new Date().getHours()+":"+new Date().getMinutes(), senderName, sides); }, 800); }
-        function addLog(res, type, time, name, sides) { const diceName = sides ? `d${sides}` : 'd20'; const who = name ? name : 'Bilinmiyor'; document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry ${type==='crit'?'log-crit':type==='fail'?'log-fail':''}"><span class="log-time">${time}</span><span>${who}: <strong>${res}</strong> (${diceName})</span></div>`); }
-        function playClickSound() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.frequency.value = 200; osc.type = 'triangle'; gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
-        function runVisualTimer(seconds) { const el = document.getElementById('timerOverlay'); el.style.display = 'block'; let left = seconds; const intv = setInterval(() => { left--; el.innerText = Math.floor(left/60)+":"+(left%60<10?'0':'')+(left%60); if (left <= 0) { clearInterval(intv); el.innerText="SÜRE BİTTİ!"; setTimeout(()=>el.style.display='none',3000); } }, 1000); }
-        function showWheelResult(data) { const overlay = document.getElementById('wheelOverlayContainer'); const wheel = document.getElementById('theWheel'); const resText = document.getElementById('wheelResultText'); overlay.style.display = 'flex'; resText.style.opacity = '0'; wheel.style.transition = 'none'; wheel.style.transform = 'rotate(0deg)'; setTimeout(() => { wheel.style.transition = 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)'; wheel.style.transform = `rotate(${data.angle}deg)`; }, 50); setTimeout(() => { resText.innerText = data.text; resText.style.opacity = '1'; playClickSound(); document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-fate"><span class="log-time">KADER</span><span>${data.text}</span></div>`); setTimeout(() => { overlay.style.display = 'none'; }, 4000); }, 4000); }
+        
+        function runVisualTimer(s) { const el = document.getElementById('timerOverlay'); el.style.display = 'block'; let l = s; const i = setInterval(() => { l--; el.innerText = Math.floor(l/60)+":"+(l%60<10?'0':'')+(l%60); if (l <= 0) { clearInterval(i); el.innerText="SÜRE BİTTİ!"; setTimeout(()=>el.style.display='none',3000); } }, 1000); }
+        function showWheelResult(d) { const o = document.getElementById('wheelOverlayContainer'); const w = document.getElementById('theWheel'); const t = document.getElementById('wheelResultText'); o.style.display = 'flex'; t.style.opacity = '0'; w.style.transition = 'none'; w.style.transform = 'rotate(0deg)'; setTimeout(() => { w.style.transition = 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)'; w.style.transform = `rotate(${d.angle}deg)`; }, 50); setTimeout(() => { t.innerText = d.text; t.style.opacity = '1'; playClickSound(); document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-fate"><span class="log-time">KADER</span><span>${d.text}</span></div>`); setTimeout(() => { o.style.display = 'none'; }, 4000); }, 4000); }
 
-        window.onload=()=>{ const myId = localStorage.getItem('dnd_my_identity'); if(myId) { myIdentityId = myId; socket.emit('claim_identity', { oldId: undefined, newId: myId }); updateInterfaceForIdentity(); setTimeout(() => { const c = partyData.find(x => x.id == myId); if(c) document.getElementById('currentIdentityDisplay').innerText = c.name; }, 1000); } };
+        window.onload=()=>{ const i = localStorage.getItem('dnd_my_identity'); if(i) { myIdentityId = i; socket.emit('claim_identity', { oldId: undefined, newId: i }); updateInterfaceForIdentity(); setTimeout(() => { const c = partyData.find(x => x.id == i); if(c) document.getElementById('currentIdentityDisplay').innerText = c.name; }, 1000); } };
     </script>
 </body>
 </html>
