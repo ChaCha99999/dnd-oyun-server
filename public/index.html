@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Master V4.5 (Final Fixes)</title>
+    <title>D&D Master V4.6 (Final Battle)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -19,13 +19,14 @@
         #identityBtn { top: 160px; left: 20px; border-color: #3498db; color: #3498db; }
         #msgDmBtn { top: 230px; left: 20px; border-color: #0984e3; color: #0984e3; } 
         #dmLogBtn { top: 300px; left: 20px; border-color: #e84393; color: #e84393; display: none; }
+        #battleModeBtn { bottom: 30px; left: 50%; transform: translateX(-50%); border-color: #e74c3c; color: #e74c3c; width: 80px; height: 80px; font-size: 32px; background: rgba(0,0,0,0.8); z-index: 3000; }
 
         /* --- PANELLER --- */
         .side-drawer { position: fixed; left: -360px; top: 0; width: 340px; height: 100vh; background: rgba(15, 15, 15, 0.98); border-right: 2px solid #4b6b44; z-index: 1500; transition: left 0.3s ease; display: flex; flex-direction: column; padding: 20px; padding-top: 60px; box-shadow: 10px 0 50px rgba(0,0,0,0.8); overflow-y: auto; }
         .side-drawer.open { left: 0; }
         .drawer-header { font-size: 18px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;}
 
-        /* --- KARAKTER KARTI (DÜZELTİLDİ: HP/MAX Girişi) --- */
+        /* --- KARAKTER KARTI --- */
         .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; transition: 0.3s; }
         .char-card.active-turn { border: 2px solid #2ecc71; box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); background: rgba(46, 204, 113, 0.1); transform: scale(1.02); z-index: 10; }
         .char-header { display: flex; gap: 10px; align-items: center; } 
@@ -33,15 +34,14 @@
         .char-details { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; } 
         .inp-name { background: transparent; border: none; color: #f1c40f; font-family: 'Cinzel', serif; font-weight: bold; font-size: 14px; width: 100%; border-bottom: 1px solid transparent; }
         
+        /* Stat Kutuları */
         .stat-row { display: flex; gap: 4px; } 
         .stat-box { display: flex; align-items: center; justify-content: center; gap: 2px; padding: 4px; border-radius: 4px; flex: 1; font-size: 9px; color:#aaa; flex-direction: column;}
-        
         .box-hp { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; } 
         .box-sp { background: rgba(52, 152, 219, 0.2); border: 1px solid #3498db; }
         .box-lvl { background: rgba(52, 152, 219, 0.2); border: 1px solid #3498db; } 
         .box-init { background: rgba(155, 89, 182, 0.2); border: 1px solid #9b59b6; }
         
-        /* Stat Input Düzeni (Yan yana) */
         .stat-dual { display: flex; align-items: center; gap: 2px; }
         .stat-input { width: 100%; background: transparent; border: none; color: #fff; text-align: center; font-weight: bold; font-family: 'Lato', sans-serif; font-size: 14px; }
         .stat-sep { color: #555; font-size: 12px; }
@@ -52,7 +52,54 @@
 
         .card-actions { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);} .icon-btn { cursor: pointer; color: #666; font-size: 14px; padding: 5px; transition: 0.2s; } .icon-btn:hover { color: #fff; }
 
-        /* --- SAHNE & ZAR --- */
+        /* --- SAVAŞ ALANI (YENİDEN DÜZELTİLDİ) --- */
+        #battleArena { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 15; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); flex-direction: row; justify-content: space-between; padding: 40px; box-sizing: border-box; }
+        .arena-column { width: 40%; height: 100%; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding: 15px; border-radius: 12px; background: rgba(20, 20, 20, 0.6); border: 1px solid #444; }
+        .heroes-col { border-color: #2ecc71; } .enemies-col { border-color: #e74c3c; }
+        .col-title { text-align: center; font-family: 'Cinzel'; font-size: 24px; margin-bottom: 10px; color: #fff; }
+        .enemy-card { background: rgba(60, 20, 20, 0.8); border: 2px solid #e74c3c; border-radius: 8px; padding: 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
+        .enemy-card:hover { transform: scale(1.02); }
+        .enemy-card.selected { border-color: #fff; box-shadow: 0 0 20px #fff; background: #444; }
+
+        /* --- DM TOOLS --- */
+        .dm-tool-row { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; } .dm-tool-title { font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: bold; }
+        .dm-btn { width: 100%; padding: 10px; margin-top: 5px; background: #333; border: 1px solid #555; color: #ddd; cursor: pointer; font-family: 'Lato', sans-serif; border-radius: 4px; transition: 0.2s; } .dm-btn:hover { background: #444; border-color: #e74c3c; color: #fff; }
+        .dm-input { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: 'Lato', sans-serif;}
+
+        /* --- MODALS (CENTERING FIX) --- */
+        /* Flex özelliği eklenerek ekranın tam ortasına gelmesi sağlandı */
+        .modal-overlay { 
+            display: none; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: 6000; 
+            background: rgba(0,0,0,0.85); 
+            justify-content: center; /* Yatay Ortala */
+            align-items: center;     /* Dikey Ortala */
+        }
+        
+        .modal-content { background: #1a1a1a; padding: 20px; border-radius: 10px; border: 2px solid #555; text-align: center; width: 350px; }
+        
+        .identity-option { padding: 10px; margin: 5px 0; background: #222; border: 1px solid #444; color: #fff; cursor: pointer; } 
+        .identity-option:hover { background: #3498db; } .identity-option.taken { opacity: 0.5; background: #444; pointer-events: none; }
+        
+        #timerOverlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 120px; font-weight: 900; color: #e74c3c; pointer-events: none; text-shadow: 0 0 30px red; font-family: 'Courier New'; }
+
+        /* KARAKTER DETAY MODALI */
+        .detail-window { width: 500px; max-width: 90%; height: 600px; background: #1a1a1a; border: 2px solid #f1c40f; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        .detail-header { padding: 15px; background: #222; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center; font-family: 'Cinzel'; font-size: 18px; color: #f1c40f; }
+        .detail-tabs { display: flex; background: #111; }
+        .tab-btn { flex: 1; padding: 15px; background: transparent; border: none; color: #777; cursor: pointer; border-bottom: 3px solid transparent; font-family: 'Lato'; font-weight: bold; transition: 0.2s; }
+        .tab-btn.active { color: #fff; border-bottom-color: #f1c40f; background: #222; }
+        .detail-content { flex: 1; padding: 20px; overflow-y: auto; font-family: 'Lato'; text-align: left; }
+        .tab-pane { display: none; } .tab-pane.active { display: block; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-group { background: #222; padding: 10px; border-radius: 5px; border: 1px solid #444; }
+        .stat-label { font-size: 11px; color: #aaa; margin-bottom: 5px; display: block; }
+        .item-list { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+        .list-item { background: #2d3436; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #777; }
+        .add-row { display: flex; gap: 5px; margin-bottom: 10px; }
+
+        /* ZAR & LOGS */
         .scene { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; } 
         .dice-container { width: 250px; height: 250px; position: relative; transform-style: preserve-3d; transition: transform 0.8s; } 
         .toad-svg { width: 100%; height: 100%; filter: contrast(1.15) saturate(1.1); } 
@@ -74,53 +121,27 @@
         @keyframes rotateCircle { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes shakeDice { 0% { transform: rotateX(0); } 25% { transform: rotateX(10deg); } 50% { transform: rotateX(-5deg); } 75% { transform: rotateX(5deg); } 100% { transform: rotateX(0); } }
         .crit-success { color: #f1c40f !important; text-shadow: 0 0 30px #f1c40f; } .crit-fail { color: #e74c3c !important; text-shadow: 0 0 30px #c0392b; }
 
-        /* --- DM TOOLS --- */
-        .dm-tool-row { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; } .dm-tool-title { font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: bold; }
-        .dm-btn { width: 100%; padding: 10px; margin-top: 5px; background: #333; border: 1px solid #555; color: #ddd; cursor: pointer; font-family: 'Lato', sans-serif; border-radius: 4px; transition: 0.2s; } .dm-btn:hover { background: #444; border-color: #e74c3c; color: #fff; }
-        .dm-input { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: 'Lato', sans-serif;}
+        /* ZAR TOPLAMA BUTONU */
+        .toggle-sum { font-size: 14px; color: #aaa; padding: 8px 15px; border: 1px solid #555; border-radius: 20px; background: rgba(0,0,0,0.5); cursor: pointer; display: flex; align-items: center; gap: 8px; transition:0.3s; margin-bottom: 10px; }
+        .toggle-sum.active { color: #2ecc71; border-color: #2ecc71; background: rgba(46, 204, 113, 0.2); font-weight:bold; box-shadow:0 0 10px rgba(46,204,113,0.3); }
+        .dice-controls { display:flex; flex-direction:column; align-items:center; z-index:20; margin-top: 20px; }
 
-        /* --- MODALS --- */
-        #wheelOverlayContainer, #timerOverlay, #whisperModal, #identityModal, #voteModal, #winnerModal, #dmLogModal, #charDetailModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 6000; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); }
-        #voteModal > div, #winnerModal > div, #whisperModal > div, #identityModal > div { background: #1a1a1a; padding: 20px; border-radius: 10px; border: 2px solid #555; text-align: center; width: 350px; }
-        .identity-option { padding: 10px; margin: 5px 0; background: #222; border: 1px solid #444; color: #fff; cursor: pointer; } 
-        .identity-option:hover { background: #3498db; } .identity-option.taken { opacity: 0.5; background: #444; pointer-events: none; }
-        
-        /* ÇARK DÜZENLEMESİ (FIX) */
-        .wheel-container { position: relative; width: 300px; height: 300px; z-index: 6001;}
-        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #dcdde1; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: conic-gradient(#e74c3c 0% 12.5%, #f1c40f 12.5% 25%, #3498db 25% 37.5%, #9b59b6 37.5% 50%, #2ecc71 50% 62.5%, #e67e22 62.5% 75%, #1abc9c 75% 87.5%, #95a5a6 87.5% 100%); transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1); }
-        .wheel-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 30px solid #fff; z-index: 6002; }
-        /* Sonuç Yazısı ÖNDE */
-        #wheelResultText { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            font-size: 40px; color: #fff; font-weight: 900; 
-            text-shadow: 0 0 20px #000, 0 0 10px #f1c40f; 
-            z-index: 6005; opacity: 0; transition: opacity 0.5s; 
-            background: rgba(0,0,0,0.6); padding: 20px; border-radius: 10px; border: 2px solid #f1c40f;
-        }
+        /* WHEEL */
+        #wheelOverlayContainer { z-index: 6000; }
+        .wheel-container { position: relative; width: 300px; height: 300px; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #dcdde1; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: conic-gradient(#e74c3c 0% 12.5%, #f1c40f 12.5% 25%, #3498db 25% 37.5%, #9b59b6 37.5% 50%, #2ecc71 50% 62.5%, #e67e22 62.5% 75%, #1abc9c 75% 87.5%, #95a5a6 87.5% 100%); transition: transform 4s; }
+        .wheel-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 30px solid #fff; z-index: 10; }
+        #wheelResultText { margin-top: 30px; font-size: 28px; color: #f1c40f; font-weight: bold; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-shadow: 0 0 10px #000; z-index: 6005; pointer-events: none;}
 
-        #timerOverlay { font-size: 80px; font-weight: 900; color: #e74c3c; pointer-events: none; }
-        #dmLogModal > div { background:#111; padding:20px; border:1px solid #e84393; width:500px; height:400px; display:flex; flex-direction:column; }
-        #dmLogList { flex:1; overflow-y:auto; border:1px solid #333; margin:10px 0; text-align:left; padding:5px; font-size:12px; }
-        .secret-entry { margin-bottom: 5px; border-left: 2px solid #555; padding: 2px; }
-        .secret-dm-sent { border-color: #e84393; background: rgba(232, 67, 147, 0.1); } .secret-dm-received { border-color: #0984e3; background: rgba(9, 132, 227, 0.1); } .secret-p2p { border-color: #f1c40f; background: rgba(241, 196, 15, 0.1); }
         .log-panel { position: fixed; right: 20px; bottom: 20px; width: 220px; max-height: 300px; height: auto; padding: 10px; z-index: 1000; display: flex; flex-direction: column; background: rgba(18, 20, 16, 0.95); border: 1px solid #4b6b44; border-radius: 8px; }
         .log-panel.collapsed { height: 40px !important; overflow: hidden; }
         .log-list { overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column-reverse; gap: 5px; min-height: 200px; font-size: 12px; }
         .log-entry { padding: 5px; border-radius: 4px; background: rgba(255,255,255,0.08); display: flex; justify-content: space-between; }
-        #activeMapContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; display: none; justify-content: center; align-items: center; background: #000; }
-        #activeMapImg { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-        /* DETAY MODAL STİL */
-        .detail-window { width: 500px; max-width: 90%; height: 600px; background: #1a1a1a; border: 2px solid #f1c40f; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
-        .detail-header { padding: 15px; background: #222; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center; font-family: 'Cinzel'; font-size: 18px; color: #f1c40f; }
-        .detail-tabs { display: flex; background: #111; }
-        .tab-btn { flex: 1; padding: 15px; background: transparent; border: none; color: #777; cursor: pointer; border-bottom: 3px solid transparent; font-family: 'Lato'; font-weight: bold; transition: 0.2s; }
-        .tab-btn.active { color: #fff; border-bottom-color: #f1c40f; background: #222; }
-        .detail-content { flex: 1; padding: 20px; overflow-y: auto; font-family: 'Lato'; text-align: left; }
-        .tab-pane { display: none; } .tab-pane.active { display: block; }
-        .item-list { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
-        .list-item { background: #2d3436; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #777; }
-        .add-row { display: flex; gap: 5px; margin-bottom: 10px; }
+        #dmLogList { flex:1; overflow-y:auto; border:1px solid #333; margin:10px 0; text-align:left; padding:5px; font-size:12px; }
+        .secret-entry { margin-bottom: 5px; border-left: 2px solid #555; padding: 2px; }
+        .secret-dm-sent { border-color: #e84393; background: rgba(232, 67, 147, 0.1); } 
+        .secret-dm-received { border-color: #0984e3; background: rgba(9, 132, 227, 0.1); } 
+        .secret-p2p { border-color: #f1c40f; background: rgba(241, 196, 15, 0.1); }
     </style>
 </head>
 <body>
@@ -130,6 +151,7 @@
     <div id="identityBtn" class="floating-btn" title="Ben Kimim?"><i class="fas fa-id-card"></i><div id="currentIdentityDisplay">Seç</div></div>
     <div id="msgDmBtn" class="floating-btn" title="DM'e Mesaj At"><i class="fas fa-envelope"></i></div>
     <div id="dmLogBtn" class="floating-btn" title="DM Gizli Kayıtları"><i class="fas fa-book-dead"></i></div>
+    <div id="battleModeBtn" class="floating-btn" title="Savaş Modu" onclick="toggleBattleMode()"><i class="fas fa-swords"></i></div>
 
     <div class="side-drawer" id="partyDrawer">
         <div class="drawer-header"><span>KAHRAMANLAR</span><div style="font-size:10px; cursor:pointer; color:#c0392b" onclick="resetPartyData()">SIFIRLA</div></div>
@@ -139,6 +161,7 @@
 
     <div class="side-drawer" id="dmDrawer">
         <div class="drawer-header" style="color:#e74c3c; border-color:#e74c3c;"><span>DM ARAÇLARI</span></div>
+        <div class="dm-tool-row"><div class="dm-tool-title">DÜŞMAN EKLE</div><input type="text" id="enemyNameInput" class="dm-input" placeholder="İsim (Örn: Goblin)"><input type="number" id="enemyHpInput" class="dm-input" placeholder="HP (Örn: 7)" style="margin-top:5px;"><button class="dm-btn" onclick="addEnemy()">+ EKLE</button></div>
         <div class="dm-tool-row"><div class="dm-tool-title">HARİTA</div><input type="text" id="mapUrlInput" class="dm-input" placeholder="Resim URL"><div style="display:flex; gap:5px;"><button class="dm-btn" onclick="setMap()">YANSIT</button><button class="dm-btn" onclick="closeMap()">KAPAT</button></div></div>
         <div class="dm-tool-row"><div class="dm-tool-title">SAVAŞ</div><button class="dm-btn" onclick="rollAllInitiative()">1. OTO ZAR</button><button class="dm-btn" onclick="sortInitiative()">2. SIRALA</button><button class="dm-btn" onclick="nextTurn()">3. SONRAKİ</button></div>
         <div class="dm-tool-row"><div class="dm-tool-title">ARAÇLAR</div><input type="number" id="timerInput" class="dm-input" placeholder="Sn"><button class="dm-btn" onclick="startTimer()">SAYAÇ</button><button class="dm-btn" onclick="spinWheel()">ÇARK</button><button class="dm-btn" onclick="startMVPVote()">OYLAMA</button></div>
@@ -147,185 +170,157 @@
     <div class="log-panel glass-panel" id="logPanel"><div class="panel-header" onclick="document.getElementById('logPanel').classList.toggle('collapsed')">ZAR GEÇMİŞİ</div><div class="log-list" id="diceLog"></div></div>
     <div id="activeMapContainer"><img id="activeMapImg" src=""></div>
 
-    <div class="scene">
-        <div class="dice-container" id="dice"><svg class="toad-svg" viewBox="0 0 200 200"><defs><radialGradient id="skinGrad" cx="50%" cy="40%" r="65%"><stop offset="0%" style="stop-color:#596248;stop-opacity:1"/><stop offset="100%" style="stop-color:#0f120d;stop-opacity:1"/></radialGradient></defs><ellipse cx="100" cy="165" rx="80" ry="15" fill="#000" opacity="0.7" filter="blur(8px)"/><path d="M 40 130 Q 10 100, 50 80 Q 80 100, 70 140 Z" fill="#465239"/><path d="M 160 130 Q 190 100, 150 80 Q 120 100, 130 140 Z" fill="#465239"/><path d="M 50 110 C 40 40, 160 40, 150 110 C 160 170, 40 170, 50 110" fill="url(#skinGrad)" stroke="#1e2316" stroke-width="1.5"/></svg><div class="rune-container"><div class="magic-circle"></div><div class="dice-number" id="result">d20</div></div></div>
+    <div class="scene" id="diceScene">
+        <div class="dice-container" id="dice"><svg class="toad-svg" viewBox="0 0 200 200"><defs><radialGradient id="skinGrad" cx="50%" cy="40%" r="65%"><stop offset="0%" style="stop-color:#596248;stop-opacity:1"/><stop offset="100%" style="stop-color:#0f120d;stop-opacity:1"/></radialGradient></defs><ellipse cx="100" cy="165" rx="80" ry="15" fill="#000" opacity="0.7" filter="blur(8px)"/><path d="M 40 130 Q 10 100, 50 80 Q 80 100, 70 140 Z" fill="#465239"/><path d="M 160 130 Q 190 100, 150 80 Q 120 100, 130 140 Z" fill="#465239"/><path d="M 50 110 C 40 40, 160 40, 150 110 C 160 170, 40 170, 50 110" fill="url(#skinGrad)" stroke="#1e2316" stroke-width="1.5"/></svg><div class="rune-container"><div class="magic-circle"></div><div class="dice-number" id="result"><div style="font-size:16px;">d20</div></div></div></div>
         <button class="roll-btn" id="btn" onclick="roll(20)">d20 AT</button>
-        <div class="dice-bar"><button class="mini-dice-btn" onclick="roll(4)">d4</button><button class="mini-dice-btn" onclick="roll(6)">d6</button><button class="mini-dice-btn" onclick="roll(8)">d8</button><button class="mini-dice-btn" onclick="roll(10)">d10</button><button class="mini-dice-btn" onclick="roll(12)">d12</button></div>
+        
+        <div class="dice-controls">
+            <div id="accumulateToggle" class="toggle-sum" onclick="toggleAccumulate()"><i class="fas fa-plus-circle"></i> TOPLAMA MODU</div>
+            <div class="dice-bar"><button class="mini-dice-btn" onclick="roll(4)">d4</button><button class="mini-dice-btn" onclick="roll(6)">d6</button><button class="mini-dice-btn" onclick="roll(8)">d8</button><button class="mini-dice-btn" onclick="roll(10)">d10</button><button class="mini-dice-btn" onclick="roll(12)">d12</button></div>
+        </div>
     </div>
 
-    <div id="charDetailModal">
+    <div id="battleArena">
+        <div class="arena-column heroes-col"><div class="col-title" style="color:#2ecc71">KAHRAMANLAR</div><div id="heroBattleList"></div></div>
+        <div class="arena-column enemies-col"><div class="col-title" style="color:#e74c3c">DÜŞMANLAR</div><div id="enemyBattleList"></div></div>
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; background:rgba(0,0,0,0.8); padding:20px; border-radius:10px; border:1px solid #555;">
+            <div style="color:#aaa; font-size:12px; margin-bottom:5px;">SON ZAR</div>
+            <div id="lastRollVal" style="font-size:36px; color:#f1c40f; font-weight:bold;">0</div>
+            <button class="dm-btn" onclick="applyDamage()" style="background:#c0392b; color:#fff; margin-top:15px;">HASAR VUR</button>
+        </div>
+    </div>
+
+    <div id="whisperModal" class="modal-overlay"><div class="modal-content"><div style="color:#9b59b6; margin-bottom:10px;">GİZLİ MESAJ</div><div id="whisperContent">...</div><button class="dm-btn" onclick="document.getElementById('whisperModal').style.display='none'">KAPAT</button></div></div>
+    <div id="identityModal" class="modal-overlay"><div class="modal-content"><div style="color:#3498db; margin-bottom:10px;">SEN KİMSİN?</div><div id="identityList" style="max-height:200px; overflow-y:auto; text-align:left;"></div><button class="dm-btn" onclick="document.getElementById('identityModal').style.display='none'">KAPAT</button></div></div>
+    <div id="voteModal" class="modal-overlay"><div class="modal-content"><h2 style="color:#f1c40f;">GÜNÜN KAHRAMANI</h2><div class="vote-grid" id="voteGrid"></div></div></div>
+    <div id="winnerModal" class="modal-overlay"><div class="modal-content"><h1 style="color:#f1c40f;">KAZANAN</h1><div id="winnerName" style="font-size:30px;">İSİM</div><div id="voteCountDisplay"></div><button class="dm-btn" onclick="document.getElementById('winnerModal').style.display='none'">KAPAT</button></div></div>
+    <div id="dmLogModal" class="modal-overlay"><div style="background:#111; padding:20px; border:1px solid #e84393; width:500px; height:400px; display:flex; flex-direction:column;"><div style="color:#e84393;">GİZLİ LOG</div><div id="dmLogList"></div><button class="dm-btn" onclick="document.getElementById('dmLogModal').style.display='none'">KAPAT</button></div></div>
+    
+    <div id="charDetailModal" class="modal-overlay">
         <div class="detail-window">
-            <div class="detail-header"><span id="detailName">...</span> <i class="fas fa-times" style="cursor:pointer" onclick="closeDetailModal()"></i></div>
-            <div class="detail-tabs">
-                <button class="tab-btn active" onclick="switchTab('inventory')">ÇANTA</button>
-                <button class="tab-btn" onclick="switchTab('skills')">YETENEK</button>
-            </div>
+            <div class="detail-header"><span id="detailName">Karakter</span> <i class="fas fa-times" style="cursor:pointer" onclick="closeDetailModal()"></i></div>
+            <div class="detail-tabs"><button class="tab-btn active" onclick="switchTab('stats')">ÖZELLİK</button><button class="tab-btn" onclick="switchTab('inventory')">ÇANTA</button><button class="tab-btn" onclick="switchTab('skills')">YETENEK</button></div>
             <div class="detail-content">
-                <div id="tab-inventory" class="tab-pane active">
-                    <div class="add-row"><input type="text" id="newInvItem" class="dm-input" placeholder="Eşya Adı"><button class="dm-btn" style="width:auto;" onclick="addItem('inventory')">+</button></div>
-                    <div id="invList" class="item-list"></div>
-                </div>
-                <div id="tab-skills" class="tab-pane">
-                    <div class="add-row"><input type="text" id="newSkillItem" class="dm-input" placeholder="Yetenek Adı"><button class="dm-btn" style="width:auto;" onclick="addItem('skills')">+</button></div>
-                    <div id="skillList" class="item-list"></div>
-                </div>
+                <div id="tab-stats" class="tab-pane active"><div class="stat-grid"><div class="stat-group"><label class="stat-label">STR</label><input type="number" class="dm-input" id="detStr" onchange="saveDetail()"></div><div class="stat-group"><label class="stat-label">DEX</label><input type="number" class="dm-input" id="detDex" onchange="saveDetail()"></div><div class="stat-group"><label class="stat-label">Max HP</label><input type="number" class="dm-input" id="detMaxHp" onchange="saveDetail()"></div><div class="stat-group"><label class="stat-label">Max SP</label><input type="number" class="dm-input" id="detMaxSp" onchange="saveDetail()"></div><div class="stat-group"><label class="stat-label">Altın</label><input type="number" class="dm-input" id="detGold" onchange="saveDetail()"></div></div></div>
+                <div id="tab-inventory" class="tab-pane"><div class="add-row"><input type="text" id="newInvItem" class="dm-input" placeholder="Eşya"><button class="dm-btn" style="width:auto;" onclick="addItem('inventory')">+</button></div><div id="invList" class="item-list"></div></div>
+                <div id="tab-skills" class="tab-pane"><div class="add-row"><input type="text" id="newSkillItem" class="dm-input" placeholder="Yetenek"><button class="dm-btn" style="width:auto;" onclick="addItem('skills')">+</button></div><div id="skillList" class="item-list"></div></div>
             </div>
         </div>
     </div>
 
-    <div id="wheelOverlayContainer"><div class="wheel-pointer"></div><div class="wheel-container"><div class="wheel" id="theWheel"></div></div><div id="wheelResultText">SONUÇ</div></div>
+    <div id="wheelOverlayContainer" class="modal-overlay"><div class="wheel-container"><div class="wheel" id="theWheel"></div><div class="wheel-pointer"></div></div><div id="wheelResultText">SONUÇ</div></div>
     <div id="timerOverlay">00:00</div>
-    <div id="whisperModal"><div><div style="color:#9b59b6; margin-bottom:10px;">GİZLİ MESAJ</div><div id="whisperContent">...</div><button class="dm-btn" onclick="document.getElementById('whisperModal').style.display='none'">KAPAT</button></div></div>
-    <div id="identityModal"><div><div style="color:#3498db; margin-bottom:10px;">SEN KİMSİN?</div><div id="identityList" style="max-height:200px; overflow-y:auto;"></div><button class="dm-btn" onclick="document.getElementById('identityModal').style.display='none'">KAPAT</button></div></div>
-    <div id="dmLogModal" style="display:none;"><div style="background:#111; padding:20px; border:1px solid #e84393; width:500px; height:400px; display:flex; flex-direction:column;"><div style="color:#e84393;">GİZLİ LOG</div><div id="dmLogList" style="flex:1; overflow-y:auto; border:1px solid #333; margin:10px 0; text-align:left; padding:5px; font-size:12px;"></div><button class="dm-btn" onclick="document.getElementById('dmLogModal').style.display='none'">KAPAT</button></div></div>
-    <div id="voteModal"><div><h2 style="color:#f1c40f;">GÜNÜN KAHRAMANI</h2><div class="vote-grid" id="voteGrid"></div></div></div>
-    <div id="winnerModal"><div><h1 style="color:#f1c40f;">KAZANAN</h1><div id="winnerName" style="font-size:30px;">İSİM</div><div id="voteCountDisplay"></div><button class="dm-btn" onclick="document.getElementById('winnerModal').style.display='none'">KAPAT</button></div></div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         let partyData = [];
+        let enemyData = [];
         let audioCtx;
         let myIdentityId = null;
         let currentTurnIndex = -1;
         let takenIdentities = [];
+        let lastDiceRoll = 0;
+        let selectedTargetId = null;
+        let selectedTargetType = null;
         let activeDetailId = null;
+        let isAccumulateMode = false;
 
-        // --- DRAG ---
-        function enableDrag(btnId, clickCallback) {
-            const btn = document.getElementById(btnId); let isDragging = false, startX, startY, initLeft, initTop;
-            btn.addEventListener('mousedown', (e) => {
-                if(e.button !== 0) return; isDragging = false; startX = e.clientX; startY = e.clientY; const rect = btn.getBoundingClientRect(); initLeft = rect.left; initTop = rect.top;
-                const onMouseMove = (ev) => { if (Math.abs(ev.clientX - startX) > 5 || Math.abs(ev.clientY - startY) > 5) isDragging = true; if (isDragging) { btn.style.left = (initLeft + ev.clientX - startX) + 'px'; btn.style.top = (initTop + ev.clientY - startY) + 'px'; } };
-                const onMouseUp = () => { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); if (!isDragging && clickCallback) clickCallback(); };
-                document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
-            });
+        // --- UI TOGGLES (ARTIK display='flex' KULLANIYOR) ---
+        function enableDrag(btnId, cb) {
+            const btn=document.getElementById(btnId); let isDragging=false,startX,startY,iL,iT;
+            btn.addEventListener('mousedown',(e)=>{if(e.button!==0)return;isDragging=false;startX=e.clientX;startY=e.clientY;const r=btn.getBoundingClientRect();iL=r.left;iT=r.top;const mv=(ev)=>{if(Math.abs(ev.clientX-startX)>5||Math.abs(ev.clientY-startY)>5)isDragging=true;if(isDragging){btn.style.left=(iL+ev.clientX-startX)+'px';btn.style.top=(iT+ev.clientY-startY)+'px';}};const mu=()=>{document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',mu);if(!isDragging&&cb)cb();};document.addEventListener('mousemove',mv);document.addEventListener('mouseup',mu);});
         }
-        enableDrag('partyToggleBtn', () => toggleDrawer('partyDrawer'));
-        enableDrag('dmToolsBtn', () => toggleDrawer('dmDrawer'));
-        enableDrag('identityBtn', () => openIdentityModal());
-        enableDrag('msgDmBtn', () => sendMsgToDM());
-        enableDrag('dmLogBtn', () => document.getElementById('dmLogModal').style.display='flex');
-        function toggleDrawer(id) { document.querySelectorAll('.side-drawer').forEach(d => { if(d.id!==id) d.classList.remove('open'); }); document.getElementById(id).classList.toggle('open'); }
+        enableDrag('partyToggleBtn',()=>toggleDrawer('partyDrawer')); enableDrag('dmToolsBtn',()=>toggleDrawer('dmDrawer')); enableDrag('identityBtn',()=>openIdentityModal()); enableDrag('msgDmBtn',()=>sendMsgToDM()); enableDrag('dmLogBtn',()=>document.getElementById('dmLogModal').style.display='flex');
+        function toggleDrawer(id){document.querySelectorAll('.side-drawer').forEach(d=>{if(d.id!==id)d.classList.remove('open')});document.getElementById(id).classList.toggle('open');}
 
-        // --- DETAIL MODAL ---
-        function openDetailModal(id) {
-            activeDetailId = id; const c = partyData.find(x=>x.id===id); if(!c)return;
-            document.getElementById('detailName').innerText = c.name;
-            renderDetailLists(c); document.getElementById('charDetailModal').style.display = 'flex';
+        // --- BATTLE ---
+        function toggleBattleMode() { const s=document.getElementById('diceScene'), a=document.getElementById('battleArena'); if(a.style.display==='flex'){a.style.display='none';s.style.opacity='1';}else{a.style.display='flex';s.style.opacity='0.2';renderBattleArena();} }
+        function addEnemy() { const n=document.getElementById('enemyNameInput').value||'Düşman', h=parseInt(document.getElementById('enemyHpInput').value)||10; enemyData.push({id:Date.now(),name:n,hp:h,maxHp:h}); socket.emit('enemy_update', enemyData); }
+        function renderBattleArena() {
+            const hList=document.getElementById('heroBattleList'), eList=document.getElementById('enemyBattleList'); hList.innerHTML=''; eList.innerHTML='';
+            partyData.forEach(c=>{ const hp=parseInt(c.hp)||0, max=parseInt(c.maxHp)||10, pct=Math.min(100,(hp/max)*100); let col='#2ecc71'; if(pct<50)col='#f1c40f'; if(pct<25)col='#e74c3c'; const sel = selectedTargetId===c.id && selectedTargetType==='hero'; hList.insertAdjacentHTML('beforeend',`<div class="enemy-card ${sel?'selected':''}" style="border-color:${sel?'#fff':'#2ecc71'}" onclick="selectTarget(${c.id},'hero')"><div><div style="font-weight:bold;color:#2ecc71">${c.name}</div><div style="font-size:12px;color:#aaa">HP:${c.hp}/${c.maxHp}</div><div style="width:100%;height:5px;background:#333;margin-top:5px"><div style="width:${pct}%;height:100%;background:${col}"></div></div></div></div>`); });
+            enemyData.forEach(e=>{ const hp=parseInt(e.hp)||0, max=parseInt(e.maxHp)||10, pct=Math.min(100,(hp/max)*100); let col='#e74c3c'; if(hp<=0)col='#555'; const sel = selectedTargetId===e.id && selectedTargetType==='enemy'; eList.insertAdjacentHTML('beforeend',`<div class="enemy-card ${sel?'selected':''}" onclick="selectTarget(${e.id},'enemy')"><div><i class="fas fa-skull" style="font-size:20px;color:${col}"></i></div><div style="flex-grow:1"><div style="font-weight:bold">${e.name}</div><div style="font-size:12px;color:#aaa">HP:${e.hp}/${e.maxHp}</div><div style="width:100%;height:5px;background:#333;margin-top:5px"><div style="width:${pct}%;height:100%;background:${col}"></div></div></div>${myIdentityId==='DM'?`<i class="fas fa-trash" onclick="removeEnemy(${e.id})"></i>`:''}</div>`); });
         }
-        function closeDetailModal() { document.getElementById('charDetailModal').style.display='none'; activeDetailId=null; }
-        function switchTab(t) { document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active')); event.target.classList.add('active'); document.getElementById('tab-'+t).classList.add('active'); }
-        function addItem(type) { if(!activeDetailId)return; const i=document.getElementById(type==='inventory'?'newInvItem':'newSkillItem'); if(!i.value)return; const c=partyData.find(x=>x.id===activeDetailId); if(!c[type])c[type]=[]; c[type].push(i.value); i.value=''; socket.emit('party_update', partyData); renderDetailLists(c); }
-        function removeItem(type, idx) { const c=partyData.find(x=>x.id===activeDetailId); if(c&&c[type]){c[type].splice(idx,1); socket.emit('party_update', partyData); renderDetailLists(c);} }
-        function renderDetailLists(c) {
-            const iL=document.getElementById('invList'); iL.innerHTML=''; (c.inventory||[]).forEach((item,i)=>iL.insertAdjacentHTML('beforeend',`<div class="list-item" style="border-left:3px solid #e67e22; justify-content:space-between; display:flex;"><span>${item}</span><i class="fas fa-trash" style="cursor:pointer; color:#aaa" onclick="removeItem('inventory',${i})"></i></div>`));
-            const sL=document.getElementById('skillList'); sL.innerHTML=''; (c.skills||[]).forEach((s,i)=>sL.insertAdjacentHTML('beforeend',`<div class="list-item" style="border-left:3px solid #9b59b6; justify-content:space-between; display:flex;"><span>${s}</span><i class="fas fa-trash" style="cursor:pointer" onclick="removeItem('skills',${i})"></i></div>`));
+        function selectTarget(id, type) { selectedTargetId = id; selectedTargetType = type; renderBattleArena(); }
+        function removeEnemy(id) { enemyData=enemyData.filter(e=>e.id!==id); socket.emit('enemy_update',enemyData); }
+        function applyDamage() {
+            if(!selectedTargetId){alert("Hedef seç!");return;} if(lastDiceRoll<=0){alert("Zar at!");return;}
+            if(selectedTargetType === 'enemy'){ const e = enemyData.find(x=>x.id===selectedTargetId); if(e){e.hp-=lastDiceRoll; if(e.hp<0)e.hp=0; socket.emit('enemy_update',enemyData); alert(`${e.name} hasar aldı!`);} }
+            else { const h = partyData.find(x=>x.id===selectedTargetId); if(h){h.hp-=lastDiceRoll; if(h.hp<0)h.hp=0; socket.emit('party_update',partyData); alert(`${h.name} hasar aldı!`);} }
         }
-
-        // --- RENDER PARTY ---
-        function renderParty() {
-            const list = document.getElementById('characterList'); list.innerHTML = '';
-            partyData.forEach((c, index) => {
-                const hp = parseInt(c.hp)||0; const maxHp = parseInt(c.maxHp)||10; const pctHp = Math.min(100, Math.max(0, (hp/maxHp)*100));
-                const sp = parseInt(c.sp)||0; const maxSp = parseInt(c.maxSp)||10; const pctSp = Math.min(100, Math.max(0, (sp/maxSp)*100));
-                let colorHp = '#2ecc71'; if(pctHp<50) colorHp='#f1c40f'; if(pctHp<25) colorHp='#e74c3c';
-                const activeClass = (index === currentTurnIndex) ? 'active-turn' : '';
-                
-                const html = `
-                <div class="char-card ${activeClass}">
-                    <div class="char-header">
-                        <div class="char-avatar-container" onclick="changeAvatar(${c.id})">${c.avatar?`<img src="${c.avatar}">`:'<i class="fas fa-user"></i>'}</div>
-                        <div class="char-details">
-                            <input class="inp-name" value="${c.name}" oninput="upd(${c.id},'name',this.value)" placeholder="İsim">
-                            <div class="stat-row">
-                                <div class="stat-box box-hp" title="HP / Max HP">HP 
-                                    <div class="stat-dual"><input class="stat-input" value="${c.hp}" oninput="upd(${c.id},'hp',this.value)"><span class="stat-sep">/</span><input class="stat-input" value="${c.maxHp}" oninput="upd(${c.id},'maxHp',this.value)"></div>
-                                </div>
-                                <div class="stat-box box-sp" title="SP / Max SP">SP 
-                                    <div class="stat-dual"><input class="stat-input" value="${c.sp||0}" oninput="upd(${c.id},'sp',this.value)"><span class="stat-sep">/</span><input class="stat-input" value="${c.maxSp||10}" oninput="upd(${c.id},'maxSp',this.value)"></div>
-                                </div>
-                            </div>
-                            <div class="stat-row" style="margin-top:2px;">
-                                <div class="stat-box box-lvl">INIT <input class="stat-input" value="${c.init||0}" oninput="upd(${c.id},'init',this.value)"></div>
-                                <div class="stat-box box-init">AC <input class="stat-input" value="${c.ac||10}" oninput="upd(${c.id},'ac',this.value)"></div>
-                            </div>
-                            <div class="hp-bar-container"><div class="hp-bar-fill" style="width:${pctHp}%; background-color:${colorHp}"></div></div>
-                            <div class="hp-bar-container" style="height:3px; margin-top:2px;"><div class="sp-bar-fill" style="width:${pctSp}%"></div></div>
-                        </div>
-                    </div>
-                    <div class="card-actions">
-                         <i class="fas fa-eye icon-btn" onclick="sendWhisper(${c.id}, '${c.name}')" title="Fısılda"></i>
-                         <i class="fas fa-suitcase icon-btn" onclick="openDetailModal(${c.id})" title="Çanta/Detay"></i>
-                         <i class="fas fa-trash icon-btn" onclick="delChar(${c.id})"></i>
-                    </div>
-                </div>`;
-                list.insertAdjacentHTML('beforeend', html);
-            });
-        }
-
-        function upd(id,k,v){ const c=partyData.find(x=>x.id==id); if(c){c[k]=v; saveData();} }
-        function saveData(){ socket.emit('party_update', partyData); } 
-        function addCharacter(){ 
-            partyData.push({
-                id:Date.now(), name:'', hp:10, maxHp:10, sp:10, maxSp:10, ac:10, init:0, inventory:[], skills:[]
-            }); 
-            saveData(); renderParty(); 
-        }
-        function delChar(id){ if(confirm('Sil?')){partyData=partyData.filter(x=>x.id!==id); saveData(); renderParty();} }
-        function changeAvatar(id){ const i=document.createElement('input'); i.type='file'; i.onchange=e=>{const r=new FileReader(); r.onload=ev=>{upd(id,'avatar',ev.target.result); renderParty();}; r.readAsDataURL(e.target.files[0]);}; i.click(); }
-        function resetPartyData(){ if(confirm('Tüm karakterleri sil?')){partyData=[]; saveData(); renderParty();} }
 
         // --- ZAR ---
-        function roll(sides) {
-            playClickSound(); document.body.classList.add('rolling'); const n = Math.floor(Math.random() * sides) + 1; let t = 'normal'; if (sides === 20) { if(n === 20) t = 'crit'; else if(n === 1) t = 'fail'; }
-            const senderName = getMyName(); socket.emit('zar_atildi', { sonuc: n, tur: t, zaman: new Date().getHours()+":"+new Date().getMinutes(), atan: senderName, zarTipi: sides });
-            setTimeout(() => { document.body.classList.remove('rolling'); const res = document.getElementById('result'); res.innerHTML = `<div class="roller-name">${senderName}</div>${n}`; let c = 'dice-number'; if(t === 'crit') c += ' crit-success'; else if(t === 'fail') c += ' crit-fail'; res.className = c; addLog(n, t, new Date().getHours()+":"+new Date().getMinutes(), senderName, sides); }, 800);
+        function toggleAccumulate() { 
+            isAccumulateMode = !isAccumulateMode; const btn = document.getElementById('accumulateToggle');
+            if(isAccumulateMode) { btn.classList.add('active'); btn.innerHTML = '<i class="fas fa-check-circle"></i> MOD AÇIK'; }
+            else { btn.classList.remove('active'); btn.innerHTML = '<i class="fas fa-plus-circle"></i> TOPLAMA MODU'; lastDiceRoll=0; document.getElementById('lastRollVal').innerText = "0"; }
         }
-        function addLog(res, type, time, name, sides) { document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry ${type==='crit'?'log-crit':type==='fail'?'log-fail':''}"><span class="log-time">${time}</span><span>${name}: <strong>${res}</strong> (d${sides})</span></div>`); }
-        function playClickSound() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.frequency.value = 200; o.type = 'triangle'; g.gain.setValueAtTime(0.1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.1); }
+        function roll(sides) {
+            playClickSound(); document.body.classList.add('rolling'); const n=Math.floor(Math.random()*sides)+1; let t='normal'; if(sides===20){if(n===20)t='crit';else if(n===1)t='fail';}
+            if(isAccumulateMode) lastDiceRoll += n; else lastDiceRoll = n;
+            document.getElementById('lastRollVal').innerText = lastDiceRoll;
+            socket.emit('zar_atildi',{sonuc:n,tur:t,zaman:new Date().getHours()+':'+new Date().getMinutes(),atan:getMyName(),zarTipi:sides});
+            setTimeout(()=>{document.body.classList.remove('rolling'); const r=document.getElementById('result'); r.innerHTML=`<div class="roller-name">${getMyName()}</div>${n}`; let c='dice-number'; if(t==='crit')c+=' crit-success'; else if(t==='fail')c+=' crit-fail'; r.className=c; addLog(n,t,new Date().getHours()+':'+new Date().getMinutes(),getMyName(),sides);},800);
+        }
 
-        // --- IDENTITY & CHAT ---
-        function openIdentityModal() { const list = document.getElementById('identityList'); list.innerHTML = ''; let dmTaken = takenIdentities.includes('DM') && myIdentityId !== 'DM'; list.insertAdjacentHTML('beforeend', `<div class="identity-option ${dmTaken?'taken':''}" onclick="${dmTaken?'':'selectIdentity(\'DM\', \'DM\')'}">DM (Oyun Yöneticisi)${dmTaken?' (DOLU)':''}</div>`); partyData.forEach(c => { let takenClass = (takenIdentities.includes(c.id) && c.id !== myIdentityId) ? 'taken' : ''; list.insertAdjacentHTML('beforeend', `<div class="identity-option ${takenClass}" onclick="${takenClass?'':`selectIdentity(${c.id}, '${c.name}')`}">${c.name}${takenClass?' (Dolu)':''}</div>`); }); document.getElementById('identityModal').style.display = 'block'; }
+        // --- DETAILS ---
+        function openDetailModal(id) { activeDetailId = id; const c = partyData.find(x=>x.id===id); if(!c)return; document.getElementById('detailName').innerText = c.name; document.getElementById('detStr').value = c.str||10; document.getElementById('detDex').value = c.dex||10; document.getElementById('detMaxHp').value = c.maxHp||10; document.getElementById('detMaxSp').value = c.maxSp||10; document.getElementById('detGold').value = c.gold||0; renderDetailLists(c); document.getElementById('charDetailModal').style.display = 'flex'; }
+        function closeDetailModal() { document.getElementById('charDetailModal').style.display='none'; activeDetailId=null; }
+        function switchTab(t) { document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active')); event.target.classList.add('active'); document.getElementById('tab-'+t).classList.add('active'); }
+        function saveDetail() { if(!activeDetailId)return; const c=partyData.find(x=>x.id===activeDetailId); if(c){ c.str=parseInt(document.getElementById('detStr').value); c.dex=parseInt(document.getElementById('detDex').value); c.maxHp=parseInt(document.getElementById('detMaxHp').value); c.maxSp=parseInt(document.getElementById('detMaxSp').value); c.gold=parseInt(document.getElementById('detGold').value); socket.emit('party_update', partyData); } }
+        function addItem(type) { if(!activeDetailId)return; const i=document.getElementById(type==='inventory'?'newInvItem':'newSkillItem'); if(!i.value)return; const c=partyData.find(x=>x.id===activeDetailId); if(!c[type])c[type]=[]; c[type].push(i.value); i.value=''; socket.emit('party_update', partyData); renderDetailLists(c); }
+        function removeItem(type, idx) { const c=partyData.find(x=>x.id===activeDetailId); if(c&&c[type]){c[type].splice(idx,1); socket.emit('party_update', partyData); renderDetailLists(c);} }
+        function renderDetailLists(c) { const iL=document.getElementById('invList'); iL.innerHTML=''; (c.inventory||[]).forEach((item,i)=>iL.insertAdjacentHTML('beforeend',`<div class="list-item" style="border-left:3px solid #e67e22; justify-content:space-between; display:flex;"><span>${item}</span><i class="fas fa-trash" style="cursor:pointer; color:#aaa" onclick="removeItem('inventory',${i})"></i></div>`)); const sL=document.getElementById('skillList'); sL.innerHTML=''; (c.skills||[]).forEach((s,i)=>sL.insertAdjacentHTML('beforeend',`<div class="list-item" style="border-left:3px solid #9b59b6; justify-content:space-between; display:flex;"><span>${s}</span><i class="fas fa-trash" style="cursor:pointer" onclick="removeItem('skills',${i})"></i></div>`)); }
+
+        // --- RENDER ---
+        function renderParty() {
+            const l=document.getElementById('characterList'); l.innerHTML='';
+            partyData.forEach((c, index) => {
+                const hp=parseInt(c.hp)||0, maxHp=parseInt(c.maxHp)||10, pctHp=Math.min(100,(hp/maxHp)*100);
+                const sp=parseInt(c.sp)||0, maxSp=parseInt(c.maxSp)||10, pctSp=Math.min(100,(sp/maxSp)*100);
+                let col='#2ecc71'; if(pctHp<50)col='#f1c40f'; if(pctHp<25)col='#e74c3c';
+                const activeClass = (index === currentTurnIndex) ? 'active-turn' : '';
+                const html=`<div class="char-card ${activeClass}"><div class="char-header"><div class="char-avatar-container" onclick="changeAvatar(${c.id})">${c.avatar?`<img src="${c.avatar}">`:'<i class="fas fa-user"></i>'}</div><div class="char-details"><input class="inp-name" value="${c.name}" oninput="upd(${c.id},'name',this.value)" placeholder="İsim"><div class="stat-row"><div class="stat-box box-hp">HP <div class="stat-dual"><input class="stat-input" value="${c.hp}" oninput="upd(${c.id},'hp',this.value)"><span class="stat-sep">/</span><input class="stat-input" value="${c.maxHp}" oninput="upd(${c.id},'maxHp',this.value)"></div></div><div class="stat-box box-sp">SP <div class="stat-dual"><input class="stat-input" value="${c.sp||0}" oninput="upd(${c.id},'sp',this.value)"><span class="stat-sep">/</span><input class="stat-input" value="${c.maxSp||10}" oninput="upd(${c.id},'maxSp',this.value)"></div></div></div><div class="stat-row" style="margin-top:2px"><div class="stat-box box-lvl">INIT <input class="stat-input" value="${c.init||0}" oninput="upd(${c.id},'init',this.value)"></div><div class="stat-box box-init">AC <input class="stat-input" value="${c.ac||10}" oninput="upd(${c.id},'ac',this.value)"></div></div><div class="hp-bar-container"><div class="hp-bar-fill" style="width:${pctHp}%; background-color:${col}"></div></div><div class="hp-bar-container" style="height:3px; margin-top:2px;"><div class="sp-bar-fill" style="width:${pctSp}%"></div></div></div></div><div class="card-actions"><i class="fas fa-eye icon-btn" onclick="sendWhisper(${c.id},'${c.name}')"></i><i class="fas fa-suitcase icon-btn" onclick="openDetailModal(${c.id})"></i><i class="fas fa-trash icon-btn" onclick="delChar(${c.id})"></i></div></div>`;
+                l.insertAdjacentHTML('beforeend',html);
+            });
+        }
+        function upd(id,k,v){const c=partyData.find(x=>x.id==id);if(c){c[k]=v;saveData();}} function saveData(){socket.emit('party_update',partyData);} function addCharacter(){ partyData.push({id:Date.now(), name:'', hp:10, maxHp:10, sp:10, maxSp:10, str:10, dex:10, level:1, init:0, gold:0, ac:10, inventory:[], skills:[]}); saveData(); renderParty(); } function delChar(id){if(confirm('Sil?')){partyData=partyData.filter(x=>x.id!==id);saveData();}} function changeAvatar(id){const i=document.createElement('input');i.type='file';i.onchange=e=>{const r=new FileReader();r.onload=ev=>{upd(id,'avatar',ev.target.result)};r.readAsDataURL(e.target.files[0])};i.click();} function resetPartyData(){if(confirm('Silinsin mi?')){partyData=[];saveData();}}
+        function addLog(res,type,time,name,sides){document.getElementById('diceLog').insertAdjacentHTML('afterbegin',`<div class="log-entry ${type==='crit'?'log-crit':type==='fail'?'log-fail':''}"><span style="font-size:10px">${time}</span> <span>${name}: <strong>${res}</strong> (d${sides})</span></div>`);}
+        function playClickSound(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const o=audioCtx.createOscillator();const g=audioCtx.createGain();o.frequency.value=200;o.type='triangle';g.gain.setValueAtTime(0.1,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.1);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+0.1);}
+        function openIdentityModal() { const list = document.getElementById('identityList'); list.innerHTML = ''; let dmTaken = takenIdentities.includes('DM') && myIdentityId !== 'DM'; list.insertAdjacentHTML('beforeend', `<div class="identity-option ${dmTaken?'taken':''}" onclick="${dmTaken?'':'selectIdentity(\'DM\', \'DM\')'}">DM (Oyun Yöneticisi)${dmTaken?' (DOLU)':''}</div>`); partyData.forEach(c => { let takenClass = (takenIdentities.includes(c.id) && c.id !== myIdentityId) ? 'taken' : ''; list.insertAdjacentHTML('beforeend', `<div class="identity-option ${takenClass}" onclick="${takenClass?'':`selectIdentity(${c.id}, '${c.name}')`}">${c.name}${takenClass?' (Dolu)':''}</div>`); }); document.getElementById('identityModal').style.display = 'flex'; }
         function selectIdentity(id, name) { let oldId = myIdentityId; myIdentityId = id; localStorage.setItem('dnd_my_identity', id); document.getElementById('currentIdentityDisplay').innerText = name || "Bilinmiyor"; document.getElementById('identityModal').style.display = 'none'; socket.emit('claim_identity', { oldId: oldId, newId: id }); updateInterfaceForIdentity(); }
-        function updateInterfaceForIdentity() { const isDM = (myIdentityId === 'DM'); document.getElementById('dmLogBtn').style.display = isDM ? 'flex' : 'none'; document.getElementById('msgDmBtn').style.display = isDM ? 'none' : 'flex'; document.getElementById('dmToolsBtn').style.display = isDM ? 'flex' : 'none'; }
+        function updateInterfaceForIdentity() { const isDM = (myIdentityId === 'DM'); document.getElementById('dmLogBtn').style.display = isDM ? 'flex' : 'none'; document.getElementById('msgDmBtn').style.display = isDM ? 'none' : 'flex'; document.getElementById('dmToolsBtn').style.display = isDM ? 'flex' : 'none'; if(document.getElementById('battleArena').style.display === 'flex') renderBattleArena(); }
         function getMyName() { return myIdentityId === 'DM' ? "DM" : (partyData.find(c => c.id == myIdentityId)?.name || "Bilinmiyor"); }
-        function sendMsgToDM() { const msg = prompt("DM'e ne fısıldamak istiyorsun?"); if (msg) { socket.emit('player_whisper', { sender: getMyName(), message: msg }); alert("Mesajın DM'e iletildi."); } }
+        function sendMsgToDM() { const msg = prompt("DM'e ne fısıldamak istiyorsun?"); if (msg) socket.emit('player_whisper', { sender: getMyName(), message: msg }); }
         function sendWhisper(id, name) { const msg = prompt(`"${name}" kişisine ne fısıldamak istersin?`); if (msg) { if(myIdentityId === 'DM') socket.emit('dm_whisper', {targetId: id, targetName: name, message: msg}); else socket.emit('p2p_whisper', { senderId: myIdentityId, senderName: getMyName(), targetId: id, targetName: name, message: msg }); } }
-
-        // SOCKET LISTENERS
-        socket.on('party_update_client', (data) => { partyData = data; renderParty(); if(activeDetailId) openDetailModal(activeDetailId); });
-        socket.on('update_taken_identities', (list) => { takenIdentities = list; });
-        socket.on('dm_log_history_load', (h) => { const l=document.getElementById('dmLogList'); l.innerHTML=''; h.forEach(e=>addDmLogEntry(e)); });
-        socket.on('dm_log_update', (e) => addDmLogEntry(e));
-        function addDmLogEntry(e) { const l = document.getElementById('dmLogList'); let cls = e.type === 'dm-sent' ? 'secret-dm-sent' : (e.type === 'dm-received' ? 'secret-dm-received' : 'secret-p2p'); l.insertAdjacentHTML('beforeend', `<div class="secret-entry ${cls}"><div style="font-size:10px; color:#aaa;">${e.time} | <strong>${e.sender}</strong> -> <strong>${e.target}</strong></div><div style="margin-top:3px;">${e.message}</div></div>`); l.scrollTop = l.scrollHeight; }
-        socket.on('herkes_icin_zar', (veri) => { const btn = document.getElementById('btn'); const resDiv = document.getElementById('result'); if (!document.body.classList.contains('rolling')) { document.body.classList.add('rolling'); playClickSound(); } setTimeout(() => { document.body.classList.remove('rolling'); resDiv.innerHTML = `<div class="roller-name">${veri.atan}</div>${veri.sonuc}`; let cls = 'dice-number'; if(veri.zarTipi == 20) { if(veri.tur === 'crit') cls += ' crit-success'; else if(veri.tur === 'fail') cls += ' crit-fail'; } resDiv.className = cls; addLog(veri.sonuc, veri.tur, veri.zaman, veri.atan, veri.zarTipi); }, 800); });
-        socket.on('map_update_client', (url) => { const div = document.getElementById('activeMapContainer'); const img = document.getElementById('activeMapImg'); if (url) { img.src = url; div.style.display = 'flex'; document.body.classList.add('map-mode'); } else { div.style.display = 'none'; document.body.classList.remove('map-mode'); } });
-        socket.on('receive_whisper', (d) => { if(myIdentityId && myIdentityId == d.targetId) { playClickSound(); document.getElementById('whisperContent').innerText = d.message; document.getElementById('whisperModal').style.display = 'block'; } else { document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span>DM, <strong>${d.targetName}</strong> ile fısıldaşıyor...</span></div>`); } });
-        socket.on('dm_receive_player_msg', (d) => { if (myIdentityId === 'DM') { playClickSound(); document.getElementById('whisperContent').innerText = `GÖNDEREN: ${d.sender}\n\n${d.message}`; document.getElementById('whisperModal').style.display = 'block'; } document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span><strong>${d.sender}</strong>, DM ile fısıldaşıyor...</span></div>`); });
-        socket.on('p2p_whisper_relay', (d) => { if (myIdentityId == d.targetId) { playClickSound(); document.getElementById('whisperContent').innerText = `GÖNDEREN: ${d.senderName}\n\n${d.message}`; document.getElementById('whisperModal').style.display = 'block'; } let t = (myIdentityId == d.senderId) ? `Sen, <strong>${d.targetName}</strong> kişisine fısıldadın.` : (myIdentityId == d.targetId ? `<strong>${d.senderName}</strong> sana fısıldadı.` : `<strong>${d.senderName}</strong>, <strong>${d.targetName}</strong> ile fısıldaşıyor...`); document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span>${t}</span></div>`); });
         
-        socket.on('timer_update', (s) => runVisualTimer(s));
-        socket.on('wheel_result', (d) => showWheelResult(d));
-        socket.on('show_vote_screen', () => { const g = document.getElementById('voteGrid'); g.innerHTML = ''; partyData.forEach(c => { g.insertAdjacentHTML('beforeend', `<div class="vote-card" onclick="castVote('${c.name}')"><h3>${c.name}</h3></div>`); }); document.getElementById('voteModal').style.display = 'flex'; });
-        socket.on('vote_result_announce', (d) => { document.getElementById('voteModal').style.display = 'none'; document.getElementById('winnerName').innerText = d.winner; document.getElementById('voteCountDisplay').innerText = d.votes + " Oy ile"; document.getElementById('winnerModal').style.display = 'block'; playClickSound(); });
+        socket.on('party_update_client',(d)=>{partyData=d;renderParty(); if(activeDetailId) openDetailModal(activeDetailId); if(document.getElementById('battleArena').style.display==='flex')renderBattleArena();});
+        socket.on('enemy_update_client',(d)=>{enemyData=d; if(document.getElementById('battleArena').style.display==='flex')renderBattleArena();});
+        socket.on('update_taken_identities',(l)=>{takenIdentities=l;});
+        socket.on('herkes_icin_zar',(v)=>{if(v.atan!==getMyName()){lastDiceRoll=v.sonuc;document.getElementById('lastRollVal').innerText=lastDiceRoll;} const r=document.getElementById('result'); if(!document.body.classList.contains('rolling')){document.body.classList.add('rolling');playClickSound();} setTimeout(()=>{document.body.classList.remove('rolling'); r.innerHTML=`<div class="roller-name">${v.atan}</div>${v.sonuc}`; let c='dice-number'; if(v.tur==='crit')c+=' crit-success'; else if(v.tur==='fail')c+=' crit-fail'; r.className=c; addLog(v.sonuc,v.tur,v.zaman,v.atan,v.zarTipi);},800);});
+        socket.on('receive_whisper',(d)=>{if(myIdentityId&&myIdentityId==d.targetId){playClickSound();document.getElementById('whisperContent').innerText=d.message;document.getElementById('whisperModal').style.display='flex';}else{document.getElementById('diceLog').insertAdjacentHTML('afterbegin',`<div class="log-entry log-whisper"><span>DM -> ${d.targetName}</span></div>`);}});
+        socket.on('dm_receive_player_msg',(d)=>{if(myIdentityId==='DM'){playClickSound();document.getElementById('whisperContent').innerText=`${d.sender}: ${d.message}`;document.getElementById('whisperModal').style.display='flex';}document.getElementById('diceLog').insertAdjacentHTML('afterbegin',`<div class="log-entry log-whisper"><span>${d.sender} -> DM</span></div>`);});
+        socket.on('p2p_whisper_relay',(d)=>{if(myIdentityId==d.targetId){playClickSound();document.getElementById('whisperContent').innerText=`${d.senderName}: ${d.message}`;document.getElementById('whisperModal').style.display='flex';}document.getElementById('diceLog').insertAdjacentHTML('afterbegin',`<div class="log-entry log-whisper"><span>${d.senderName} -> ${d.targetName}</span></div>`);});
+        socket.on('dm_log_history_load',(h)=>{const l=document.getElementById('dmLogList');l.innerHTML='';h.forEach(e=>addDmLogEntry(e));});
+        socket.on('dm_log_update',(e)=>{addDmLogEntry(e);});
+        socket.on('map_update_client', (u) => { if(u){document.getElementById('activeMapImg').src=u; document.getElementById('activeMapContainer').style.display='flex'; document.body.classList.add('map-mode');} else { document.getElementById('activeMapContainer').style.display='none'; document.body.classList.remove('map-mode');} });
+        socket.on('timer_update', (s) => {const el=document.getElementById('timerOverlay'); el.style.display='block'; let l=s; const i=setInterval(()=>{l--; el.innerText=l; if(l<=0){clearInterval(i); setTimeout(()=>el.style.display='none',2000);}},1000);});
+        socket.on('wheel_result', (d) => {const o=document.getElementById('wheelOverlayContainer'); o.style.display='flex'; const w=document.getElementById('theWheel'); w.style.transition='none'; w.style.transform='rotate(0deg)'; setTimeout(()=>{w.style.transition='transform 4s cubic-bezier(0.1,0.7,0.1,1)'; w.style.transform=`rotate(${d.angle}deg)`;},50); setTimeout(()=>{document.getElementById('wheelResultText').innerText=d.text; document.getElementById('diceLog').insertAdjacentHTML('afterbegin',`<div class="log-entry log-fate">${d.text}</div>`); setTimeout(()=>o.style.display='none',4000);},4000);});
+        socket.on('show_vote_screen',()=>{const g=document.getElementById('voteGrid');g.innerHTML='';partyData.forEach(c=>{g.insertAdjacentHTML('beforeend',`<div class="vote-card" onclick="castVote('${c.name}')">${c.name}</div>`);});document.getElementById('voteModal').style.display='flex';});
+        socket.on('vote_result_announce',(d)=>{document.getElementById('voteModal').style.display='none';document.getElementById('winnerName').innerText=d.winner;document.getElementById('voteCountDisplay').innerText=d.votes+' Oy';document.getElementById('winnerModal').style.display='flex';playClickSound();});
+        function setMap(){const u=document.getElementById('mapUrlInput').value; socket.emit('map_change',u);}
+        function closeMap(){socket.emit('map_change',null);}
+        function rollAllInitiative(){partyData.forEach(c=>{c.init=Math.floor(Math.random()*20)+1;});sortInitiative();}
+        function sortInitiative(){partyData.sort((a,b)=>(parseInt(b.init)||0)-(parseInt(a.init)||0));currentTurnIndex=-1;saveData();renderParty();}
+        function nextTurn(){currentTurnIndex++;if(currentTurnIndex>=partyData.length)currentTurnIndex=0;renderParty();}
+        function startTimer(){socket.emit('timer_start',document.getElementById('timerInput').value);}
+        function spinWheel(){const f=["DOST ATEŞİ!","SİLAHIN FIRLADI!","ADRENALİN!","KÖRLÜK!","TANRISAL ŞİFA","DÜŞMAN TÖKEZLEDİ","BÜYÜ GERİ TEPTİ!","YERE KAPAKLANDIN!","ZIRHIN ÇATLADI!","KAFAN KARIŞTI!","ZEHİRLENDİN!","LANETLENDİN!","TAM İSABET!","ŞANS MELEĞİ!","İKİNCİ ŞANS!"];const t=f[Math.floor(Math.random()*f.length)];socket.emit('wheel_spin',{text:t,angle:1800+Math.random()*360});}
+        function startMVPVote(){socket.emit('start_vote');}
+        function endMVPVote(){socket.emit('end_vote');}
+        function castVote(n){socket.emit('cast_vote',n);document.getElementById('voteModal').style.display='none';}
 
-        // TOOLS
-        function setMap() { const url = document.getElementById('mapUrlInput').value; socket.emit('map_change', url); }
-        function closeMap() { socket.emit('map_change', null); }
-        function rollAllInitiative() { partyData.forEach(c => { c.init = Math.floor(Math.random() * 20) + 1; }); sortInitiative(); }
-        function sortInitiative() { partyData.sort((a, b) => (parseInt(b.init) || 0) - (parseInt(a.init) || 0)); currentTurnIndex = -1; saveData(); renderParty(); }
-        function nextTurn() { currentTurnIndex++; if (currentTurnIndex >= partyData.length) currentTurnIndex = 0; renderParty(); }
-        function startTimer() { const s=document.getElementById('timerInput').value; if(s) socket.emit('timer_start', s); }
-        function spinWheel() { const f=["DOST ATEŞİ!", "SİLAHIN FIRLADI!", "ADRENALİN!", "KÖRLÜK!", "TANRISAL ŞİFA", "DÜŞMAN TÖKEZLEDİ", "BÜYÜ GERİ TEPTİ!", "YERE KAPAKLANDIN!", "ZIRHIN ÇATLADI!", "KAFAN KARIŞTI!", "ZEHİRLENDİN!", "LANETLENDİN!", "TAM İSABET!", "ŞANS MELEĞİ!", "İKİNCİ ŞANS!"]; const text = f[Math.floor(Math.random()*f.length)]; const angle = 1800 + Math.floor(Math.random() * 360); socket.emit('wheel_spin', {text, angle}); }
-        function startMVPVote() { socket.emit('start_vote'); }
-        function endMVPVote() { socket.emit('end_vote'); }
-        function castVote(n) { socket.emit('cast_vote', n); document.getElementById('voteModal').style.display='none'; alert("Oyunuz alındı: " + n); }
-        
-        function runVisualTimer(s) { const el = document.getElementById('timerOverlay'); el.style.display = 'block'; let l = s; const i = setInterval(() => { l--; el.innerText = Math.floor(l/60)+":"+(l%60<10?'0':'')+(l%60); if (l <= 0) { clearInterval(i); el.innerText="SÜRE BİTTİ!"; setTimeout(()=>el.style.display='none',3000); } }, 1000); }
-        function showWheelResult(d) { const o = document.getElementById('wheelOverlayContainer'); const w = document.getElementById('theWheel'); const t = document.getElementById('wheelResultText'); o.style.display = 'flex'; t.style.opacity = '0'; w.style.transition = 'none'; w.style.transform = 'rotate(0deg)'; setTimeout(() => { w.style.transition = 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)'; w.style.transform = `rotate(${d.angle}deg)`; }, 50); setTimeout(() => { t.innerText = d.text; t.style.opacity = '1'; playClickSound(); document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-fate"><span class="log-time">KADER</span><span>${d.text}</span></div>`); setTimeout(() => { o.style.display = 'none'; }, 4000); }, 4000); }
-
-        window.onload=()=>{ const i = localStorage.getItem('dnd_my_identity'); if(i) { myIdentityId = i; socket.emit('claim_identity', { oldId: undefined, newId: i }); updateInterfaceForIdentity(); setTimeout(() => { const c = partyData.find(x => x.id == i); if(c) document.getElementById('currentIdentityDisplay').innerText = c.name; }, 1000); } };
+        window.onload=()=>{const i=localStorage.getItem('dnd_my_identity');if(i){myIdentityId=i;socket.emit('claim_identity',{oldId:undefined,newId:i});updateInterfaceForIdentity();setTimeout(()=>{const c=partyData.find(x=>x.id==i);if(c)document.getElementById('currentIdentityDisplay').innerText=c.name;},1000);}};
     </script>
 </body>
 </html>
