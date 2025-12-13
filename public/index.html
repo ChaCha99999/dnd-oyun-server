@@ -3,100 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Master Screen V2.0</title>
+    <title>D&D Master Screen V2.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* TEMEL TASARIM */
+        /* TEMEL AYARLAR */
         body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background-color: #0f0f0f; background-image: radial-gradient(circle at center, rgba(0,0,0,0.4), #000), url('masa.jpg'); background-size: cover; background-position: center; font-family: 'Cinzel', serif; color: #dcdde1; user-select: none; }
         .glass-panel { background: rgba(18, 20, 16, 0.95); border: 1px solid #4b6b44; backdrop-filter: blur(8px); border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.8); }
-        
-        /* BUTONLAR & MENÜLER */
-        .floating-btn { position: fixed; left: 20px; z-index: 1000; width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; transition: all 0.2s; background: linear-gradient(135deg, #2f3624, #0f120d); border: 2px solid #555; color: #aaa; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        .floating-btn:hover { transform: scale(1.1); color: #fff; border-color: #fff; }
-        #partyToggleBtn { top: 20px; border-color: #f1c40f; color: #f1c40f; }
-        #soundToggleBtn { top: 80px; border-color: #7bed9f; color: #7bed9f; }
-        #dmToolsBtn { top: 140px; border-color: #e74c3c; color: #e74c3c; } /* YENİ: DM Araçları */
 
-        .side-drawer { position: fixed; left: -360px; top: 0; width: 340px; height: 100vh; background: rgba(15, 15, 15, 0.98); border-right: 2px solid #4b6b44; z-index: 140; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; padding: 20px; padding-top: 50px; overflow-y: auto; box-shadow: 10px 0 50px rgba(0,0,0,0.8); }
+        /* HAREKETLİ BUTONLAR */
+        .floating-btn { position: fixed; z-index: 2000; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: grab; background: linear-gradient(135deg, #2f3624, #0f120d); border: 2px solid #555; color: #aaa; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: transform 0.1s; }
+        .floating-btn:active { cursor: grabbing; transform: scale(0.95); }
+        .floating-btn:hover { color: #fff; border-color: #fff; }
+        /* Başlangıç Pozisyonları */
+        #partyToggleBtn { top: 20px; left: 20px; border-color: #f1c40f; color: #f1c40f; }
+        #dmToolsBtn { top: 90px; left: 20px; border-color: #e74c3c; color: #e74c3c; }
+
+        /* YAN PANELLER (ÇEKMECELER) */
+        .side-drawer { position: fixed; left: -360px; top: 0; width: 340px; height: 100vh; background: rgba(15, 15, 15, 0.98); border-right: 2px solid #4b6b44; z-index: 1500; transition: left 0.3s ease; display: flex; flex-direction: column; padding: 20px; padding-top: 60px; box-shadow: 10px 0 50px rgba(0,0,0,0.8); overflow-y: auto; }
         .side-drawer.open { left: 0; }
         .drawer-header { font-size: 18px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;}
-        
-        /* DM TOOLS STYLES (YENİ) */
+
+        /* LOG PANELİ (FIX) */
+        .log-panel { position: fixed; right: 20px; bottom: 20px; width: 220px; height: 250px; padding: 10px; z-index: 1000; display: flex; flex-direction: column; pointer-events: auto; }
+        .panel-header { font-size: 12px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 5px; margin-bottom: 5px; }
+        .log-list { overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column-reverse; gap: 5px; font-family: 'Lato', sans-serif; font-size: 12px; }
+        .log-entry { padding: 6px; border-radius: 4px; background: rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease; }
+        .log-time { color: #7f8fa6; font-size: 10px; margin-right: 5px;}
+        .log-crit { border-left: 3px solid #f1c40f; color: #f1c40f; background: rgba(241, 196, 15, 0.15); }
+        .log-fail { border-left: 3px solid #e74c3c; color: #e74c3c; background: rgba(231, 76, 60, 0.15); }
+        .log-fate { border-left: 3px solid #9b59b6; color: #e0bbef; background: rgba(142, 68, 173, 0.2); font-style: italic; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* DM TOOLS STİLİ */
         .dm-tool-row { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .dm-tool-title { font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: bold; }
-        .dm-btn { width: 100%; padding: 8px; margin-top: 5px; background: #333; border: 1px solid #555; color: #ddd; cursor: pointer; font-family: 'Lato', sans-serif; border-radius: 4px; transition: 0.2s; }
+        .dm-btn { width: 100%; padding: 10px; margin-top: 5px; background: #333; border: 1px solid #555; color: #ddd; cursor: pointer; font-family: 'Lato', sans-serif; border-radius: 4px; transition: 0.2s; }
         .dm-btn:hover { background: #444; border-color: #e74c3c; color: #fff; }
-        .dm-input { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: 'Lato', sans-serif;}
+        .dm-input { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; }
 
-        /* TIMER OVERLAY (YENİ) */
-        #timerOverlay { display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); font-size: 80px; font-weight: 900; color: #e74c3c; text-shadow: 0 0 20px red; z-index: 2000; pointer-events: none; font-family: 'Courier New', monospace; letter-spacing: 5px; animation: pulseTimer 1s infinite; }
+        /* KARAKTER KARTI */
+        .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; position: relative;}
+        .char-header { display: flex; gap: 10px; align-items: center; } 
+        .char-avatar-container { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #555; overflow: hidden; position: relative; cursor: pointer; background: #222; display: flex; justify-content: center; align-items: center; flex-shrink: 0;} 
+        .char-avatar-container img { width: 100%; height: 100%; object-fit: cover; }
+        .char-details { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; } 
+        .inp-name { background: transparent; border: none; color: #f1c40f; font-family: 'Cinzel', serif; font-weight: bold; font-size: 14px; width: 100%; border-bottom: 1px solid transparent; }
+        .stat-row { display: flex; gap: 4px; } 
+        .stat-box { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 4px; border-radius: 4px; flex: 1; }
+        .box-hp { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; } .box-gold { background: rgba(241, 196, 15, 0.1); border: 1px solid #f39c12; }
+        .stat-input { width: 100%; background: transparent; border: none; color: #fff; text-align: center; font-weight: bold; font-family: 'Lato', sans-serif; font-size: 12px; }
+        .card-actions { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);}
+        .icon-btn { cursor: pointer; color: #666; font-size: 14px; padding: 5px; transition: 0.2s; } .icon-btn:hover { color: #fff; } .del-btn:hover { color: #e74c3c; } .whisper-btn:hover { color: #9b59b6; }
+
+        /* OVERLAYS & MODALS */
+        #timerOverlay { display: none; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); font-size: 80px; font-weight: 900; color: #e74c3c; text-shadow: 0 0 20px red; z-index: 3000; pointer-events: none; font-family: 'Courier New', monospace; letter-spacing: 5px; animation: pulseTimer 1s infinite; }
         @keyframes pulseTimer { 0% { opacity: 1; transform: translateX(-50%) scale(1); } 50% { opacity: 0.8; transform: translateX(-50%) scale(0.95); } 100% { opacity: 1; transform: translateX(-50%) scale(1); } }
 
-        /* WHISPER MODAL (YENİ) */
-        #whisperModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; padding: 20px; background: #1a1a1a; border: 2px solid #9b59b6; border-radius: 10px; z-index: 3000; box-shadow: 0 0 50px #9b59b6; text-align: center; }
-        .whisper-text { font-family: 'Lato', sans-serif; font-size: 18px; color: #e0bbef; margin: 20px 0; font-style: italic; line-height: 1.5; }
-        .whisper-title { color: #9b59b6; font-size: 24px; border-bottom: 1px solid #555; padding-bottom: 10px; }
-
-        /* VOTE MODAL (YENİ) */
-        #voteModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 4000; justify-content: center; align-items: center; flex-direction: column; }
-        .vote-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; width: 80%; max-width: 800px; margin-top: 30px; }
-        .vote-card { background: #222; border: 1px solid #f1c40f; padding: 20px; text-align: center; cursor: pointer; border-radius: 8px; transition: 0.2s; }
-        .vote-card:hover { background: #f1c40f; color: #000; transform: translateY(-5px); }
-
-        /* MEVCUT STİLLER (Karakter, Ses, Zar) */
-        .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .char-header { display: flex; gap: 10px; align-items: center; } .char-avatar-container { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #555; overflow: hidden; position: relative; cursor: pointer; flex-shrink: 0; background: #222; display: flex; justify-content: center; align-items: center; } .char-avatar-container img { width: 100%; height: 100%; object-fit: cover; }
-        .char-details { flex-grow: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; } .inp-name { background: transparent; border: none; color: #f1c40f; font-family: 'Cinzel', serif; font-weight: bold; font-size: 16px; width: 100%; border-bottom: 1px solid transparent; } .inp-sub { background: transparent; border: none; color: #a4b0be; font-family: 'Lato', sans-serif; font-size: 12px; width: 100%; margin-bottom: 5px;}
-        .stat-row { display: flex; gap: 4px; justify-content: space-between; } .stat-box { display: flex; align-items: center; justify-content: center; gap: 2px; padding: 2px; border-radius: 4px; flex: 1; min-width: 0; }
-        .box-hp { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; } .box-lvl { background: rgba(41, 128, 185, 0.2); border: 1px solid #2980b9; } .box-gold { background: rgba(241, 196, 15, 0.1); border: 1px solid #f39c12; }
-        .label-hp { font-size: 9px; color: #e74c3c; font-weight: bold; } .label-lvl { font-size: 9px; color: #3498db; font-weight: bold; } .label-gold { font-size: 10px; color: #f1c40f; } .stat-input { width: 100%; max-width: 30px; background: transparent; border: none; color: #fff; text-align: center; font-weight: bold; font-family: 'Lato', sans-serif; font-size: 12px; padding: 0; }
-        .card-actions { display: flex; justify-content: space-between; margin-top: 5px; } 
-        .icon-btn { color: #555; font-size: 12px; cursor: pointer; transition: 0.2s; padding: 5px;} .icon-btn:hover { color: #fff; } .whisper-btn { color: #9b59b6; } .whisper-btn:hover { color: #e0bbef; text-shadow: 0 0 5px #9b59b6; }
-
-        /* ZAR VE SAHNE */
-        .scene { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; perspective: 1000px; } .dice-container { width: 250px; height: 250px; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); filter: drop-shadow(0 30px 40px rgba(0,0,0,0.8)); } .toad-svg { width: 100%; height: 100%; filter: contrast(1.15) saturate(1.1); } .rune-container { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%) translateZ(35px); width: 90px; height: 80px; display: flex; justify-content: center; align-items: center; z-index: 10; } .magic-circle { position: absolute; width: 100%; height: 100%; border: 3px dotted rgba(158, 212, 123, 0.4); border-radius: 50%; animation: rotateCircle 15s linear infinite; } .dice-number { font-size: 46px; font-weight: 900; color: #e1e6e2; text-shadow: 0 2px 4px #000, 0 0 20px rgba(106, 176, 76, 0.4); z-index: 11; pointer-events: none; } button.roll-btn { margin-top: 40px; padding: 12px 50px; font-family: 'Cinzel', serif; font-size: 20px; font-weight: 800; color: #dcdde1; background: linear-gradient(180deg, #3a423b 0%, #1a1d1a 100%); border: 1px solid #57606f; border-radius: 4px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s ease; } button.roll-btn:hover { color: #fff; background: linear-gradient(180deg, #4b6b44 0%, #2f3624 100%); transform: translateY(-2px); } button.roll-btn:disabled { opacity: 0.6; cursor: not-allowed; } .rolling .dice-container { animation: shakeDice 0.6s ease-in-out infinite; } .rolling .dice-number { display: none; } .rolling .magic-circle { border-color: #fff; box-shadow: 0 0 30px #fff; } @keyframes shakeDice { 0% { transform: rotateX(0) translateY(0); } 25% { transform: rotateX(10deg) rotateY(-10deg) rotateZ(2deg); } 50% { transform: rotateX(-5deg) rotateY(10deg); } 75% { transform: rotateX(5deg) rotateY(-5deg); } 100% { transform: rotateX(0); } } @keyframes rotateCircle { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .crit-success { color: #f1c40f !important; text-shadow: 0 0 30px #f1c40f; } .crit-fail { color: #e74c3c !important; text-shadow: 0 0 30px #c0392b; }
+        #whisperModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 350px; padding: 20px; background: #1a1a1a; border: 2px solid #9b59b6; border-radius: 10px; z-index: 4000; box-shadow: 0 0 50px #9b59b6; text-align: center; }
+        .whisper-text { font-family: 'Lato', sans-serif; font-size: 16px; color: #e0bbef; margin: 20px 0; font-style: italic; }
         
-        /* LOG VE SES */
-        .log-panel { position: fixed; right: 20px; bottom: 20px; width: 200px; height: 200px; padding: 10px; z-index: 90; display: flex; flex-direction: column; } .panel-header { font-size: 12px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 5px; margin-bottom: 5px; letter-spacing: 1px; } .log-list { overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column-reverse; gap: 5px; font-family: 'Lato', sans-serif; font-size: 12px; } .log-entry { padding: 5px; border-radius: 4px; background: rgba(255,255,255,0.05); display: flex; justify-content: space-between; } .log-time { color: #7f8fa6; font-size: 10px; } .log-crit { border-left: 3px solid #f1c40f; color: #f1c40f; background: rgba(241, 196, 15, 0.1); } .log-fail { border-left: 3px solid #e74c3c; color: #e74c3c; background: rgba(231, 76, 60, 0.1); }
-        .log-fate { border-left: 3px solid #9b59b6; color: #e0bbef; background: rgba(142, 68, 173, 0.2); font-style: italic; }
-        
-        /* SOUNDBOARD STİLLERİ AYNEN DEVAM */
-        .sound-list { display: flex; flex-direction: column; gap: 15px; } .hidden-input { display: none; } .sound-card { background: rgba(255,255,255,0.03); border: 1px solid #4b6b44; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: all 0.3s; } .sound-card:hover { border-color: #7bed9f; background: rgba(75, 107, 68, 0.1); } .sound-card.playing { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.1); } .sb-btn { width: 100%; padding: 5px; background: transparent; border: none; color: #7f8fa6; cursor: pointer; display: flex; align-items: center; justify-content: space-between; } .sb-btn.loaded { color: #dcdde1; } .btn-content { display: flex; align-items: center; gap: 10px; flex-grow: 1; } .sound-name-input { background: transparent; border: none; border-bottom: 1px solid transparent; color: inherit; font-family: 'Lato', sans-serif; font-weight: bold; font-size: 14px; width: 100%; transition: border-color 0.2s; } .mini-vol-container { display: flex; align-items: center; gap: 5px; opacity: 0.5; transition: opacity 0.3s; } .sound-card.playing .mini-vol-container { opacity: 1; } .mini-vol-icon { font-size: 10px; color: #7bed9f; width: 15px; } input[type=range].mini-slider { -webkit-appearance: none; width: 100%; height: 3px; background: #2f3624; border-radius: 2px; cursor: pointer; } input[type=range].mini-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 10px; width: 10px; border-radius: 50%; background: #dcdde1; margin-top: -3.5px; } .stop-btn { margin-top: 20px; background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; color: #e74c3c; justify-content: center; padding: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        #voteModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 5000; justify-content: center; align-items: center; flex-direction: column; }
+        .vote-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; width: 80%; max-width: 600px; margin-top: 20px; }
+        .vote-card { background: #222; border: 1px solid #f1c40f; padding: 15px; text-align: center; cursor: pointer; border-radius: 8px; } .vote-card:hover { background: #f1c40f; color: #000; }
+
+        /* SAHNE & ZAR */
+        .scene { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; perspective: 1000px; } 
+        .dice-container { width: 250px; height: 250px; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); filter: drop-shadow(0 30px 40px rgba(0,0,0,0.8)); } 
+        .toad-svg { width: 100%; height: 100%; filter: contrast(1.15) saturate(1.1); } 
+        .rune-container { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%) translateZ(35px); width: 90px; height: 80px; display: flex; justify-content: center; align-items: center; z-index: 10; } 
+        .magic-circle { position: absolute; width: 100%; height: 100%; border: 3px dotted rgba(158, 212, 123, 0.4); border-radius: 50%; animation: rotateCircle 15s linear infinite; } 
+        .dice-number { font-size: 46px; font-weight: 900; color: #e1e6e2; text-shadow: 0 2px 4px #000, 0 0 20px rgba(106, 176, 76, 0.4); z-index: 11; pointer-events: none; } 
+        button.roll-btn { margin-top: 40px; padding: 12px 50px; font-family: 'Cinzel', serif; font-size: 20px; font-weight: 800; color: #dcdde1; background: linear-gradient(180deg, #3a423b 0%, #1a1d1a 100%); border: 1px solid #57606f; border-radius: 4px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s ease; } 
+        button.roll-btn:hover { color: #fff; background: linear-gradient(180deg, #4b6b44 0%, #2f3624 100%); transform: translateY(-2px); } button.roll-btn:disabled { opacity: 0.6; cursor: not-allowed; } 
+        .rolling .dice-container { animation: shakeDice 0.6s ease-in-out infinite; } .rolling .dice-number { display: none; } .rolling .magic-circle { border-color: #fff; box-shadow: 0 0 30px #fff; } 
+        @keyframes shakeDice { 0% { transform: rotateX(0) translateY(0); } 25% { transform: rotateX(10deg) rotateY(-10deg) rotateZ(2deg); } 50% { transform: rotateX(-5deg) rotateY(10deg); } 75% { transform: rotateX(5deg) rotateY(-5deg); } 100% { transform: rotateX(0); } } 
+        @keyframes rotateCircle { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } 
+        .crit-success { color: #f1c40f !important; text-shadow: 0 0 30px #f1c40f; } .crit-fail { color: #e74c3c !important; text-shadow: 0 0 30px #c0392b; }
     </style>
 </head>
 <body>
 
-    <div id="partyToggleBtn" class="floating-btn" onclick="toggleDrawer('partyDrawer')"><i class="fas fa-users"></i></div>
-    <div id="soundToggleBtn" class="floating-btn" onclick="toggleDrawer('soundDrawer')"><i class="fas fa-music"></i></div>
-    <div id="dmToolsBtn" class="floating-btn" onclick="toggleDrawer('dmDrawer')"><i class="fas fa-dragon"></i></div>
+    <div id="partyToggleBtn" class="floating-btn" title="Karakterler"><i class="fas fa-users"></i></div>
+    <div id="dmToolsBtn" class="floating-btn" title="DM Araçları"><i class="fas fa-dragon"></i></div>
 
     <div class="side-drawer" id="partyDrawer">
-        <div class="drawer-header"><span>KAHRAMANLAR</span><div class="reset-btn" onclick="resetPartyData()">SIFIRLA</div></div>
+        <div class="drawer-header"><span>KAHRAMANLAR</span><div style="font-size:10px; cursor:pointer; color:#c0392b" onclick="resetPartyData()">SIFIRLA</div></div>
         <div id="characterList"></div>
         <button class="dm-btn" style="border-color:#7bed9f; color:#7bed9f;" onclick="addCharacter()">+ YENİ KARAKTER</button>
     </div>
 
-    <div class="side-drawer" id="soundDrawer">
-        <div class="drawer-header" style="color:#7bed9f; border-color:#7bed9f;"><span>ATMOSFER</span></div>
-        <div class="sound-list" id="soundList"></div>
-        <div class="stop-btn" onclick="stopAllMusic()"><i class="fas fa-stop"></i> TÜMÜNÜ DURDUR</div>
-    </div>
-
     <div class="side-drawer" id="dmDrawer">
         <div class="drawer-header" style="color:#e74c3c; border-color:#e74c3c;"><span>DM ARAÇLARI</span></div>
-        
         <div class="dm-tool-row">
             <div class="dm-tool-title"><i class="fas fa-hourglass-half"></i> GERİ SAYIM</div>
-            <input type="number" id="timerInput" class="dm-input" placeholder="Saniye (Örn: 300)">
+            <input type="number" id="timerInput" class="dm-input" placeholder="Saniye (Örn: 180)">
             <button class="dm-btn" onclick="startTimer()">BAŞLAT</button>
         </div>
-
         <div class="dm-tool-row">
             <div class="dm-tool-title"><i class="fas fa-dharmachakra"></i> KADER ÇARKI</div>
             <button class="dm-btn" style="color:#9b59b6; border-color:#9b59b6;" onclick="spinWheel()">ÇEVİR!</button>
         </div>
-
         <div class="dm-tool-row">
             <div class="dm-tool-title"><i class="fas fa-star"></i> MVP OYLAMASI</div>
             <button class="dm-btn" style="color:#f1c40f; border-color:#f1c40f;" onclick="startMVPVote()">OYLAMAYI BAŞLAT</button>
@@ -104,17 +111,15 @@
     </div>
 
     <div id="timerOverlay">00:00</div>
-    
     <div id="whisperModal">
-        <div class="whisper-title"><i class="fas fa-user-secret"></i> Gizli Mesaj</div>
+        <div style="color:#9b59b6; font-size:20px; border-bottom:1px solid #555; padding-bottom:10px;"><i class="fas fa-user-secret"></i> Gizli Mesaj</div>
         <div class="whisper-text" id="whisperContent">...</div>
-        <button class="dm-btn" onclick="document.getElementById('whisperModal').style.display='none'">KAPAT (Kimse Görmedi)</button>
+        <button class="dm-btn" onclick="document.getElementById('whisperModal').style.display='none'">KAPAT</button>
     </div>
-
     <div id="voteModal">
-        <h1 style="color:#f1c40f; font-family:'Cinzel',serif; text-shadow:0 0 10px #f1c40f;">GÜNÜN KAHRAMANI SEÇİLİYOR</h1>
+        <h2 style="color:#f1c40f; font-family:'Cinzel',serif;">GÜNÜN KAHRAMANI</h2>
         <div class="vote-grid" id="voteGrid"></div>
-        <button class="dm-btn" style="margin-top:20px; width:200px;" onclick="document.getElementById('voteModal').style.display='none'">İPTAL</button>
+        <button class="dm-btn" style="margin-top:20px; width:150px;" onclick="document.getElementById('voteModal').style.display='none'">İPTAL</button>
     </div>
 
     <div class="log-panel glass-panel"><div class="panel-header">ZAR GEÇMİŞİ</div><div class="log-list" id="diceLog"></div></div>
@@ -136,20 +141,21 @@
         const socket = io();
         let partyData = [];
         
-        // --- 1. SOCKET DİNLEYİCİLERİ ---
-        
+        // --- LOG SİSTEMİ DÜZELTİLDİ ---
         socket.on('herkes_icin_zar', (veri) => {
+            // Log ekle (Fix)
             addLog(veri.sonuc, veri.tur, veri.zaman);
-            if (!document.getElementById('btn').disabled) {
-                // Animasyon (Basit)
+            
+            const btn = document.getElementById('btn');
+            // Eğer ben atmadıysam, animasyonu oynat
+            if (!btn.disabled) {
                 const resDiv = document.getElementById('result');
                 document.body.classList.add('rolling');
-                playNoise();
+                playClickSound(); // Sadece tık sesi
                 setTimeout(() => {
                     document.body.classList.remove('rolling');
                     resDiv.innerText = veri.sonuc;
                     resDiv.className = 'dice-number ' + (veri.tur === 'crit' ? 'crit-success' : veri.tur === 'fail' ? 'crit-fail' : '');
-                    playResultSound(veri.tur, veri.sonuc);
                 }, 800);
             }
         });
@@ -160,192 +166,145 @@
             renderParty();
         });
 
-        socket.on('timer_update', (seconds) => {
-            runVisualTimer(seconds);
+        socket.on('timer_update', (seconds) => runVisualTimer(seconds));
+        socket.on('wheel_result', (res) => {
+             // Loga kader sonucunu ekle
+             const logDiv = document.getElementById('diceLog');
+             const html = `<div class="log-entry log-fate"><span class="log-time">KADER</span><span>${res}</span></div>`;
+             logDiv.insertAdjacentHTML('afterbegin', html);
         });
-
-        socket.on('wheel_result', (result) => {
-            const logContainer = document.getElementById('diceLog');
-            const html = `<div class="log-entry log-fate"><span class="log-time">KADER</span><span>${result}</span></div>`;
-            logContainer.insertAdjacentHTML('afterbegin', html);
-            playTone(200, 'sawtooth'); // Uğursuz ses
-        });
-
         socket.on('receive_whisper', (data) => {
-            // Sadece hedef kişiye göster
-            // NOT: Herkes kendi tarayıcısında "Benim karakterim kim?" diye kontrol etmeli.
-            // Bu örnekte: Eğer karakter listesinde ismim geçiyorsa ve ID eşleşiyorsa göster.
-            const myChar = partyData.find(c => c.id == data.targetId);
-            // Burada basitlik adına: Eğer tarayıcımda bu ID'ye sahip bir karakteri düzenleyebiliyorsam (yani veri bendeyse) göster.
-            // Daha güvenli yol: Login sistemi. Şimdilik "Public ID" kontrolü yeterli.
-            
-            // Kullanıcı kontrolü: Eğer "Gizli Mesaj" modalı açılacaksa:
-            // Sadece o karakterin " sahibi " olduğunu varsayıyoruz. 
-            // (Aslında herkesin verisi herkeste var ama sadece ID eşleşince açılacak)
-            
-            // *BASİT ÇÖZÜM*: Whisper'ı gönderirken, mesajın başına "Kime: [İsim]" eklenir.
-            // Client tarafında: "Benim adım bu mu?" diye kontrol zor olduğu için, 
-            // ŞİMDİLİK: Whisper herkese "Gizli Mesaj geldi" der ama içeriği göstermez. 
-            // Sadece tıklayan (ID'yi bilen) görebilir mi? Hayır.
-            // EN İYİSİ: DM Whispers'ı direkt POP-UP olarak açar. DM kime attığını bilir.
-            // Oyuncu tarafında: "Bana mı geldi?" -> Evet, ID kontrolü.
-            
-            // *HACK*: PartyData'daki ilk karakter benimmiş gibi davranabilirim veya
-            // Basitçe: Whisper geldiğinde bir "Mesaj Kutusu" yanıp söner. Üstünde "ChaCha İçin" yazar.
-            // Eğer sen ChaCha isen tıklayıp açarsın.
-            
-           if (data.targetName) {
-               if(confirm(`"${data.targetName}" için gizli bir mesaj var. Sen "${data.targetName}" misin?`)) {
-                   document.getElementById('whisperContent').innerText = data.message;
-                   document.getElementById('whisperModal').style.display = 'block';
-               }
-           }
+             if(data.targetName && confirm(`"${data.targetName}" için gizli bir mesaj var. Sen misin?`)) {
+                 document.getElementById('whisperContent').innerText = data.message;
+                 document.getElementById('whisperModal').style.display = 'block';
+             }
         });
-
         socket.on('show_vote_screen', () => {
-            const grid = document.getElementById('voteGrid');
-            grid.innerHTML = '';
-            partyData.forEach(char => {
-                const html = `<div class="vote-card" onclick="castVote('${char.name}')">
-                    <div style="font-size:30px; margin-bottom:10px;">${char.avatar ? `<img src="${char.avatar}" style="width:50px;height:50px;border-radius:50%">` : '<i class="fas fa-user"></i>'}</div>
-                    <h3>${char.name}</h3>
-                </div>`;
-                grid.insertAdjacentHTML('beforeend', html);
+            const grid = document.getElementById('voteGrid'); grid.innerHTML = '';
+            partyData.forEach(c => {
+                grid.insertAdjacentHTML('beforeend', `<div class="vote-card" onclick="castVote('${c.name}')"><h3>${c.name}</h3></div>`);
             });
             document.getElementById('voteModal').style.display = 'flex';
         });
 
-        // --- 2. FONKSİYONLAR ---
-
-        // Timer
-        function startTimer() {
-            const secs = document.getElementById('timerInput').value;
-            if(secs) socket.emit('timer_start', secs);
+        // --- BUTON SÜRÜKLEME (GERİ EKLENDİ) ---
+        function enableDrag(btnId, drawerId) {
+            const btn = document.getElementById(btnId);
+            let isDragging = false, startX, startY, initLeft, initTop;
+            
+            btn.addEventListener('mousedown', (e) => {
+                isDragging = false; startX = e.clientX; startY = e.clientY;
+                const rect = btn.getBoundingClientRect();
+                initLeft = rect.left; initTop = rect.top;
+                
+                const onMouseMove = (ev) => {
+                    const dx = ev.clientX - startX; const dy = ev.clientY - startY;
+                    if(Math.abs(dx)>3 || Math.abs(dy)>3) isDragging = true;
+                    btn.style.left = (initLeft + dx) + 'px';
+                    btn.style.top = (initTop + dy) + 'px';
+                };
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                    if (!isDragging && drawerId) {
+                        document.querySelectorAll('.side-drawer').forEach(d => { if(d.id!==drawerId) d.classList.remove('open'); });
+                        document.getElementById(drawerId).classList.toggle('open');
+                    }
+                };
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
         }
-        function runVisualTimer(seconds) {
-            const el = document.getElementById('timerOverlay');
-            el.style.display = 'block';
-            let left = seconds;
-            const intv = setInterval(() => {
-                left--;
-                const m = Math.floor(left / 60);
-                const s = left % 60;
-                el.innerText = `${m}:${s<10?'0'+s:s}`;
-                if (left <= 0) {
-                    clearInterval(intv);
-                    el.innerText = "SÜRE BİTTİ!";
-                    playTone(100, 'sawtooth');
-                    setTimeout(() => el.style.display = 'none', 3000);
-                }
-            }, 1000);
-        }
+        // İki butonu da sürüklenebilir yap
+        enableDrag('partyToggleBtn', 'partyDrawer');
+        enableDrag('dmToolsBtn', 'dmDrawer');
 
-        // Wheel
-        const fates = ["Kılıcın elinden kaydı!", "Düşman tökezledi (+Advantage)", "Gaipten bir ses duydun...", "Bir eşyan kırıldı!", "Tanrılar sana gülümsedi (Canın doldu)", "Hava aniden soğudu...", "Cebinde altın buldun!", "Ayakkabın bağlandı, düştün."];
-        function spinWheel() {
-            const rand = fates[Math.floor(Math.random() * fates.length)];
-            socket.emit('wheel_spin', rand);
-        }
-
-        // Whisper
-        function sendWhisper(id, name) {
-            const msg = prompt(`"${name}" karakterine ne fısıldamak istersin?`);
-            if (msg) {
-                socket.emit('dm_whisper', { targetId: id, targetName: name, message: msg });
-            }
-        }
-
-        // Vote
-        function startMVPVote() { socket.emit('start_vote'); }
-        function castVote(name) {
-            alert("Oyunuzu " + name + " için kullandınız!");
-            document.getElementById('voteModal').style.display = 'none';
-            // Burası sunucuya gönderilip sayılabilir ama şimdilik sadece UI.
+        // --- FONKSİYONLAR ---
+        function addLog(res, type, time) {
+            const logDiv = document.getElementById('diceLog');
+            const html = `<div class="log-entry ${type==='crit'?'log-crit':type==='fail'?'log-fail':''}"><span class="log-time">${time}</span><span>d20: <strong>${res}</strong></span></div>`;
+            logDiv.insertAdjacentHTML('afterbegin', html);
         }
 
-        // Zar
         function roll() {
-            initAudio(); 
+            playClickSound(); // Tık sesi
             const btn = document.getElementById('btn');
             btn.disabled = true; document.body.classList.add('rolling');
-            playNoise();
             setTimeout(() => {
                 document.body.classList.remove('rolling');
                 const num = Math.floor(Math.random() * 20) + 1;
                 const type = num === 20 ? 'crit' : num === 1 ? 'fail' : 'normal';
                 
-                // Kendi ekranımda göster
                 const res = document.getElementById('result');
                 res.innerText = num;
                 res.className = 'dice-number ' + (type==='crit'?'crit-success':type==='fail'?'crit-fail':'');
-                playResultSound(type, num);
-
-                // Sunucuya at
-                socket.emit('zar_atildi', { sonuc: num, tur: type, zaman: new Date().getHours()+":"+new Date().getMinutes() });
                 
+                socket.emit('zar_atildi', { sonuc: num, tur: type, zaman: new Date().getHours()+":"+new Date().getMinutes() });
                 btn.disabled = false;
             }, 800);
         }
 
-        // --- YARDIMCI FONKSİYONLAR (Party, Audio, UI) ---
-        function toggleDrawer(id) {
-            document.querySelectorAll('.side-drawer').forEach(d => { if(d.id!==id) d.classList.remove('open'); });
-            document.getElementById(id).classList.toggle('open');
+        // Basit Ses (Sadece Tıkırtı)
+        let audioCtx;
+        function playClickSound() {
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.value = 200;
+            osc.type = 'triangle';
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
-        function addLog(res, type, time) {
-            const html = `<div class="log-entry ${type==='crit'?'log-crit':type==='fail'?'log-fail':''}"><span class="log-time">${time}</span><span>d20: <strong>${res}</strong></span></div>`;
-            document.getElementById('diceLog').insertAdjacentHTML('afterbegin', html);
+
+        // DM Tools Functions
+        function startTimer() { const s=document.getElementById('timerInput').value; if(s) socket.emit('timer_start', s); }
+        function runVisualTimer(seconds) {
+            const el = document.getElementById('timerOverlay'); el.style.display = 'block';
+            let left = seconds;
+            const intv = setInterval(() => {
+                left--; el.innerText = Math.floor(left/60)+":"+(left%60<10?'0':'')+(left%60);
+                if (left <= 0) { clearInterval(intv); el.innerText="SÜRE BİTTİ!"; setTimeout(()=>el.style.display='none',3000); }
+            }, 1000);
         }
-        
-        // Karakter Kartı Render (Whisper butonu eklendi)
+        function spinWheel() { const f=["Kılıcın düştü!","Düşman kaydı!","Bir ses duydun...","Altın buldun!","Ayağın takıldı."]; socket.emit('wheel_spin', f[Math.floor(Math.random()*f.length)]); }
+        function startMVPVote() { socket.emit('start_vote'); }
+        function castVote(n) { alert("Oy verildi: "+n); document.getElementById('voteModal').style.display='none'; }
+        function sendWhisper(id, name) { const m = prompt(`${name} için mesajın:`); if(m) socket.emit('dm_whisper', {targetId:id, targetName:name, message:m}); }
+
+        // Karakter Yönetimi
         function renderParty() {
-            const c = document.getElementById('characterList'); c.innerHTML = '';
-            partyData.forEach(char => {
+            const list = document.getElementById('characterList'); list.innerHTML = '';
+            partyData.forEach(c => {
                 const html = `<div class="char-card">
                     <div class="char-header">
-                        <div class="char-avatar-container" onclick="changeAvatar(${char.id})">${char.avatar?`<img src="${char.avatar}">`:'<i class="fas fa-user"></i>'}</div>
+                        <div class="char-avatar-container" onclick="changeAvatar(${c.id})">${c.avatar?`<img src="${c.avatar}">`:'<i class="fas fa-user"></i>'}</div>
                         <div class="char-details">
-                            <input class="inp-name" value="${char.name}" oninput="upd(${char.id},'name',this.value)">
+                            <input class="inp-name" value="${c.name}" oninput="upd(${c.id},'name',this.value)" placeholder="İsim">
                             <div class="stat-row">
-                                <div class="stat-box box-hp">HP <input class="stat-input" value="${char.hp}" oninput="upd(${char.id},'hp',this.value)"></div>
-                                <div class="stat-box box-gold">GP <input class="stat-input" value="${char.gold}" oninput="upd(${char.id},'gold',this.value)"></div>
+                                <div class="stat-box box-hp">HP <input class="stat-input" value="${c.hp}" oninput="upd(${c.id},'hp',this.value)"></div>
+                                <div class="stat-box box-gold">GP <input class="stat-input" value="${c.gold}" oninput="upd(${c.id},'gold',this.value)"></div>
                             </div>
                         </div>
                     </div>
                     <div class="card-actions">
-                         <i class="fas fa-trash icon-btn" onclick="delChar(${char.id})"></i>
-                         <i class="fas fa-eye icon-btn whisper-btn" onclick="sendWhisper(${char.id}, '${char.name}')" title="Gizli Mesaj"></i>
+                         <i class="fas fa-eye icon-btn whisper-btn" onclick="sendWhisper(${c.id}, '${c.name}')" title="Fısılda"></i>
+                         <i class="fas fa-trash icon-btn del-btn" onclick="delChar(${c.id})"></i>
                     </div>
                 </div>`;
-                c.insertAdjacentHTML('beforeend', html);
+                list.insertAdjacentHTML('beforeend', html);
             });
         }
-        
-        // Data Sync
         function upd(id,k,v){ const c=partyData.find(x=>x.id==id); if(c){c[k]=v; saveData();} }
         function saveData(){ localStorage.setItem('dnd_party_v5', JSON.stringify(partyData)); socket.emit('party_update', partyData); }
-        function addCharacter(){ partyData.push({id:Date.now(), name:'İsimsiz', hp:10, gold:0, avatar:null}); saveData(); renderParty(); }
+        function addCharacter(){ partyData.push({id:Date.now(), name:'', hp:10, gold:0, avatar:null}); saveData(); renderParty(); }
         function delChar(id){ if(confirm('Sil?')){partyData=partyData.filter(x=>x.id!==id); saveData(); renderParty();} }
         function changeAvatar(id){ const i=document.createElement('input'); i.type='file'; i.onchange=e=>{const r=new FileReader(); r.onload=ev=>{upd(id,'avatar',ev.target.result); renderParty();}; r.readAsDataURL(e.target.files[0]);}; i.click(); }
-        function resetPartyData(){ if(confirm('Sıfırla?')){partyData=[]; saveData(); renderParty();} }
+        function resetPartyData(){ if(confirm('Tüm karakterleri sil?')){partyData=[]; saveData(); renderParty();} }
 
-        // Audio Engine
-        let audioCtx, sfxGain;
-        function initAudio() { if(!audioCtx){ audioCtx=new(window.AudioContext||window.webkitAudioContext)(); sfxGain=audioCtx.createGain(); sfxGain.connect(audioCtx.destination); sfxGain.gain.value=0.5; } if(audioCtx.state==='suspended') audioCtx.resume(); }
-        function playTone(f,t){ if(!audioCtx)return; const o=audioCtx.createOscillator(); o.type=t; o.frequency.value=f; const g=audioCtx.createGain(); g.gain.value=0.2; g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+1); o.connect(g); g.connect(sfxGain); o.start(); o.stop(audioCtx.currentTime+1); }
-        function playNoise(){ if(!audioCtx)return; const b=audioCtx.createBuffer(1,22050,44100); const d=b.getChannelData(0); for(let i=0;i<22050;i++)d[i]=Math.random()*2-1; const s=audioCtx.createBufferSource(); s.buffer=b; const f=audioCtx.createBiquadFilter(); f.frequency.value=500; s.connect(f); f.connect(sfxGain); s.start(); }
-        function playResultSound(t,n){ if(t==='crit') [523,659,783].forEach(x=>playTone(x,'sine')); else if(t==='fail') playTone(150,'sawtooth'); else n>=10?playTone(880,'sine'):playTone(100,'triangle'); }
-        
-        // Soundboard (Basitleştirilmiş)
-        const sounds={rain:{n:'YAĞMUR',f:null}, battle:{n:'SAVAŞ',f:null}};
-        function stopAllMusic(){ Object.values(sounds).forEach(s=>{if(s.f){s.f.pause();s.f.currentTime=0;}}); }
-        // (Tam soundboard kodu çok yer kapladığı için burada temel fonksiyonları bıraktım, yukarıdaki sound-list divi ile çalışır. Dilersen V1'deki sound kodlarını buraya ekleyebilirsin.)
-        
-        // Başlangıç
-        window.onload=()=>{ 
-            const s=localStorage.getItem('dnd_party_v5'); 
-            if(s){ partyData=JSON.parse(s); renderParty(); }
-        };
+        window.onload=()=>{ const s=localStorage.getItem('dnd_party_v5'); if(s){ partyData=JSON.parse(s); renderParty(); } };
     </script>
 </body>
 </html>
