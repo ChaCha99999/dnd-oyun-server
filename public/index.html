@@ -3,28 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Master V3.7 (Identity Lock)</title>
+    <title>D&D Master V3.9 (DM Secret Log)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- TEMEL --- */
+        /* --- CSS AYNI (Korundu) --- */
         body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background-color: #0f0f0f; background-image: radial-gradient(circle at center, rgba(0,0,0,0.4), #000), url('masa.jpg'); background-size: cover; background-position: center; font-family: 'Cinzel', serif; color: #dcdde1; user-select: none; }
         .glass-panel { background: rgba(18, 20, 16, 0.95); border: 1px solid #4b6b44; backdrop-filter: blur(8px); border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.8); }
-
-        /* --- BUTONLAR --- */
         .floating-btn { position: fixed; z-index: 2000; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: grab; background: linear-gradient(135deg, #2f3624, #0f120d); border: 2px solid #555; color: #aaa; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: transform 0.1s; }
         .floating-btn:active { cursor: grabbing; transform: scale(0.95); } .floating-btn:hover { color: #fff; border-color: #fff; }
         #partyToggleBtn { top: 20px; left: 20px; border-color: #f1c40f; color: #f1c40f; }
         #dmToolsBtn { top: 90px; left: 20px; border-color: #e74c3c; color: #e74c3c; }
         #identityBtn { top: 160px; left: 20px; border-color: #3498db; color: #3498db; }
         #msgDmBtn { top: 230px; left: 20px; border-color: #0984e3; color: #0984e3; } 
+        /* YENİ: DM SECRET LOG BUTONU */
+        #dmLogBtn { top: 300px; left: 20px; border-color: #e84393; color: #e84393; display: none; } /* Başlangıçta gizli */
 
-        /* --- PANELLER --- */
         .side-drawer { position: fixed; left: -360px; top: 0; width: 340px; height: 100vh; background: rgba(15, 15, 15, 0.98); border-right: 2px solid #4b6b44; z-index: 1500; transition: left 0.3s ease; display: flex; flex-direction: column; padding: 20px; padding-top: 60px; box-shadow: 10px 0 50px rgba(0,0,0,0.8); overflow-y: auto; }
         .side-drawer.open { left: 0; }
         .drawer-header { font-size: 18px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;}
-
-        /* --- KARAKTER KARTI --- */
         .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; transition: 0.3s; }
         .char-card.active-turn { border: 2px solid #2ecc71; box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); background: rgba(46, 204, 113, 0.1); transform: scale(1.02); z-index: 10; }
         .char-header { display: flex; gap: 10px; align-items: center; } 
@@ -37,13 +34,9 @@
         .hp-bar-container { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-top: 4px; border: 1px solid #444; }
         .hp-bar-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.3s ease, background-color 0.3s ease; }
         .card-actions { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);} .icon-btn { cursor: pointer; color: #666; font-size: 14px; padding: 5px; transition: 0.2s; } .icon-btn:hover { color: #fff; }
-
-        /* --- DM TOOLS --- */
         .dm-tool-row { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; } .dm-tool-title { font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: bold; }
         .dm-btn { width: 100%; padding: 10px; margin-top: 5px; background: #333; border: 1px solid #555; color: #ddd; cursor: pointer; font-family: 'Lato', sans-serif; border-radius: 4px; transition: 0.2s; } .dm-btn:hover { background: #444; border-color: #e74c3c; color: #fff; }
         .dm-input { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: 'Lato', sans-serif;}
-
-        /* --- VISUALS --- */
         #wheelOverlayContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 6000; justify-content: center; align-items: center; flex-direction: column; }
         .wheel-container { position: relative; width: 300px; height: 300px; }
         .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #dcdde1; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: conic-gradient(#e74c3c 0% 12.5%, #f1c40f 12.5% 25%, #3498db 25% 37.5%, #9b59b6 37.5% 50%, #2ecc71 50% 62.5%, #e67e22 62.5% 75%, #1abc9c 75% 87.5%, #95a5a6 87.5% 100%); transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1); transform: rotate(0deg); }
@@ -53,18 +46,26 @@
         #timerOverlay { display: none; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); font-size: 80px; font-weight: 900; color: #e74c3c; text-shadow: 0 0 20px red; z-index: 3000; pointer-events: none; font-family: 'Courier New', monospace; letter-spacing: 5px; animation: pulseTimer 1s infinite; }
         @keyframes pulseTimer { 0% { opacity: 1; transform: translateX(-50%) scale(1); } 50% { opacity: 0.8; transform: translateX(-50%) scale(0.95); } 100% { opacity: 1; transform: translateX(-50%) scale(1); } }
         
-        #whisperModal, #voteModal, #winnerModal, #identityModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a1a; border: 2px solid #9b59b6; border-radius: 10px; z-index: 4000; box-shadow: 0 0 50px #9b59b6; text-align: center; padding: 20px; width: 350px; }
+        #whisperModal, #voteModal, #winnerModal, #identityModal, #dmLogModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a1a; border: 2px solid #9b59b6; border-radius: 10px; z-index: 4000; box-shadow: 0 0 50px #9b59b6; text-align: center; padding: 20px; width: 350px; }
         #voteModal { top: 0; left: 0; transform: none; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; flex-direction: column; border: none; border-radius: 0; }
         .vote-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; width: 80%; max-width: 600px; margin-top: 20px; }
         .vote-card { background: #222; border: 1px solid #f1c40f; padding: 15px; text-align: center; cursor: pointer; border-radius: 8px; } .vote-card:hover { background: #f1c40f; color: #000; }
         #winnerModal { border-color: #f1c40f; box-shadow: 0 0 50px #f1c40f; animation: popIn 0.5s ease; }
         #identityModal { border-color: #3498db; box-shadow: 0 0 50px #3498db; }
+        
+        /* DM LOG MODAL STİLİ */
+        #dmLogModal { width: 500px; max-width: 90%; height: 400px; border-color: #e84393; box-shadow: 0 0 50px #e84393; display:none; flex-direction:column; }
+        #dmLogList { flex-grow: 1; overflow-y: auto; text-align: left; margin: 10px 0; border: 1px solid #333; padding: 10px; background: rgba(0,0,0,0.3); font-family: 'Lato', sans-serif; font-size: 13px; }
+        .secret-entry { margin-bottom: 8px; padding: 5px; border-radius: 4px; border-left: 3px solid #555; }
+        .secret-dm-sent { border-color: #e84393; background: rgba(232, 67, 147, 0.1); }
+        .secret-dm-received { border-color: #0984e3; background: rgba(9, 132, 227, 0.1); }
+        .secret-p2p { border-color: #f1c40f; background: rgba(241, 196, 15, 0.1); }
+
         .identity-option { padding: 10px; margin: 5px 0; background: #222; border: 1px solid #444; color: #fff; cursor: pointer; transition: 0.2s; } 
         .identity-option:hover { background: #3498db; border-color: #3498db; }
-        .identity-option.taken { opacity: 0.5; cursor: not-allowed; background: #444; border-color: #555; color: #888; pointer-events: none; } /* KİLİTLİ STİL */
+        .identity-option.taken { opacity: 0.5; cursor: not-allowed; background: #444; border-color: #555; color: #888; pointer-events: none; }
         #currentIdentityDisplay { font-size: 10px; position: absolute; bottom: -20px; width: 100%; text-align: center; color: #3498db; pointer-events: none;}
         @keyframes popIn { 0% { transform: translate(-50%, -50%) scale(0.5); } 80% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
-
         .log-panel { position: fixed; right: 20px; bottom: 20px; width: 220px; max-height: 300px; height: auto; padding: 10px; z-index: 1000; display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .log-panel.collapsed { height: 40px !important; overflow: hidden; opacity: 0.7; }
         .panel-header { font-size: 12px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 5px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
@@ -75,8 +76,6 @@
         .log-fail { border-left: 3px solid #e74c3c; color: #e74c3c; background: rgba(231, 76, 60, 0.15); }
         .log-fate { border-left: 3px solid #9b59b6; color: #e0bbef; background: rgba(142, 68, 173, 0.2); font-style: italic; }
         .log-whisper { border-left: 3px solid #9b59b6; color: #aaa; background: rgba(155, 89, 182, 0.1); font-style: italic; }
-
-        /* SAHNE & MAP */
         .scene { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; perspective: 1000px; position: relative; } 
         .dice-container { width: 250px; height: 250px; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); filter: drop-shadow(0 30px 40px rgba(0,0,0,0.8)); z-index: 20; } 
         .toad-svg { width: 100%; height: 100%; filter: contrast(1.15) saturate(1.1); } 
@@ -84,8 +83,7 @@
         .magic-circle { position: absolute; width: 100%; height: 100%; border: 3px dotted rgba(158, 212, 123, 0.4); border-radius: 50%; animation: rotateCircle 15s linear infinite; } 
         .dice-number { 
             font-size: 46px; font-weight: 900; color: #e1e6e2; text-shadow: 0 2px 4px #000, 0 0 20px rgba(106, 176, 76, 0.4); 
-            z-index: 11; pointer-events: none;
-            width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 11; pointer-events: none; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; flex-direction: column;
         }
         .roller-name { font-size: 16px; color: #f1c40f; font-family: 'Cinzel', serif; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
         button.roll-btn { padding: 12px 50px; font-family: 'Cinzel', serif; font-size: 20px; font-weight: 800; color: #dcdde1; background: linear-gradient(180deg, #3a423b 0%, #1a1d1a 100%); border: 1px solid #57606f; border-radius: 4px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s ease; z-index: 20;} 
@@ -97,7 +95,6 @@
         @keyframes shakeDice { 0% { transform: rotateX(0) translateY(0); } 25% { transform: rotateX(10deg) rotateY(-10deg) rotateZ(2deg); } 50% { transform: rotateX(-5deg) rotateY(10deg); } 75% { transform: rotateX(5deg) rotateY(-5deg); } 100% { transform: rotateX(0); } } 
         @keyframes rotateCircle { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } 
         .crit-success { color: #f1c40f !important; text-shadow: 0 0 30px #f1c40f; } .crit-fail { color: #e74c3c !important; text-shadow: 0 0 30px #c0392b; }
-
         #activeMapContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; display: none; justify-content: center; align-items: center; background: #000; }
         #activeMapImg { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 0 50px rgba(0,0,0,0.9); }
         .map-mode .dice-container { transform: scale(0.6) translateZ(10px); filter: drop-shadow(0 0 10px #000); }
@@ -114,6 +111,10 @@
     </div>
     <div id="msgDmBtn" class="floating-btn" title="DM'e Mesaj At" onclick="sendMsgToDM()">
         <i class="fas fa-envelope"></i>
+    </div>
+    
+    <div id="dmLogBtn" class="floating-btn" title="DM Gizli Kayıtları" onclick="document.getElementById('dmLogModal').style.display='flex'">
+        <i class="fas fa-book-dead"></i>
     </div>
 
     <div class="side-drawer" id="partyDrawer">
@@ -188,6 +189,12 @@
     <div id="identityModal"><div style="color:#3498db; font-size:20px; border-bottom:1px solid #555; padding-bottom:10px;">SEN KİMSİN?</div><div id="identityList" style="max-height:200px; overflow-y:auto; margin:10px 0;"></div><button class="dm-btn" onclick="document.getElementById('identityModal').style.display='none'">KAPAT</button></div>
     <div id="voteModal"><h2 style="color:#f1c40f; font-family:'Cinzel',serif;">GÜNÜN KAHRAMANI</h2><div class="vote-grid" id="voteGrid"></div></div>
     <div id="winnerModal"><h1 style="color:#f1c40f; font-family:'Cinzel',serif; margin:0;">KAZANAN</h1><div id="winnerName" style="font-size:40px; font-weight:bold; color:#fff; margin:20px 0;">İSİM</div><div style="color:#aaa;" id="voteCountDisplay">0 Oy ile</div><button class="dm-btn" onclick="document.getElementById('winnerModal').style.display='none'">KAPAT</button></div>
+    
+    <div id="dmLogModal">
+        <div style="color:#e84393; font-size:20px; border-bottom:1px solid #555; padding-bottom:10px;">GİZLİ DM KAYITLARI</div>
+        <div id="dmLogList"></div>
+        <button class="dm-btn" onclick="document.getElementById('dmLogModal').style.display='none'">KAPAT</button>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -198,16 +205,12 @@
         let currentTurnIndex = -1;
         let takenIdentities = [];
 
-        // --- IDENTITY LOCK LOGIC (YENİ) ---
         function openIdentityModal() {
             const list = document.getElementById('identityList'); list.innerHTML = '';
             list.insertAdjacentHTML('beforeend', `<div class="identity-option" onclick="selectIdentity(null)">DM (Oyun Yöneticisi)</div>`);
-            
             partyData.forEach(c => {
-                // Eğer kimlik dolduysa "taken" class'ı ekle
                 let takenClass = (takenIdentities.includes(c.id) && c.id !== myIdentityId) ? 'taken' : '';
                 let label = c.name + (takenClass ? ' (Dolu)' : '');
-                
                 list.insertAdjacentHTML('beforeend', `<div class="identity-option ${takenClass}" onclick="selectIdentity(${c.id}, '${c.name}')">${label}</div>`);
             });
             document.getElementById('identityModal').style.display = 'block';
@@ -217,12 +220,29 @@
             let oldId = myIdentityId;
             myIdentityId = id; 
             localStorage.setItem('dnd_my_identity', id);
-            
             document.getElementById('currentIdentityDisplay').innerText = id === null ? "DM" : (name || "Bilinmiyor");
             document.getElementById('identityModal').style.display = 'none';
-            
-            // Sunucuya bildir: "Eskisini bırak, yenisini al"
             socket.emit('claim_identity', { oldId: oldId, newId: id });
+            updateInterfaceForIdentity(); // Arayüzü güncelle
+        }
+
+        // KİMLİĞE GÖRE BUTONLARI GİZLE/GÖSTER
+        function updateInterfaceForIdentity() {
+            const logBtn = document.getElementById('dmLogBtn');
+            const msgBtn = document.getElementById('msgDmBtn');
+            const dmTools = document.getElementById('dmToolsBtn');
+            
+            if (myIdentityId === null) {
+                // DM Modu
+                logBtn.style.display = 'flex'; // Gizli logu gör
+                msgBtn.style.display = 'none'; // Kendime mesaj atmayayım
+                dmTools.style.display = 'flex';
+            } else {
+                // Oyuncu Modu
+                logBtn.style.display = 'none'; // Gizli logu gizle
+                msgBtn.style.display = 'flex';
+                dmTools.style.display = 'none';
+            }
         }
 
         function getMyName() {
@@ -241,10 +261,30 @@
         }
 
         socket.on('party_update_client', (data) => { partyData = data; renderParty(); });
-        
-        socket.on('update_taken_identities', (list) => { 
-            takenIdentities = list; // Dolu kimlikleri güncelle
+        socket.on('update_taken_identities', (list) => { takenIdentities = list; });
+
+        // --- YENİ: DM LOG GÜNCELLEMELERİ ---
+        socket.on('dm_log_history_load', (history) => {
+            const list = document.getElementById('dmLogList'); list.innerHTML = '';
+            history.forEach(entry => addDmLogEntry(entry));
         });
+        socket.on('dm_log_update', (entry) => {
+            addDmLogEntry(entry);
+        });
+        function addDmLogEntry(entry) {
+            const list = document.getElementById('dmLogList');
+            let cls = '';
+            if(entry.type === 'dm-sent') cls = 'secret-dm-sent';
+            else if(entry.type === 'dm-received') cls = 'secret-dm-received';
+            else cls = 'secret-p2p';
+            
+            const html = `<div class="secret-entry ${cls}">
+                <div style="font-size:10px; color:#aaa;">${entry.time} | <strong>${entry.sender}</strong> -> <strong>${entry.target}</strong></div>
+                <div style="margin-top:3px;">${entry.message}</div>
+            </div>`;
+            list.insertAdjacentHTML('beforeend', html);
+            list.scrollTop = list.scrollHeight;
+        }
 
         socket.on('herkes_icin_zar', (veri) => {
             const btn = document.getElementById('btn'); const resDiv = document.getElementById('result');
@@ -278,15 +318,28 @@
 
         socket.on('dm_receive_player_msg', (data) => {
             if (myIdentityId === null) {
-                // DM isem mesajı gör
                 playClickSound();
                 document.getElementById('whisperContent').innerText = `GÖNDEREN: ${data.sender}\n\n${data.message}`;
                 document.getElementById('whisperModal').style.display = 'block';
             } 
-            
-            // --- DÜZELTİLEN KISIM: LOG HERKESE DÜŞSÜN (GÖNDEREN DAHİL) ---
             const logDiv = document.getElementById('diceLog');
             const html = `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span><strong>${data.sender}</strong>, DM ile fısıldaşıyor...</span></div>`;
+            logDiv.insertAdjacentHTML('afterbegin', html);
+        });
+
+        socket.on('p2p_whisper_relay', (data) => {
+            if (myIdentityId == data.targetId) {
+                playClickSound();
+                document.getElementById('whisperContent').innerText = `GÖNDEREN: ${data.senderName}\n\n${data.message}`;
+                document.getElementById('whisperModal').style.display = 'block';
+            }
+            let logText = "";
+            if (myIdentityId == data.senderId) logText = `Sen, <strong>${data.targetName}</strong> kişisine fısıldadın.`;
+            else if (myIdentityId == data.targetId) logText = `<strong>${data.senderName}</strong> sana fısıldadı.`;
+            else logText = `<strong>${data.senderName}</strong>, <strong>${data.targetName}</strong> ile fısıldaşıyor...`;
+
+            const logDiv = document.getElementById('diceLog');
+            const html = `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span>${logText}</span></div>`;
             logDiv.insertAdjacentHTML('afterbegin', html);
         });
 
@@ -312,7 +365,18 @@
         function startMVPVote() { socket.emit('start_vote'); }
         function endMVPVote() { socket.emit('end_vote'); }
         function castVote(n) { socket.emit('cast_vote', n); document.getElementById('voteModal').style.display='none'; alert("Oyunuz alındı: " + n); }
-        function sendWhisper(id, name) { const m = prompt(`${name} için mesajın:`); if(m) socket.emit('dm_whisper', {targetId:id, targetName:name, message:m}); }
+        
+        function sendWhisper(targetId, targetName) {
+            const myName = getMyName();
+            const msg = prompt(`"${targetName}" kişisine ne fısıldamak istersin?`);
+            if (msg) {
+                if(myIdentityId === null) {
+                    socket.emit('dm_whisper', {targetId: targetId, targetName: targetName, message: msg});
+                } else {
+                    socket.emit('p2p_whisper', { senderId: myIdentityId, senderName: myName, targetId: targetId, targetName: targetName, message: msg });
+                }
+            }
+        }
 
         function roll(sides) {
             playClickSound(); const btn = document.getElementById('btn'); btn.disabled = true; document.body.classList.add('rolling');
@@ -382,18 +446,18 @@
                 isDragging = false; startX = e.clientX; startY = e.clientY;
                 const rect = btn.getBoundingClientRect(); initLeft = rect.left; initTop = rect.top;
                 const onMouseMove = (ev) => { const dx = ev.clientX - startX; const dy = ev.clientY - startY; if(Math.abs(dx)>3 || Math.abs(dy)>3) isDragging = true; btn.style.left = (initLeft + dx) + 'px'; btn.style.top = (initTop + dy) + 'px'; };
-                const onMouseUp = () => { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); if (!isDragging && drawerId) { document.querySelectorAll('.side-drawer').forEach(d => { if(d.id!==drawerId) d.classList.remove('open'); }); document.getElementById(drawerId).classList.toggle('open'); } else if(!isDragging && !drawerId && (btnId === 'identityBtn' || btnId === 'msgDmBtn')) { if(btnId==='identityBtn') openIdentityModal(); else sendMsgToDM(); } };
+                const onMouseUp = () => { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); if (!isDragging && drawerId) { document.querySelectorAll('.side-drawer').forEach(d => { if(d.id!==drawerId) d.classList.remove('open'); }); document.getElementById(drawerId).classList.toggle('open'); } else if(!isDragging && !drawerId && (btnId === 'identityBtn' || btnId === 'msgDmBtn' || btnId === 'dmLogBtn')) { if(btnId==='identityBtn') openIdentityModal(); else if(btnId==='msgDmBtn') sendMsgToDM(); else document.getElementById('dmLogModal').style.display='flex'; } };
                 document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
             });
         }
-        enableDrag('partyToggleBtn', 'partyDrawer'); enableDrag('dmToolsBtn', 'dmDrawer'); enableDrag('identityBtn', null); enableDrag('msgDmBtn', null);
+        enableDrag('partyToggleBtn', 'partyDrawer'); enableDrag('dmToolsBtn', 'dmDrawer'); enableDrag('identityBtn', null); enableDrag('msgDmBtn', null); enableDrag('dmLogBtn', null);
 
         window.onload=()=>{
             const myId = localStorage.getItem('dnd_my_identity');
             if(myId) { 
                 myIdentityId = myId;
-                // Sayfa yenilendiğinde "Bu kimlik benim" diye sunucuya bildir ki başkası alamasın
                 socket.emit('claim_identity', { oldId: null, newId: myId });
+                updateInterfaceForIdentity();
                 setTimeout(() => { const c = partyData.find(x => x.id == myId); if(c) document.getElementById('currentIdentityDisplay').innerText = c.name; }, 1000); 
             }
         };
