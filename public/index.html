@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Master V4.7 (Visual Polish)</title>
+    <title>D&D Master V4.8 (Map Fix)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -77,9 +77,9 @@
         .identity-option { padding: 10px; margin: 5px 0; background: #222; border: 1px solid #444; color: #fff; cursor: pointer; } 
         .identity-option:hover { background: #3498db; } .identity-option.taken { opacity: 0.5; background: #444; pointer-events: none; }
         
-        /* TIMER (FIXED: Başlangıçta gizli) */
+        /* TIMER */
         #timerOverlay { 
-            display: none; /* DÜZELTME BURADA */
+            display: none;
             position: fixed; 
             top: 50%; left: 50%; 
             transform: translate(-50%, -50%); 
@@ -107,11 +107,11 @@
         .list-item { background: #2d3436; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #777; }
         .add-row { display: flex; gap: 5px; margin-bottom: 10px; }
 
-        /* ZAR & LOGS (GÜNCELLENDİ: Gerçekçi D20) */
+        /* ZAR & LOGS */
         .scene { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; } 
         .dice-container { width: 250px; height: 250px; position: relative; transform-style: preserve-3d; transition: transform 0.8s; } 
         
-        /* YENİ D20 SVG */
+        /* D20 SVG */
         .d20-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 15px rgba(241, 196, 15, 0.2)); }
         
         /* ZAR RAKAMI */
@@ -153,7 +153,9 @@
         .log-panel.collapsed { height: 40px !important; overflow: hidden; }
         .log-list { overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column-reverse; gap: 5px; min-height: 200px; font-size: 12px; }
         .log-entry { padding: 5px; border-radius: 4px; background: rgba(255,255,255,0.08); display: flex; justify-content: space-between; }
-        #activeMapContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; display: none; justify-content: center; align-items: center; background: #000; }
+        
+        /* HARİTA KATMANI DÜZELTİLDİ (En öne alındı) */
+        #activeMapContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1900; display: none; justify-content: center; align-items: center; background: #000; }
         #activeMapImg { max-width: 100%; max-height: 100%; object-fit: contain; }
     </style>
 </head>
@@ -301,13 +303,10 @@
         function openDetailModal(id) { activeDetailId = id; const c = partyData.find(x=>x.id===id); if(!c)return; document.getElementById('detailName').innerText = c.name; document.getElementById('detStr').value = c.str||10; document.getElementById('detDex').value = c.dex||10; document.getElementById('detMaxHp').value = c.maxHp||10; document.getElementById('detMaxSp').value = c.maxSp||10; document.getElementById('detGold').value = c.gold||0; renderDetailLists(c); document.getElementById('charDetailModal').style.display = 'flex'; }
         function closeDetailModal() { document.getElementById('charDetailModal').style.display='none'; activeDetailId=null; }
         function switchTab(t) { document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active')); event.target.classList.add('active'); document.getElementById('tab-'+t).classList.add('active'); }
-        function saveDetailStat() { if(!activeDetailId)return; const c=partyData.find(x=>x.id===activeDetailId); if(c){ c.str=parseInt(document.getElementById('detStr').value); c.dex=parseInt(document.getElementById('detDex').value); c.maxHp=parseInt(document.getElementById('detMaxHp').value); c.maxSp=parseInt(document.getElementById('detMaxSp').value); c.gold=parseInt(document.getElementById('detGold').value); socket.emit('party_update', partyData); } }
+        function saveDetail() { if(!activeDetailId)return; const c=partyData.find(x=>x.id===activeDetailId); if(c){ c.str=parseInt(document.getElementById('detStr').value); c.dex=parseInt(document.getElementById('detDex').value); c.maxHp=parseInt(document.getElementById('detMaxHp').value); c.maxSp=parseInt(document.getElementById('detMaxSp').value); c.gold=parseInt(document.getElementById('detGold').value); socket.emit('party_update', partyData); } }
         function addItem(type) { if(!activeDetailId)return; const i=document.getElementById(type==='inventory'?'newInvItem':'newSkillItem'); if(!i.value)return; const c=partyData.find(x=>x.id===activeDetailId); if(!c[type])c[type]=[]; c[type].push(i.value); i.value=''; socket.emit('party_update', partyData); renderDetailLists(c); }
         function removeItem(type, idx) { const c=partyData.find(x=>x.id===activeDetailId); if(c&&c[type]){c[type].splice(idx,1); socket.emit('party_update', partyData); renderDetailLists(c);} }
-        function renderDetailLists(c) {
-            const iL=document.getElementById('invList'); iL.innerHTML=''; (c.inventory||[]).forEach((item,i)=>iL.insertAdjacentHTML('beforeend',`<div class="list-item" style="border-left:3px solid #e67e22; justify-content:space-between; display:flex;"><span>${item}</span><i class="fas fa-trash" style="cursor:pointer; color:#aaa" onclick="removeItem('inventory',${i})"></i></div>`));
-            const sL=document.getElementById('skillList'); sL.innerHTML=''; (c.skills||[]).forEach((s,i)=>sL.insertAdjacentHTML('beforeend',`<div class="list-item" style="border-left:3px solid #9b59b6; justify-content:space-between; display:flex;"><span>${s}</span><i class="fas fa-trash" style="cursor:pointer" onclick="removeItem('skills',${i})"></i></div>`));
-        }
+        function renderDetailLists(c) { const iL=document.getElementById('invList'); iL.innerHTML=''; (c.inventory||[]).forEach((item,i)=>iL.insertAdjacentHTML('beforeend',`<div class="list-item" style="border-left:3px solid #e67e22; justify-content:space-between; display:flex;"><span>${item}</span><i class="fas fa-trash" style="cursor:pointer; color:#aaa" onclick="removeItem('inventory',${i})"></i></div>`)); const sL=document.getElementById('skillList'); sL.innerHTML=''; (c.skills||[]).forEach((s,i)=>sL.insertAdjacentHTML('beforeend',`<div class="list-item" style="border-left:3px solid #9b59b6; justify-content:space-between; display:flex;"><span>${s}</span><i class="fas fa-trash" style="cursor:pointer" onclick="removeItem('skills',${i})"></i></div>`)); }
 
         // --- RENDER PARTY ---
         function renderParty() {
@@ -362,6 +361,7 @@
         function addLog(res, type, time, name, sides) { document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry ${type==='crit'?'log-crit':type==='fail'?'log-fail':''}"><span class="log-time">${time}</span><span>${name}: <strong>${res}</strong> (d${sides})</span></div>`); }
         function playClickSound() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.frequency.value = 200; o.type = 'triangle'; g.gain.setValueAtTime(0.1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.1); }
 
+        // --- IDENTITY & CHAT ---
         function openIdentityModal() { const list = document.getElementById('identityList'); list.innerHTML = ''; let dmTaken = takenIdentities.includes('DM') && myIdentityId !== 'DM'; list.insertAdjacentHTML('beforeend', `<div class="identity-option ${dmTaken?'taken':''}" onclick="${dmTaken?'':'selectIdentity(\'DM\', \'DM\')'}">DM (Oyun Yöneticisi)${dmTaken?' (DOLU)':''}</div>`); partyData.forEach(c => { let takenClass = (takenIdentities.includes(c.id) && c.id !== myIdentityId) ? 'taken' : ''; list.insertAdjacentHTML('beforeend', `<div class="identity-option ${takenClass}" onclick="${takenClass?'':`selectIdentity(${c.id}, '${c.name}')`}">${c.name}${takenClass?' (Dolu)':''}</div>`); }); document.getElementById('identityModal').style.display = 'flex'; }
         function selectIdentity(id, name) { let oldId = myIdentityId; myIdentityId = id; localStorage.setItem('dnd_my_identity', id); document.getElementById('currentIdentityDisplay').innerText = name || "Bilinmiyor"; document.getElementById('identityModal').style.display = 'none'; socket.emit('claim_identity', { oldId: oldId, newId: id }); updateInterfaceForIdentity(); }
         function updateInterfaceForIdentity() { const isDM = (myIdentityId === 'DM'); document.getElementById('dmLogBtn').style.display = isDM ? 'flex' : 'none'; document.getElementById('msgDmBtn').style.display = isDM ? 'none' : 'flex'; document.getElementById('dmToolsBtn').style.display = isDM ? 'flex' : 'none'; if(document.getElementById('battleArena').style.display === 'flex') renderBattleArena(); }
@@ -386,6 +386,7 @@
         socket.on('receive_whisper', (d) => { if(myIdentityId && myIdentityId == d.targetId) { playClickSound(); document.getElementById('whisperContent').innerText = d.message; document.getElementById('whisperModal').style.display = 'flex'; } else { document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span>DM, <strong>${d.targetName}</strong> ile fısıldaşıyor...</span></div>`); } });
         socket.on('dm_receive_player_msg', (d) => { if (myIdentityId === 'DM') { playClickSound(); document.getElementById('whisperContent').innerText = `GÖNDEREN: ${d.sender}\n\n${d.message}`; document.getElementById('whisperModal').style.display = 'flex'; } document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span><strong>${d.sender}</strong>, DM ile fısıldaşıyor...</span></div>`); });
         socket.on('p2p_whisper_relay', (d) => { if (myIdentityId == d.targetId) { playClickSound(); document.getElementById('whisperContent').innerText = `GÖNDEREN: ${d.senderName}\n\n${d.message}`; document.getElementById('whisperModal').style.display = 'flex'; } let t = (myIdentityId == d.senderId) ? `Sen, <strong>${d.targetName}</strong> kişisine fısıldadın.` : (myIdentityId == d.targetId ? `<strong>${d.senderName}</strong> sana fısıldadı.` : `<strong>${d.senderName}</strong>, <strong>${d.targetName}</strong> ile fısıldaşıyor...`); document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span>${t}</span></div>`); });
+        
         socket.on('timer_update', (s) => runVisualTimer(s));
         socket.on('wheel_result', (d) => showWheelResult(d));
         socket.on('show_vote_screen', () => { const g = document.getElementById('voteGrid'); g.innerHTML = ''; partyData.forEach(c => { g.insertAdjacentHTML('beforeend', `<div class="vote-card" onclick="castVote('${c.name}')"><h3>${c.name}</h3></div>`); }); document.getElementById('voteModal').style.display = 'flex'; });
