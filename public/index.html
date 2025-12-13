@@ -3,24 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Master Screen V2.2 (Sync Fix)</title>
+    <title>D&D Master Screen V2.3 (Visual Wheel)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS AYARLARI AYNEN KORUNDU */
+        /* --- TEMEL AYARLAR --- */
         body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background-color: #0f0f0f; background-image: radial-gradient(circle at center, rgba(0,0,0,0.4), #000), url('masa.jpg'); background-size: cover; background-position: center; font-family: 'Cinzel', serif; color: #dcdde1; user-select: none; }
         .glass-panel { background: rgba(18, 20, 16, 0.95); border: 1px solid #4b6b44; backdrop-filter: blur(8px); border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.8); }
 
+        /* BUTONLAR */
         .floating-btn { position: fixed; z-index: 2000; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: grab; background: linear-gradient(135deg, #2f3624, #0f120d); border: 2px solid #555; color: #aaa; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: transform 0.1s; }
         .floating-btn:active { cursor: grabbing; transform: scale(0.95); }
         .floating-btn:hover { color: #fff; border-color: #fff; }
         #partyToggleBtn { top: 20px; left: 20px; border-color: #f1c40f; color: #f1c40f; }
         #dmToolsBtn { top: 90px; left: 20px; border-color: #e74c3c; color: #e74c3c; }
 
+        /* YAN PANELLER */
         .side-drawer { position: fixed; left: -360px; top: 0; width: 340px; height: 100vh; background: rgba(15, 15, 15, 0.98); border-right: 2px solid #4b6b44; z-index: 1500; transition: left 0.3s ease; display: flex; flex-direction: column; padding: 20px; padding-top: 60px; box-shadow: 10px 0 50px rgba(0,0,0,0.8); overflow-y: auto; }
         .side-drawer.open { left: 0; }
         .drawer-header { font-size: 18px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;}
 
+        /* LOG PANELİ */
         .log-panel { position: fixed; right: 20px; bottom: 20px; width: 220px; height: 250px; padding: 10px; z-index: 1000; display: flex; flex-direction: column; pointer-events: auto; }
         .panel-header { font-size: 12px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 5px; margin-bottom: 5px; }
         .log-list { overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column-reverse; gap: 5px; font-family: 'Lato', sans-serif; font-size: 12px; }
@@ -31,12 +34,14 @@
         .log-fate { border-left: 3px solid #9b59b6; color: #e0bbef; background: rgba(142, 68, 173, 0.2); font-style: italic; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* DM TOOLS */
         .dm-tool-row { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .dm-tool-title { font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: bold; }
         .dm-btn { width: 100%; padding: 10px; margin-top: 5px; background: #333; border: 1px solid #555; color: #ddd; cursor: pointer; font-family: 'Lato', sans-serif; border-radius: 4px; transition: 0.2s; }
         .dm-btn:hover { background: #444; border-color: #e74c3c; color: #fff; }
         .dm-input { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; }
 
+        /* KARAKTER KARTI */
         .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; position: relative;}
         .char-header { display: flex; gap: 10px; align-items: center; } 
         .char-avatar-container { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #555; overflow: hidden; position: relative; cursor: pointer; background: #222; display: flex; justify-content: center; align-items: center; flex-shrink: 0;} 
@@ -50,16 +55,26 @@
         .card-actions { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);}
         .icon-btn { cursor: pointer; color: #666; font-size: 14px; padding: 5px; transition: 0.2s; } .icon-btn:hover { color: #fff; } .del-btn:hover { color: #e74c3c; } .whisper-btn:hover { color: #9b59b6; }
 
+        /* --- YENİ KADER ÇARKI (VISUAL WHEEL) --- */
+        #wheelOverlayContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 6000; justify-content: center; align-items: center; flex-direction: column; }
+        .wheel-container { position: relative; width: 300px; height: 300px; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #dcdde1; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: conic-gradient(#e74c3c 0% 12.5%, #f1c40f 12.5% 25%, #3498db 25% 37.5%, #9b59b6 37.5% 50%, #2ecc71 50% 62.5%, #e67e22 62.5% 75%, #1abc9c 75% 87.5%, #95a5a6 87.5% 100%); transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1); transform: rotate(0deg); }
+        .wheel-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 30px solid #fff; z-index: 10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+        .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: #222; border-radius: 50%; border: 3px solid #fff; z-index: 5; display:flex; justify-content:center; align-items:center; color:#fff; font-size:24px;}
+        #wheelResultText { margin-top: 30px; font-size: 32px; color: #f1c40f; font-weight: bold; text-shadow: 0 0 10px #f1c40f; opacity: 0; transition: opacity 0.5s; text-align: center; max-width: 80%; }
+
+        /* TIMER OVERLAY */
         #timerOverlay { display: none; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); font-size: 80px; font-weight: 900; color: #e74c3c; text-shadow: 0 0 20px red; z-index: 3000; pointer-events: none; font-family: 'Courier New', monospace; letter-spacing: 5px; animation: pulseTimer 1s infinite; }
         @keyframes pulseTimer { 0% { opacity: 1; transform: translateX(-50%) scale(1); } 50% { opacity: 0.8; transform: translateX(-50%) scale(0.95); } 100% { opacity: 1; transform: translateX(-50%) scale(1); } }
 
+        /* OTHER MODALS */
         #whisperModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 350px; padding: 20px; background: #1a1a1a; border: 2px solid #9b59b6; border-radius: 10px; z-index: 4000; box-shadow: 0 0 50px #9b59b6; text-align: center; }
         .whisper-text { font-family: 'Lato', sans-serif; font-size: 16px; color: #e0bbef; margin: 20px 0; font-style: italic; }
-        
         #voteModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 5000; justify-content: center; align-items: center; flex-direction: column; }
         .vote-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; width: 80%; max-width: 600px; margin-top: 20px; }
         .vote-card { background: #222; border: 1px solid #f1c40f; padding: 15px; text-align: center; cursor: pointer; border-radius: 8px; } .vote-card:hover { background: #f1c40f; color: #000; }
 
+        /* SAHNE & ZAR */
         .scene { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; perspective: 1000px; } 
         .dice-container { width: 250px; height: 250px; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); filter: drop-shadow(0 30px 40px rgba(0,0,0,0.8)); } 
         .toad-svg { width: 100%; height: 100%; filter: contrast(1.15) saturate(1.1); } 
@@ -102,6 +117,15 @@
         </div>
     </div>
 
+    <div id="wheelOverlayContainer">
+        <div class="wheel-pointer"></div>
+        <div class="wheel-container">
+            <div class="wheel" id="theWheel"></div>
+            <div class="wheel-center"><i class="fas fa-star"></i></div>
+        </div>
+        <div id="wheelResultText">SONUÇ</div>
+    </div>
+
     <div id="timerOverlay">00:00</div>
     <div id="whisperModal">
         <div style="color:#9b59b6; font-size:20px; border-bottom:1px solid #555; padding-bottom:10px;"><i class="fas fa-user-secret"></i> Gizli Mesaj</div>
@@ -134,24 +158,26 @@
         let partyData = [];
         
         socket.on('herkes_icin_zar', (veri) => {
-            // FIX: Gelen veriyi hemen loga işle
-            addLog(veri.sonuc, veri.tur, veri.zaman);
-            
             // Animasyon (Ben değilsem bile oyna)
             const btn = document.getElementById('btn');
             const resDiv = document.getElementById('result');
             
-            // Eğer animasyon zaten oynuyorsa (ben bastıysam) tekrar başlatma
             if (!document.body.classList.contains('rolling')) {
                 document.body.classList.add('rolling');
                 playClickSound();
             }
 
-            // Sonucu göstermek için bekle (Senkronize bekleme)
+            // LOG VE SONUÇ: Sadece animasyon bitince göster (SPOILER FIX)
             setTimeout(() => {
                 document.body.classList.remove('rolling');
+                
+                // 1. Ekrana yaz
                 resDiv.innerText = veri.sonuc;
                 resDiv.className = 'dice-number ' + (veri.tur === 'crit' ? 'crit-success' : veri.tur === 'fail' ? 'crit-fail' : '');
+                
+                // 2. Loga yaz (Animasyon bittikten sonra)
+                addLog(veri.sonuc, veri.tur, veri.zaman);
+
             }, 800);
         });
 
@@ -162,11 +188,38 @@
         });
 
         socket.on('timer_update', (seconds) => runVisualTimer(seconds));
-        socket.on('wheel_result', (res) => {
-             const logDiv = document.getElementById('diceLog');
-             const html = `<div class="log-entry log-fate"><span class="log-time">KADER</span><span>${res}</span></div>`;
-             logDiv.insertAdjacentHTML('afterbegin', html);
+        
+        // --- VISUAL WHEEL SOCKET ---
+        socket.on('wheel_result', (data) => {
+             // data = {text: "...", angle: 3600 + ...}
+             const overlay = document.getElementById('wheelOverlayContainer');
+             const wheel = document.getElementById('theWheel');
+             const resText = document.getElementById('wheelResultText');
+             
+             overlay.style.display = 'flex';
+             resText.style.opacity = '0';
+             wheel.style.transition = 'none';
+             wheel.style.transform = 'rotate(0deg)';
+
+             setTimeout(() => {
+                 wheel.style.transition = 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)';
+                 wheel.style.transform = `rotate(${data.angle}deg)`;
+             }, 50);
+
+             setTimeout(() => {
+                 resText.innerText = data.text;
+                 resText.style.opacity = '1';
+                 playClickSound();
+                 
+                 // Loga da ekle
+                 const logDiv = document.getElementById('diceLog');
+                 const html = `<div class="log-entry log-fate"><span class="log-time">KADER</span><span>${data.text}</span></div>`;
+                 logDiv.insertAdjacentHTML('afterbegin', html);
+
+                 setTimeout(() => { overlay.style.display = 'none'; }, 4000);
+             }, 4000); // 4sn dönme süresi
         });
+
         socket.on('receive_whisper', (data) => {
              if(data.targetName && confirm(`"${data.targetName}" için gizli bir mesaj var. Sen misin?`)) {
                  document.getElementById('whisperContent').innerText = data.message;
@@ -218,24 +271,21 @@
             btn.disabled = true; 
             document.body.classList.add('rolling');
             
-            // SENKRON FIX: Önce hesapla, sonra gönder. Animasyon sunucudan gelecek yanıtla değil,
-            // benim yerel başlatmamla akıyor, ama diğerleri de veriyi alır almaz başlatacak.
             const num = Math.floor(Math.random() * 20) + 1;
             const type = num === 20 ? 'crit' : num === 1 ? 'fail' : 'normal';
             
-            // FIX: Kendi loguma HEMEN ekle (Socket bekleme)
-            addLog(num, type, new Date().getHours()+":"+new Date().getMinutes());
-
-            // Sunucuya gönder (Veri yolda giderken animasyon oynayacak)
+            // Spoiler Fix: Kendi loguma da animasyon bitince (800ms) ekle
             socket.emit('zar_atildi', { sonuc: num, tur: type, zaman: new Date().getHours()+":"+new Date().getMinutes() });
 
-            // 800ms sonra sonucu aç
             setTimeout(() => {
                 document.body.classList.remove('rolling');
                 const res = document.getElementById('result');
                 res.innerText = num;
                 res.className = 'dice-number ' + (type==='crit'?'crit-success':type==='fail'?'crit-fail':'');
                 btn.disabled = false;
+                
+                // Add log here for sender too
+                addLog(num, type, new Date().getHours()+":"+new Date().getMinutes());
             }, 800);
         }
 
@@ -258,7 +308,20 @@
                 if (left <= 0) { clearInterval(intv); el.innerText="SÜRE BİTTİ!"; setTimeout(()=>el.style.display='none',3000); }
             }, 1000);
         }
-        function spinWheel() { const f=["Kılıcın düştü!","Düşman kaydı!","Bir ses duydun...","Altın buldun!","Ayağın takıldı."]; socket.emit('wheel_spin', f[Math.floor(Math.random()*f.length)]); }
+        
+        // --- VISUAL WHEEL LOGIC ---
+        function spinWheel() { 
+            const f=["Kılıcın düştü!","Düşman kaydı!","Bir ses duydun...","Altın buldun!","Ayağın takıldı.","Büyü geri tepti!"]; 
+            const rand = Math.floor(Math.random()*f.length);
+            const text = f[rand];
+            
+            // Görsel için rastgele bir açı hesapla (en az 5 tur dönsün: 360*5)
+            // Her dilim için basit bir açı eklemiyoruz, görsel olarak rastgele dursun.
+            const angle = 1800 + Math.floor(Math.random() * 360);
+            
+            socket.emit('wheel_spin', {text: text, angle: angle}); 
+        }
+
         function startMVPVote() { socket.emit('start_vote'); }
         function castVote(n) { alert("Oy verildi: "+n); document.getElementById('voteModal').style.display='none'; }
         function sendWhisper(id, name) { const m = prompt(`${name} için mesajın:`); if(m) socket.emit('dm_whisper', {targetId:id, targetName:name, message:m}); }
