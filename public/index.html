@@ -105,10 +105,44 @@
     <script>
         const socket = io(); // Sunucuya bağlan
 
-        // Sunucudan gelen zarları dinle
-        socket.on('herkes_icin_zar', (veri) => {
-            addLog(veri.sonuc, veri.tur, veri.zaman);
-        });
+       // Sunucudan gelen zarları dinle
+socket.on('herkes_icin_zar', (veri) => {
+    // 1. Log kaydını her durumda ekle
+    addLog(veri.sonuc, veri.tur, veri.zaman);
+
+    const btn = document.getElementById('btn');
+    
+    // 2. GÖRSEL GÜNCELLEME:
+    // Eğer butona basan ben değilsem (Button disabled değilse), animasyonu oynat
+    // (Ben bastıysam zaten roll() fonksiyonu animasyonu yapıyor, çakışmasın)
+    if (!btn.disabled) {
+        const resultDisplay = document.getElementById('result');
+        
+        // Zarı sallamaya başla
+        document.body.classList.add('rolling');
+        resultDisplay.innerText = ''; 
+        playNoise(); // Sallama sesi
+
+        // Biraz bekleyip sonucu göster (Animasyon süresi)
+        setTimeout(() => {
+            document.body.classList.remove('rolling');
+            resultDisplay.innerText = veri.sonuc;
+
+            // Rengi ayarla (Kritik vs.)
+            resultDisplay.className = 'dice-number'; 
+            if (veri.tur === 'crit') resultDisplay.classList.add('crit-success');
+            else if (veri.tur === 'fail') resultDisplay.classList.add('crit-fail');
+
+            // Sonuç sesini çal
+            if (veri.tur === 'crit') [523, 659, 783].forEach(f => playTone(f, 'sine'));
+            else if (veri.tur === 'fail') playTone(150, 'sawtooth');
+            else {
+                if (veri.sonuc >= 10) playTone(880, 'sine');
+                else playTone(100, 'triangle');
+            }
+        }, 800); // 0.8 saniye bekle
+    }
+});
 
         // --- DRAG DROP ---
         function enableDrag(e,t){const n=document.getElementById(e);let o=!1,l=!1,s,d,a,c;n.addEventListener("mousedown",e=>{o=!0,l=!1,s=e.clientX,d=e.clientY;const t=n.getBoundingClientRect();a=t.left,c=t.top,n.style.cursor="grabbing"}),window.addEventListener("mousemove",e=>{if(!o)return;const t=e.clientX-s,r=e.clientY-d;(Math.abs(t)>3||Math.abs(r)>3)&&(l=!0),n.style.left=a+t+"px",n.style.top=c+r+"px"}),window.addEventListener("mouseup",()=>{if(!o)return;o=!1,n.style.cursor="grab";if(!l&&t){document.querySelectorAll(".side-drawer").forEach(e=>{e.id!==t&&e.classList.remove("open")}),document.getElementById(t).classList.toggle("open")}})}
@@ -173,3 +207,4 @@
     </script>
 </body>
 </html>
+
