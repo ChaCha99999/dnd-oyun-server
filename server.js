@@ -18,40 +18,39 @@ app.get('/', (req, res) => {
     }
 });
 
-// --- SUNUCU HAFIZASI (RAM DB) ---
-let serverPartyData = []; // Karakter verileri burada duracak
-let currentMapUrl = null; // Açık olan harita burada duracak
+// --- SUNUCU HAFIZASI ---
+let serverPartyData = []; 
+let currentMapUrl = null; 
 let voteCounts = {}; 
 
 io.on('connection', (socket) => {
-  console.log('Bağlantı:', socket.id);
-
-  // 1. YENİ GELENE VERİLERİ YOLLA (Senkronizasyon)
+  // 1. GİRİŞ
   socket.emit('party_update_client', serverPartyData);
-  if (currentMapUrl) {
-      socket.emit('map_update_client', currentMapUrl);
-  }
+  if (currentMapUrl) socket.emit('map_update_client', currentMapUrl);
 
-  // 2. TEMEL EYLEMLER
+  // 2. OYUN İÇİ EYLEMLER
   socket.on('zar_atildi', (veri) => socket.broadcast.emit('herkes_icin_zar', veri));
   
-  // 3. VERİ GÜNCELLEME (Kalıcı Hafıza Simülasyonu)
   socket.on('party_update', (yeniVeri) => {
-      serverPartyData = yeniVeri; // Sunucuda güncelle
-      socket.broadcast.emit('party_update_client', serverPartyData); // Diğerlerine yay
+      serverPartyData = yeniVeri;
+      socket.broadcast.emit('party_update_client', serverPartyData);
   });
 
-  // 4. HARİTA SİSTEMİ
-  socket.on('map_change', (url) => {
-      currentMapUrl = url;
-      io.emit('map_update_client', url);
+  socket.on('map_change', (url) => { currentMapUrl = url; io.emit('map_update_client', url); });
+
+  // 3. İLETİŞİM (WHISPERS)
+  // DM -> Oyuncu
+  socket.on('dm_whisper', (d) => io.emit('receive_whisper', d));
+  
+  // Oyuncu -> DM (YENİ)
+  socket.on('player_whisper', (data) => {
+      // data = { sender: "Gandalf", message: "..." }
+      io.emit('dm_receive_player_msg', data); 
   });
 
-  // 5. OYLAMA & WHISPER & TIMER
+  // 4. EĞLENCE & ARAÇLAR
   socket.on('timer_start', (s) => io.emit('timer_update', s));
   socket.on('wheel_spin', (d) => io.emit('wheel_result', d));
-  socket.on('dm_whisper', (d) => io.emit('receive_whisper', d));
-
   socket.on('start_vote', () => { voteCounts = {}; io.emit('show_vote_screen'); });
   socket.on('cast_vote', (name) => { if (!voteCounts[name]) voteCounts[name]=0; voteCounts[name]++; });
   socket.on('end_vote', () => {
