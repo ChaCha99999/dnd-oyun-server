@@ -23,33 +23,38 @@ let serverPartyData = [];
 let currentMapUrl = null; 
 let voteCounts = {}; 
 let takenIdentities = []; 
-let dmLogHistory = []; // DM İÇİN GİZLİ LOG KAYITLARI
+let dmLogHistory = [];
 
-// DM Loguna Ekleme Fonksiyonu
 function logToDM(type, sender, target, message) {
     const logEntry = {
         time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
-        type: type, // 'dm-sent', 'dm-received', 'p2p'
-        sender: sender,
-        target: target,
-        message: message
+        type: type, sender: sender, target: target, message: message
     };
     dmLogHistory.push(logEntry);
-    // Tüm socketlere yolla ama sadece DM açabilecek
     io.emit('dm_log_update', logEntry);
 }
 
 io.on('connection', (socket) => {
-  // GİRİŞTE VERİLERİ YÜKLE
+  // GİRİŞ
   socket.emit('party_update_client', serverPartyData);
   if (currentMapUrl) socket.emit('map_update_client', currentMapUrl);
   socket.emit('update_taken_identities', takenIdentities);
-  socket.emit('dm_log_history_load', dmLogHistory); // Yeni giren DM ise geçmişi görsün
+  socket.emit('dm_log_history_load', dmLogHistory);
 
-  // KİMLİK
+  // KİMLİK (DÜZELTİLDİ: DM KONTROLÜ EKLENDİ)
   socket.on('claim_identity', (data) => {
-      if (data.oldId !== null) takenIdentities = takenIdentities.filter(id => id !== data.oldId);
-      if (data.newId !== null && !takenIdentities.includes(data.newId)) takenIdentities.push(data.newId);
+      // Eskiyi sil (Eğer varsa)
+      // Not: 'null' değeri de dizide saklanabilir, filter doğru çalışır.
+      if (data.oldId !== undefined) { 
+          takenIdentities = takenIdentities.filter(id => id !== data.oldId);
+      }
+      
+      // Yeniyi ekle (null yani DM dahil)
+      // Eğer yeni ID listede yoksa ekle
+      if (!takenIdentities.includes(data.newId)) {
+          takenIdentities.push(data.newId);
+      }
+      
       io.emit('update_taken_identities', takenIdentities);
   });
 
@@ -61,24 +66,18 @@ io.on('connection', (socket) => {
   });
   socket.on('map_change', (url) => { currentMapUrl = url; io.emit('map_update_client', url); });
 
-  // --- İLETİŞİM & LOGLAMA ---
-  
-  // DM -> Oyuncu
+  // İLETİŞİM
   socket.on('dm_whisper', (d) => {
       io.emit('receive_whisper', d);
       logToDM('dm-sent', 'DM', d.targetName, d.message);
   });
-  
-  // Oyuncu -> DM
   socket.on('player_whisper', (d) => {
       io.emit('dm_receive_player_msg', d);
       logToDM('dm-received', d.sender, 'DM', d.message);
   });
-
-  // Oyuncu -> Oyuncu
   socket.on('p2p_whisper', (d) => {
       io.emit('p2p_whisper_relay', d);
-      logToDM('p2p', d.senderName, d.targetName, d.message); // DM bunu da görür!
+      logToDM('p2p', d.senderName, d.targetName, d.message);
   });
 
   // ARAÇLAR
