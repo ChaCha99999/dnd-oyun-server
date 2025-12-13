@@ -20,13 +20,10 @@ app.get('/', (req, res) => {
 
 // --- SUNUCU HAFIZASI ---
 let serverPartyData = []; 
-let serverEnemies = []; // Düşmanlar
 let currentMapUrl = null; 
-let voteCounts = {}; 
 let takenIdentities = []; 
 let dmLogHistory = [];
 
-// Log fonksiyonu
 function logToDM(type, sender, target, message) {
     const logEntry = {
         time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
@@ -37,32 +34,25 @@ function logToDM(type, sender, target, message) {
 }
 
 io.on('connection', (socket) => {
-  // GİRİŞ VERİLERİ
+  // GİRİŞ
   socket.emit('party_update_client', serverPartyData);
-  socket.emit('enemy_update_client', serverEnemies);
   if (currentMapUrl) socket.emit('map_update_client', currentMapUrl);
   socket.emit('update_taken_identities', takenIdentities);
   socket.emit('dm_log_history_load', dmLogHistory);
 
-  // KİMLİK
+  // KİMLİK (V4.1 MANTIĞI)
   socket.on('claim_identity', (data) => {
       if (data.oldId !== undefined) takenIdentities = takenIdentities.filter(id => id !== data.oldId);
       if (data.newId && !takenIdentities.includes(data.newId)) takenIdentities.push(data.newId);
       io.emit('update_taken_identities', takenIdentities);
   });
 
-  // OYUN İÇİ EYLEMLER
+  // OYUN
   socket.on('zar_atildi', (veri) => socket.broadcast.emit('herkes_icin_zar', veri));
   
   socket.on('party_update', (yeniVeri) => {
       serverPartyData = yeniVeri;
       socket.broadcast.emit('party_update_client', serverPartyData);
-  });
-  
-  // Düşman Yönetimi
-  socket.on('enemy_update', (enemies) => {
-      serverEnemies = enemies;
-      io.emit('enemy_update_client', serverEnemies);
   });
 
   socket.on('map_change', (url) => { currentMapUrl = url; io.emit('map_update_client', url); });
@@ -75,13 +65,9 @@ io.on('connection', (socket) => {
   // ARAÇLAR
   socket.on('timer_start', (s) => io.emit('timer_update', s));
   socket.on('wheel_spin', (d) => io.emit('wheel_result', d));
-  socket.on('start_vote', () => { voteCounts = {}; io.emit('show_vote_screen'); });
-  socket.on('cast_vote', (name) => { if (!voteCounts[name]) voteCounts[name]=0; voteCounts[name]++; });
-  socket.on('end_vote', () => {
-      let winner = "Kimse", max = -1;
-      Object.keys(voteCounts).forEach(c => { if(voteCounts[c]>max){max=voteCounts[c]; winner=c;} });
-      io.emit('vote_result_announce', {winner, votes:max});
-  });
+  socket.on('start_vote', () => { io.emit('show_vote_screen'); });
+  socket.on('cast_vote', (name) => { /* Basit oylama */ });
+  socket.on('end_vote', () => { io.emit('vote_result_announce', {winner: 'Kazanan', votes: 0}); });
 });
 
 const PORT = process.env.PORT || 3000;
