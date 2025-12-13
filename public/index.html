@@ -3,30 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Master Screen V2.6 (Level & Icons)</title>
+    <title>D&D Master Screen V2.7 (Secure Whisper)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* TEMEL */
+        /* --- TEMEL --- */
         body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background-color: #0f0f0f; background-image: radial-gradient(circle at center, rgba(0,0,0,0.4), #000), url('masa.jpg'); background-size: cover; background-position: center; font-family: 'Cinzel', serif; color: #dcdde1; user-select: none; }
         .glass-panel { background: rgba(18, 20, 16, 0.95); border: 1px solid #4b6b44; backdrop-filter: blur(8px); border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.8); }
 
-        /* BUTONLAR */
+        /* --- BUTONLAR --- */
         .floating-btn { position: fixed; z-index: 2000; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: grab; background: linear-gradient(135deg, #2f3624, #0f120d); border: 2px solid #555; color: #aaa; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: transform 0.1s; }
         .floating-btn:active { cursor: grabbing; transform: scale(0.95); } .floating-btn:hover { color: #fff; border-color: #fff; }
         #partyToggleBtn { top: 20px; left: 20px; border-color: #f1c40f; color: #f1c40f; }
         #dmToolsBtn { top: 90px; left: 20px; border-color: #e74c3c; color: #e74c3c; }
+        /* Yeni Kimlik Butonu */
+        #identityBtn { top: 160px; left: 20px; border-color: #3498db; color: #3498db; }
 
-        /* YAN PANELLER */
+        /* --- PANELLER --- */
         .side-drawer { position: fixed; left: -360px; top: 0; width: 340px; height: 100vh; background: rgba(15, 15, 15, 0.98); border-right: 2px solid #4b6b44; z-index: 1500; transition: left 0.3s ease; display: flex; flex-direction: column; padding: 20px; padding-top: 60px; box-shadow: 10px 0 50px rgba(0,0,0,0.8); overflow-y: auto; }
         .side-drawer.open { left: 0; }
         .drawer-header { font-size: 18px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;}
 
-        /* LOG PANELİ */
+        /* --- LOG --- */
         .log-panel { position: fixed; right: 20px; bottom: 20px; width: 220px; max-height: 300px; height: auto; padding: 10px; z-index: 1000; display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .log-panel.collapsed { height: 40px !important; overflow: hidden; opacity: 0.7; }
         .panel-header { font-size: 12px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 5px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .panel-header:hover { color: #fff; }
         .log-list { overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column-reverse; gap: 5px; font-family: 'Lato', sans-serif; font-size: 12px; min-height: 200px; }
         .log-panel.collapsed .log-list { display: none; }
         .log-entry { padding: 6px; border-radius: 4px; background: rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease; }
@@ -35,28 +36,22 @@
         .log-fate { border-left: 3px solid #9b59b6; color: #e0bbef; background: rgba(142, 68, 173, 0.2); font-style: italic; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* DM TOOLS */
+        /* --- KARTLAR & TOOLS --- */
         .dm-tool-row { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .dm-tool-title { font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: bold; }
         .dm-btn { width: 100%; padding: 10px; margin-top: 5px; background: #333; border: 1px solid #555; color: #ddd; cursor: pointer; font-family: 'Lato', sans-serif; border-radius: 4px; transition: 0.2s; } .dm-btn:hover { background: #444; border-color: #e74c3c; color: #fff; }
         .dm-input { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; }
 
-        /* KARAKTER KARTI */
         .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; position: relative;}
         .char-header { display: flex; gap: 10px; align-items: center; } 
         .char-avatar-container { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #555; overflow: hidden; position: relative; cursor: pointer; background: #222; display: flex; justify-content: center; align-items: center; flex-shrink: 0;} .char-avatar-container img { width: 100%; height: 100%; object-fit: cover; }
         .char-details { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; } 
         .inp-name { background: transparent; border: none; color: #f1c40f; font-family: 'Cinzel', serif; font-weight: bold; font-size: 14px; width: 100%; border-bottom: 1px solid transparent; }
-        .stat-row { display: flex; gap: 4px; } 
-        .stat-box { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 4px; border-radius: 4px; flex: 1; }
-        /* Yeni Renkler */
-        .box-hp { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; } 
-        .box-lvl { background: rgba(52, 152, 219, 0.2); border: 1px solid #3498db; } /* Mavi Level Kutusu */
-        .box-gold { background: rgba(241, 196, 15, 0.1); border: 1px solid #f39c12; } 
+        .stat-row { display: flex; gap: 4px; } .stat-box { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 4px; border-radius: 4px; flex: 1; }
+        .box-hp { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; } .box-lvl { background: rgba(52, 152, 219, 0.2); border: 1px solid #3498db; } .box-gold { background: rgba(241, 196, 15, 0.1); border: 1px solid #f39c12; } 
         .stat-input { width: 100%; background: transparent; border: none; color: #fff; text-align: center; font-weight: bold; font-family: 'Lato', sans-serif; font-size: 12px; }
         .card-actions { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);} .icon-btn { cursor: pointer; color: #666; font-size: 14px; padding: 5px; transition: 0.2s; } .icon-btn:hover { color: #fff; }
 
-        /* MODALS & WHEEL */
+        /* --- VISUAL WHEEL --- */
         #wheelOverlayContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 6000; justify-content: center; align-items: center; flex-direction: column; }
         .wheel-container { position: relative; width: 300px; height: 300px; }
         .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #dcdde1; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: conic-gradient(#e74c3c 0% 12.5%, #f1c40f 12.5% 25%, #3498db 25% 37.5%, #9b59b6 37.5% 50%, #2ecc71 50% 62.5%, #e67e22 62.5% 75%, #1abc9c 75% 87.5%, #95a5a6 87.5% 100%); transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1); transform: rotate(0deg); }
@@ -64,15 +59,24 @@
         .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: #222; border-radius: 50%; border: 3px solid #fff; z-index: 5; display:flex; justify-content:center; align-items:center; color:#fff; font-size:24px;}
         #wheelResultText { margin-top: 30px; font-size: 28px; color: #f1c40f; font-weight: bold; opacity: 0; transition: opacity 0.5s; text-align: center; }
 
+        /* --- MODALS --- */
         #timerOverlay { display: none; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); font-size: 80px; font-weight: 900; color: #e74c3c; text-shadow: 0 0 20px red; z-index: 3000; pointer-events: none; font-family: 'Courier New', monospace; letter-spacing: 5px; animation: pulseTimer 1s infinite; }
         @keyframes pulseTimer { 0% { opacity: 1; transform: translateX(-50%) scale(1); } 50% { opacity: 0.8; transform: translateX(-50%) scale(0.95); } 100% { opacity: 1; transform: translateX(-50%) scale(1); } }
         
-        #whisperModal, #voteModal, #winnerModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a1a; border: 2px solid #9b59b6; border-radius: 10px; z-index: 4000; box-shadow: 0 0 50px #9b59b6; text-align: center; padding: 20px; width: 350px; }
+        #whisperModal, #voteModal, #winnerModal, #identityModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a1a; border: 2px solid #9b59b6; border-radius: 10px; z-index: 4000; box-shadow: 0 0 50px #9b59b6; text-align: center; padding: 20px; width: 350px; }
+        
         #voteModal { top: 0; left: 0; transform: none; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; flex-direction: column; border: none; border-radius: 0; }
         .vote-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; width: 80%; max-width: 600px; margin-top: 20px; }
         .vote-card { background: #222; border: 1px solid #f1c40f; padding: 15px; text-align: center; cursor: pointer; border-radius: 8px; } .vote-card:hover { background: #f1c40f; color: #000; }
+        
         #winnerModal { border-color: #f1c40f; box-shadow: 0 0 50px #f1c40f; animation: popIn 0.5s ease; }
         @keyframes popIn { 0% { transform: translate(-50%, -50%) scale(0.5); } 80% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
+        
+        /* Identity Modal Style */
+        #identityModal { border-color: #3498db; box-shadow: 0 0 50px #3498db; }
+        .identity-option { padding: 10px; margin: 5px 0; background: #222; border: 1px solid #444; color: #fff; cursor: pointer; transition: 0.2s; }
+        .identity-option:hover { background: #3498db; border-color: #3498db; }
+        #currentIdentityDisplay { font-size: 10px; position: absolute; bottom: -20px; width: 100%; text-align: center; color: #3498db; pointer-events: none;}
 
         /* SAHNE */
         .scene { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; perspective: 1000px; } 
@@ -93,6 +97,10 @@
 
     <div id="partyToggleBtn" class="floating-btn" title="Karakterler"><i class="fas fa-users"></i></div>
     <div id="dmToolsBtn" class="floating-btn" title="DM Araçları"><i class="fas fa-dragon"></i></div>
+    <div id="identityBtn" class="floating-btn" title="Ben Kimim?" onclick="openIdentityModal()">
+        <i class="fas fa-id-card"></i>
+        <div id="currentIdentityDisplay">DM</div>
+    </div>
 
     <div class="side-drawer" id="partyDrawer">
         <div class="drawer-header"><span>KAHRAMANLAR</span><div style="font-size:10px; cursor:pointer; color:#c0392b" onclick="resetPartyData()">SIFIRLA</div></div>
@@ -134,9 +142,15 @@
     <div id="timerOverlay">00:00</div>
     
     <div id="whisperModal">
-        <div style="color:#9b59b6; font-size:20px; border-bottom:1px solid #555; padding-bottom:10px;"><i class="fas fa-user-secret"></i> Gizli Mesaj</div>
+        <div style="color:#9b59b6; font-size:20px; border-bottom:1px solid #555; padding-bottom:10px;"><i class="fas fa-user-secret"></i> GİZLİ MESAJ</div>
         <div class="whisper-text" id="whisperContent">...</div>
         <button class="dm-btn" onclick="document.getElementById('whisperModal').style.display='none'">KAPAT</button>
+    </div>
+
+    <div id="identityModal">
+        <div style="color:#3498db; font-size:20px; border-bottom:1px solid #555; padding-bottom:10px;">SEN KİMSİN?</div>
+        <div id="identityList" style="max-height:200px; overflow-y:auto; margin:10px 0;"></div>
+        <button class="dm-btn" onclick="document.getElementById('identityModal').style.display='none'">KAPAT</button>
     </div>
 
     <div id="voteModal">
@@ -169,6 +183,28 @@
         const socket = io();
         let partyData = [];
         let audioCtx;
+        let myIdentityId = null; // BENİM KİMLİĞİM
+
+        // --- IDENTITY MANAGEMENT (YENİ) ---
+        function openIdentityModal() {
+            const list = document.getElementById('identityList'); list.innerHTML = '';
+            // DM Seçeneği
+            list.insertAdjacentHTML('beforeend', `<div class="identity-option" onclick="selectIdentity(null)">DM (Oyun Yöneticisi)</div>`);
+            // Karakterler
+            partyData.forEach(c => {
+                list.insertAdjacentHTML('beforeend', `<div class="identity-option" onclick="selectIdentity(${c.id}, '${c.name}')">${c.name}</div>`);
+            });
+            document.getElementById('identityModal').style.display = 'block';
+        }
+
+        function selectIdentity(id, name) {
+            myIdentityId = id;
+            localStorage.setItem('dnd_my_identity', id);
+            const display = document.getElementById('currentIdentityDisplay');
+            if(id === null) { display.innerText = "DM"; } 
+            else { display.innerText = name || "Bilinmiyor"; }
+            document.getElementById('identityModal').style.display = 'none';
+        }
 
         // --- SOCKETS ---
         socket.on('herkes_icin_zar', (veri) => {
@@ -209,8 +245,12 @@
              }, 4000);
         });
 
+        // GÜVENLİ WHISPER ALICISI (YENİ)
         socket.on('receive_whisper', (data) => {
-             if(data.targetName && confirm(`"${data.targetName}" için gizli bir mesaj var. Sen misin?`)) {
+             // Mesaj herkese gelir ama SADECE kimliği eşleşen açar
+             // data.targetId ile myIdentityId eşleşiyor mu?
+             if(myIdentityId && myIdentityId == data.targetId) {
+                 playClickSound(); // Uyarı sesi
                  document.getElementById('whisperContent').innerText = data.message;
                  document.getElementById('whisperModal').style.display = 'block';
              }
@@ -292,8 +332,10 @@
                 document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
             });
         }
+        // Tüm butonları sürükle
         enableDrag('partyToggleBtn', 'partyDrawer');
         enableDrag('dmToolsBtn', 'dmDrawer');
+        enableDrag('identityBtn', null); // Sadece buton, çekmece açmaz (Modal açar)
 
         function renderParty() {
             const list = document.getElementById('characterList'); list.innerHTML = '';
@@ -308,7 +350,23 @@
         function delChar(id){ if(confirm('Sil?')){partyData=partyData.filter(x=>x.id!==id); saveData(); renderParty();} }
         function changeAvatar(id){ const i=document.createElement('input'); i.type='file'; i.onchange=e=>{const r=new FileReader(); r.onload=ev=>{upd(id,'avatar',ev.target.result); renderParty();}; r.readAsDataURL(e.target.files[0]);}; i.click(); }
         function resetPartyData(){ if(confirm('Tüm karakterleri sil?')){partyData=[]; saveData(); renderParty();} }
-        window.onload=()=>{ const s=localStorage.getItem('dnd_party_v5'); if(s){ partyData=JSON.parse(s); renderParty(); } };
+        
+        window.onload=()=>{ 
+            const s=localStorage.getItem('dnd_party_v5'); 
+            if(s){ partyData=JSON.parse(s); renderParty(); }
+            
+            // Kimlik kontrolü
+            const myId = localStorage.getItem('dnd_my_identity');
+            if(myId) { 
+                myIdentityId = myId;
+                // İsim bulmak için dataya bak (Data yüklendikten sonra)
+                setTimeout(() => {
+                    const c = partyData.find(x => x.id == myId);
+                    if(c) document.getElementById('currentIdentityDisplay').innerText = c.name;
+                    else if(myId === 'null' || !myId) document.getElementById('currentIdentityDisplay').innerText = 'DM';
+                }, 500);
+            }
+        };
     </script>
 </body>
 </html>
