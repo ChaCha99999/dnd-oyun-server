@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Master V3.1 (Multi-Dice & Name)</title>
+    <title>D&D Master V3.2 (Combat Manager)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- TEMEL AYARLAR --- */
+        /* --- TEMEL --- */
         body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background-color: #0f0f0f; background-image: radial-gradient(circle at center, rgba(0,0,0,0.4), #000), url('masa.jpg'); background-size: cover; background-position: center; font-family: 'Cinzel', serif; color: #dcdde1; user-select: none; }
         .glass-panel { background: rgba(18, 20, 16, 0.95); border: 1px solid #4b6b44; backdrop-filter: blur(8px); border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.8); }
 
@@ -24,7 +24,10 @@
         .drawer-header { font-size: 18px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;}
 
         /* --- KARAKTER KARTI --- */
-        .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; position: relative;}
+        .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; transition: 0.3s; }
+        /* AKTİF SIRA GÖSTERGESİ (YENİ) */
+        .char-card.active-turn { border: 2px solid #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); background: rgba(46, 204, 113, 0.05); transform: scale(1.02); }
+        
         .char-header { display: flex; gap: 10px; align-items: center; } 
         .char-avatar-container { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #555; overflow: hidden; position: relative; cursor: pointer; background: #222; display: flex; justify-content: center; align-items: center; flex-shrink: 0;} .char-avatar-container img { width: 100%; height: 100%; object-fit: cover; }
         .char-details { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; } 
@@ -81,24 +84,18 @@
         .rune-container { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%) translateZ(35px); width: 90px; height: 80px; display: flex; justify-content: center; align-items: center; z-index: 10; } 
         .magic-circle { position: absolute; width: 100%; height: 100%; border: 3px dotted rgba(158, 212, 123, 0.4); border-radius: 50%; animation: rotateCircle 15s linear infinite; } 
         .dice-number { font-size: 46px; font-weight: 900; color: #e1e6e2; text-shadow: 0 2px 4px #000, 0 0 20px rgba(106, 176, 76, 0.4); z-index: 11; pointer-events: none; } 
-        
-        /* ZAR ATAN İSİM GÖSTERİMİ */
         .roller-name { font-size: 16px; color: #f1c40f; font-family: 'Cinzel', serif; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
-
         button.roll-btn { padding: 12px 50px; font-family: 'Cinzel', serif; font-size: 20px; font-weight: 800; color: #dcdde1; background: linear-gradient(180deg, #3a423b 0%, #1a1d1a 100%); border: 1px solid #57606f; border-radius: 4px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s ease; z-index: 20;} 
         button.roll-btn:disabled { opacity: 0.6; cursor: not-allowed; } 
-
-        /* YENİ ZAR SEÇENEKLERİ ÇUBUĞU */
         .dice-bar { display: flex; gap: 10px; margin-top: 20px; z-index: 20; }
         .mini-dice-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid #777; color: #ccc; cursor: pointer; font-family: 'Lato', sans-serif; font-weight: bold; transition: 0.2s; }
         .mini-dice-btn:hover { border-color: #f1c40f; color: #f1c40f; transform: scale(1.1); background: rgba(0,0,0,0.9); }
-
         .rolling .dice-container { animation: shakeDice 0.6s ease-in-out infinite; } .rolling .dice-number { display: none; } .rolling .magic-circle { border-color: #fff; box-shadow: 0 0 30px #fff; } 
         @keyframes shakeDice { 0% { transform: rotateX(0) translateY(0); } 25% { transform: rotateX(10deg) rotateY(-10deg) rotateZ(2deg); } 50% { transform: rotateX(-5deg) rotateY(10deg); } 75% { transform: rotateX(5deg) rotateY(-5deg); } 100% { transform: rotateX(0); } } 
         @keyframes rotateCircle { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } 
         .crit-success { color: #f1c40f !important; text-shadow: 0 0 30px #f1c40f; } .crit-fail { color: #e74c3c !important; text-shadow: 0 0 30px #c0392b; }
 
-        /* HARİTA GÖSTERİMİ */
+        /* HARİTA */
         #activeMapContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; display: none; justify-content: center; align-items: center; background: #000; }
         #activeMapImg { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 0 50px rgba(0,0,0,0.9); }
         .map-mode .dice-container { transform: scale(0.6) translateZ(10px); filter: drop-shadow(0 0 10px #000); }
@@ -122,7 +119,6 @@
 
     <div class="side-drawer" id="dmDrawer">
         <div class="drawer-header" style="color:#e74c3c; border-color:#e74c3c;"><span>DM ARAÇLARI</span></div>
-        
         <div class="dm-tool-row">
             <div class="dm-tool-title"><i class="fas fa-map"></i> HARİTA / GÖRSEL</div>
             <input type="text" id="mapUrlInput" class="dm-input" placeholder="Resim Linki (URL)">
@@ -131,10 +127,14 @@
                 <button class="dm-btn" style="border-color:#e74c3c; color:#e74c3c" onclick="closeMap()">KAPAT</button>
             </div>
         </div>
+        
         <div class="dm-tool-row">
-            <div class="dm-tool-title"><i class="fas fa-sort-numeric-down"></i> İNİSİYATİF</div>
-            <button class="dm-btn" style="border-color:#9b59b6; color:#9b59b6;" onclick="sortInitiative()">ZARLARI SIRALA</button>
+            <div class="dm-tool-title"><i class="fas fa-sort-numeric-down"></i> SAVAŞ YÖNETİMİ</div>
+            <button class="dm-btn" style="color:#fff;" onclick="rollAllInitiative()">1. HERKES İÇİN AT</button>
+            <button class="dm-btn" style="color:#9b59b6; border-color:#9b59b6;" onclick="sortInitiative()">2. SIRALA (MANUEL)</button>
+            <button class="dm-btn" style="color:#2ecc71; border-color:#2ecc71;" onclick="nextTurn()">3. SIRADAKİ KİŞİ</button>
         </div>
+
         <div class="dm-tool-row">
             <div class="dm-tool-title"><i class="fas fa-hourglass-half"></i> GERİ SAYIM</div>
             <input type="number" id="timerInput" class="dm-input" placeholder="Saniye (Örn: 60)">
@@ -169,9 +169,7 @@
             </svg>
             <div class="rune-container"><div class="magic-circle"></div><div class="dice-number" id="result"><div style="font-size:16px;">d20</div></div></div>
         </div>
-        
         <button class="roll-btn" id="btn" onclick="roll(20)">d20 AT</button>
-        
         <div class="dice-bar">
             <button class="mini-dice-btn" onclick="roll(4)">d4</button>
             <button class="mini-dice-btn" onclick="roll(6)">d6</button>
@@ -214,6 +212,7 @@
         let partyData = [];
         let audioCtx;
         let myIdentityId = null;
+        let currentTurnIndex = -1; // Sıra kimde?
 
         // --- IDENTITY ---
         function openIdentityModal() {
@@ -237,46 +236,27 @@
         socket.on('party_update_client', (data) => {
             partyData = data; renderParty();
         });
-
         socket.on('herkes_icin_zar', (veri) => {
             const btn = document.getElementById('btn');
             const resDiv = document.getElementById('result');
             if (!document.body.classList.contains('rolling')) { document.body.classList.add('rolling'); playClickSound(); }
             setTimeout(() => {
                 document.body.classList.remove('rolling');
-                
-                // İSİMLİ SONUÇ GÖSTERİMİ
                 resDiv.innerHTML = `<div class="roller-name">${veri.atan}</div>${veri.sonuc}`;
-                
-                // Renklendirme ve Efekt (Sadece d20 için kritik)
                 let cls = 'dice-number';
-                if(veri.zarTipi == 20) {
-                     if(veri.tur === 'crit') cls += ' crit-success';
-                     else if(veri.tur === 'fail') cls += ' crit-fail';
-                }
+                if(veri.zarTipi == 20) { if(veri.tur === 'crit') cls += ' crit-success'; else if(veri.tur === 'fail') cls += ' crit-fail'; }
                 resDiv.className = cls;
-                
                 addLog(veri.sonuc, veri.tur, veri.zaman, veri.atan, veri.zarTipi);
             }, 800);
         });
-
         socket.on('map_update_client', (url) => {
             const div = document.getElementById('activeMapContainer');
             const img = document.getElementById('activeMapImg');
-            if (url) {
-                img.src = url; div.style.display = 'flex';
-                document.body.classList.add('map-mode');
-            } else {
-                div.style.display = 'none';
-                document.body.classList.remove('map-mode');
-            }
+            if (url) { img.src = url; div.style.display = 'flex'; document.body.classList.add('map-mode'); } 
+            else { div.style.display = 'none'; document.body.classList.remove('map-mode'); }
         });
-
         socket.on('receive_whisper', (data) => {
-             if(myIdentityId && myIdentityId == data.targetId) {
-                 playClickSound(); document.getElementById('whisperContent').innerText = data.message;
-                 document.getElementById('whisperModal').style.display = 'block';
-             }
+             if(myIdentityId && myIdentityId == data.targetId) { playClickSound(); document.getElementById('whisperContent').innerText = data.message; document.getElementById('whisperModal').style.display = 'block'; }
         });
         socket.on('timer_update', (s) => runVisualTimer(s));
         socket.on('wheel_result', (d) => showWheelResult(d));
@@ -286,77 +266,60 @@
             document.getElementById('voteModal').style.display = 'flex';
         });
         socket.on('vote_result_announce', (d) => {
-            document.getElementById('voteModal').style.display = 'none';
-            document.getElementById('winnerName').innerText = d.winner;
-            document.getElementById('voteCountDisplay').innerText = d.votes + " Oy ile";
-            document.getElementById('winnerModal').style.display = 'block'; playClickSound();
+            document.getElementById('voteModal').style.display = 'none'; document.getElementById('winnerName').innerText = d.winner;
+            document.getElementById('voteCountDisplay').innerText = d.votes + " Oy ile"; document.getElementById('winnerModal').style.display = 'block'; playClickSound();
         });
 
         // --- DM ACTIONS ---
         function setMap() { const url = document.getElementById('mapUrlInput').value; socket.emit('map_change', url); }
         function closeMap() { socket.emit('map_change', null); }
+        
+        // YENİ İNİSİYATİF MANTIĞI
+        function rollAllInitiative() {
+            partyData.forEach(c => {
+                c.init = Math.floor(Math.random() * 20) + 1; // Otomatik d20
+            });
+            sortInitiative(); // Otomatik sırala ve kaydet
+        }
         function sortInitiative() {
-            partyData.sort((a, b) => (b.init || 0) - (a.init || 0));
+            partyData.sort((a, b) => (parseInt(b.init) || 0) - (parseInt(a.init) || 0));
+            currentTurnIndex = -1; // Sırayı sıfırla
             saveData(); renderParty();
         }
-        function startTimer() { const s=document.getElementById('timerInput').value; if(s) socket.emit('timer_start', s); }
-        function spinWheel() { 
-            const f=["DOST ATEŞİ!", "SİLAHIN FIRLADI!", "ADRENALİN!", "KÖRLÜK!", "TANRISAL ŞİFA", "DÜŞMAN TÖKEZLEDİ", "BÜYÜ GERİ TEPTİ!", "YERE KAPAKLANDIN!"]; 
-            const text = f[Math.floor(Math.random()*f.length)]; const angle = 1800 + Math.floor(Math.random() * 360);
-            socket.emit('wheel_spin', {text, angle}); 
+        function nextTurn() {
+            currentTurnIndex++;
+            if (currentTurnIndex >= partyData.length) currentTurnIndex = 0;
+            renderParty(); // Kartları güncelle (Highlight için)
         }
+
+        function startTimer() { const s=document.getElementById('timerInput').value; if(s) socket.emit('timer_start', s); }
+        function spinWheel() { const f=["DOST ATEŞİ!", "SİLAHIN FIRLADI!", "ADRENALİN!", "KÖRLÜK!", "TANRISAL ŞİFA", "DÜŞMAN TÖKEZLEDİ", "BÜYÜ GERİ TEPTİ!", "YERE KAPAKLANDIN!"]; const text = f[Math.floor(Math.random()*f.length)]; const angle = 1800 + Math.floor(Math.random() * 360); socket.emit('wheel_spin', {text, angle}); }
         function startMVPVote() { socket.emit('start_vote'); }
         function endMVPVote() { socket.emit('end_vote'); }
         function castVote(n) { socket.emit('cast_vote', n); document.getElementById('voteModal').style.display='none'; alert("Oyunuz alındı: " + n); }
         function sendWhisper(id, name) { const m = prompt(`${name} için mesajın:`); if(m) socket.emit('dm_whisper', {targetId:id, targetName:name, message:m}); }
 
-        // --- CORE (MULTI DICE UPDATE) ---
+        // --- CORE ---
         function roll(sides) {
-            playClickSound(); const btn = document.getElementById('btn'); btn.disabled = true; 
-            document.body.classList.add('rolling');
-            
+            playClickSound(); const btn = document.getElementById('btn'); btn.disabled = true; document.body.classList.add('rolling');
             const num = Math.floor(Math.random() * sides) + 1; 
             let type = 'normal';
-            
-            // Sadece d20 için kritik mantığı
-            if (sides === 20) {
-                if(num === 20) type = 'crit';
-                else if(num === 1) type = 'fail';
-            }
-
+            if (sides === 20) { if(num === 20) type = 'crit'; else if(num === 1) type = 'fail'; }
             const senderName = getMyName();
-
-            socket.emit('zar_atildi', { 
-                sonuc: num, 
-                tur: type, 
-                zaman: new Date().getHours()+":"+new Date().getMinutes(),
-                atan: senderName,
-                zarTipi: sides
-            });
-
+            socket.emit('zar_atildi', { sonuc: num, tur: type, zaman: new Date().getHours()+":"+new Date().getMinutes(), atan: senderName, zarTipi: sides });
             setTimeout(() => {
                 document.body.classList.remove('rolling');
                 const resDiv = document.getElementById('result');
-                
-                // İsimli Gösterim
                 resDiv.innerHTML = `<div class="roller-name">${senderName}</div>${num}`;
-                
-                let cls = 'dice-number';
-                if(type === 'crit') cls += ' crit-success';
-                else if(type === 'fail') cls += ' crit-fail';
+                let cls = 'dice-number'; if(type === 'crit') cls += ' crit-success'; else if(type === 'fail') cls += ' crit-fail';
                 resDiv.className = cls;
-
-                btn.disabled = false; 
-                addLog(num, type, new Date().getHours()+":"+new Date().getMinutes(), senderName, sides);
+                btn.disabled = false; addLog(num, type, new Date().getHours()+":"+new Date().getMinutes(), senderName, sides);
             }, 800);
         }
-
         function addLog(res, type, time, name, sides) { 
-            const diceName = sides ? `d${sides}` : 'd20';
-            const who = name ? name : 'Bilinmiyor';
+            const diceName = sides ? `d${sides}` : 'd20'; const who = name ? name : 'Bilinmiyor';
             document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry ${type==='crit'?'log-crit':type==='fail'?'log-fail':''}"><span class="log-time">${time}</span><span>${who}: <strong>${res}</strong> (${diceName})</span></div>`); 
         }
-
         function playClickSound() {
             if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -366,17 +329,19 @@
             osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        // --- RENDER PARTY ---
+        // --- RENDER ---
         function renderParty() {
             const list = document.getElementById('characterList'); list.innerHTML = '';
-            partyData.forEach(c => {
-                const hp = parseInt(c.hp) || 0;
-                const max = parseInt(c.maxHp) || hp || 10;
+            partyData.forEach((c, index) => {
+                const hp = parseInt(c.hp) || 0; const max = parseInt(c.maxHp) || hp || 10;
                 const percent = Math.min(100, Math.max(0, (hp / max) * 100));
                 let barColor = '#2ecc71'; if(percent < 50) barColor = '#f1c40f'; if(percent < 25) barColor = '#e74c3c';
+                
+                // Highlight active turn
+                const activeClass = (index === currentTurnIndex) ? 'active-turn' : '';
 
                 const html = `
-                <div class="char-card">
+                <div class="char-card ${activeClass}">
                     <div class="char-header">
                         <div class="char-avatar-container" onclick="changeAvatar(${c.id})">${c.avatar?`<img src="${c.avatar}">`:'<i class="fas fa-user"></i>'}</div>
                         <div class="char-details">
@@ -390,39 +355,19 @@
                             <div class="hp-bar-container"><div class="hp-bar-fill" style="width:${percent}%; background:${barColor}"></div></div>
                         </div>
                     </div>
-                    <div class="card-actions">
-                         <i class="fas fa-eye icon-btn whisper-btn" onclick="sendWhisper(${c.id}, '${c.name}')" title="Fısılda"></i>
-                         <i class="fas fa-trash icon-btn" onclick="delChar(${c.id})"></i>
-                    </div>
+                    <div class="card-actions"><i class="fas fa-eye icon-btn whisper-btn" onclick="sendWhisper(${c.id}, '${c.name}')" title="Fısılda"></i><i class="fas fa-trash icon-btn" onclick="delChar(${c.id})"></i></div>
                 </div>`;
                 list.insertAdjacentHTML('beforeend', html);
             });
         }
-        
         function upd(id,k,v){ const c=partyData.find(x=>x.id==id); if(c){c[k]=v; saveData();} }
         function saveData(){ socket.emit('party_update', partyData); } 
         function addCharacter(){ partyData.push({id:Date.now(), name:'', hp:10, maxHp:10, level:1, init:0, gold:0, avatar:null}); saveData(); renderParty(); }
         function delChar(id){ if(confirm('Sil?')){partyData=partyData.filter(x=>x.id!==id); saveData(); renderParty();} }
         function changeAvatar(id){ const i=document.createElement('input'); i.type='file'; i.onchange=e=>{const r=new FileReader(); r.onload=ev=>{upd(id,'avatar',ev.target.result); renderParty();}; r.readAsDataURL(e.target.files[0]);}; i.click(); }
         function resetPartyData(){ if(confirm('Tüm karakterleri sil?')){partyData=[]; saveData(); renderParty();} }
-
-        // --- ANIMATIONS & UTILS ---
-        function runVisualTimer(seconds) {
-            const el = document.getElementById('timerOverlay'); el.style.display = 'block'; let left = seconds;
-            const intv = setInterval(() => { left--; el.innerText = Math.floor(left/60)+":"+(left%60<10?'0':'')+(left%60); if (left <= 0) { clearInterval(intv); el.innerText="SÜRE BİTTİ!"; setTimeout(()=>el.style.display='none',3000); } }, 1000);
-        }
-        function showWheelResult(data) {
-             const overlay = document.getElementById('wheelOverlayContainer'); const wheel = document.getElementById('theWheel'); const resText = document.getElementById('wheelResultText');
-             overlay.style.display = 'flex'; resText.style.opacity = '0'; wheel.style.transition = 'none'; wheel.style.transform = 'rotate(0deg)';
-             setTimeout(() => { wheel.style.transition = 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)'; wheel.style.transform = `rotate(${data.angle}deg)`; }, 50);
-             setTimeout(() => {
-                 resText.innerText = data.text; resText.style.opacity = '1'; playClickSound();
-                 document.getElementById('diceLog').insertAdjacentHTML('afterbegin', `<div class="log-entry log-fate"><span class="log-time">KADER</span><span>${data.text}</span></div>`);
-                 setTimeout(() => { overlay.style.display = 'none'; }, 4000);
-             }, 4000);
-        }
         
-        // --- DRAG ---
+        // DRAG
         function enableDrag(btnId, drawerId) {
             const btn = document.getElementById(btnId); let isDragging = false, startX, startY, initLeft, initTop;
             btn.addEventListener('mousedown', (e) => {
@@ -434,7 +379,7 @@
             });
         }
         enableDrag('partyToggleBtn', 'partyDrawer'); enableDrag('dmToolsBtn', 'dmDrawer'); enableDrag('identityBtn', null);
-        
+
         window.onload=()=>{
             const myId = localStorage.getItem('dnd_my_identity');
             if(myId) { myIdentityId = myId; setTimeout(() => { const c = partyData.find(x => x.id == myId); if(c) document.getElementById('currentIdentityDisplay').innerText = c.name; }, 1000); }
