@@ -6,52 +6,54 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 const path = require('path');
 
-// --- AKILLI DOSYA BULMA SİSTEMİ ---
-// 1. Önce 'public' klasörüne bak
 app.use(express.static(path.join(__dirname, 'public')));
-
-// 2. Bulamazsan ana klasöre bak
 app.use(express.static(__dirname));
 
-// 3. Ana sayfaya girildiğinde index.html'i zorla
 app.get('/', (req, res) => {
     const fs = require('fs');
-    // Public içinde index.html var mı?
     if (fs.existsSync(path.join(__dirname, 'public', 'index.html'))) {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    } 
-    // Yoksa ana dizinde index.html var mı?
-    else if (fs.existsSync(path.join(__dirname, 'index.html'))) {
+    } else if (fs.existsSync(path.join(__dirname, 'index.html'))) {
         res.sendFile(path.join(__dirname, 'index.html'));
-    }
-    else {
-        res.send('HATA: index.html dosyası bulunamadı!');
+    } else {
+        res.send('HATA: index.html bulunamadı!');
     }
 });
 
-// --- OYUN BAĞLANTILARI ---
 io.on('connection', (socket) => {
-  console.log('Bir oyuncu bağlandı: ' + socket.id);
+  console.log('Bağlantı: ' + socket.id);
 
-  // 1. ZAR ATMA OLAYI
-  socket.on('zar_atildi', (veri) => {
-    // Zarı atan kişi zaten sonucunu görüyor.
-    // Bu yüzden "broadcast" kullanarak zarı atan HARİÇ herkese yolluyoruz.
-    socket.broadcast.emit('herkes_icin_zar', veri); 
+  // 1. ZAR VE KARAKTER (Eski özellikler)
+  socket.on('zar_atildi', (veri) => socket.broadcast.emit('herkes_icin_zar', veri));
+  socket.on('party_update', (yeniVeri) => socket.broadcast.emit('party_update_client', yeniVeri));
+
+  // --- YENİ V2.0 ÖZELLİKLERİ ---
+
+  // 2. GERİ SAYIM (Countdown)
+  socket.on('timer_start', (seconds) => {
+    io.emit('timer_update', seconds); // Herkese sayacı başlat
   });
 
-  // 2. KARAKTER GÜNCELLEME OLAYI (YENİ)
-  socket.on('party_update', (yeniVeri) => {
-    // Listeyi biri güncellediğinde, diğer herkesin ekranını güncelliyoruz.
-    socket.broadcast.emit('party_update_client', yeniVeri);
+  // 3. KADER ÇARKI (Wheel of Fate)
+  socket.on('wheel_spin', (result) => {
+    io.emit('wheel_result', result); // Herkese sonucu göster
   });
 
-  socket.on('disconnect', () => {
-    console.log('Oyuncu ayrıldı');
+  // 4. GİZLİ FISILTI (Whisper)
+  socket.on('dm_whisper', (data) => {
+    // data = { targetCharId: 123, message: "..." }
+    // Bunu herkese yolluyoruz ama Client tarafında "Bu mesaj bana mı?" kontrolü yapacağız.
+    // (Login sistemi olmadığı için en pratik yöntem bu)
+    io.emit('receive_whisper', data); 
   });
+
+  // 5. MVP OYLAMASI
+  socket.on('start_vote', () => {
+    io.emit('show_vote_screen'); // Herkese oylama ekranını aç
+  });
+
+  socket.on('disconnect', () => console.log('Ayrıldı.'));
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Sunucu ${PORT} portunda çalışıyor`);
-});
+server.listen(PORT, () => console.log(`Sunucu ${PORT} portunda.`));
