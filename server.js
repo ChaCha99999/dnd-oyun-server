@@ -26,6 +26,7 @@ let voteCounts = {};
 let takenIdentities = []; 
 let dmLogHistory = [];
 
+// Log fonksiyonu
 function logToDM(type, sender, target, message) {
     const logEntry = {
         time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
@@ -36,7 +37,7 @@ function logToDM(type, sender, target, message) {
 }
 
 io.on('connection', (socket) => {
-  // GİRİŞ
+  // GİRİŞ VERİLERİ
   socket.emit('party_update_client', serverPartyData);
   socket.emit('enemy_update_client', serverEnemies);
   if (currentMapUrl) socket.emit('map_update_client', currentMapUrl);
@@ -50,7 +51,7 @@ io.on('connection', (socket) => {
       io.emit('update_taken_identities', takenIdentities);
   });
 
-  // OYUN
+  // OYUN İÇİ EYLEMLER
   socket.on('zar_atildi', (veri) => socket.broadcast.emit('herkes_icin_zar', veri));
   
   socket.on('party_update', (yeniVeri) => {
@@ -58,6 +59,7 @@ io.on('connection', (socket) => {
       socket.broadcast.emit('party_update_client', serverPartyData);
   });
   
+  // Düşman Yönetimi
   socket.on('enemy_update', (enemies) => {
       serverEnemies = enemies;
       io.emit('enemy_update_client', serverEnemies);
