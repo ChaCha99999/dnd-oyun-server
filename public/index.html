@@ -3,166 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D DM Master Screen V9 (Custom Names)</title>
+    <title>D&D DM Master Screen (Online)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden;
-            background-color: #0f0f0f;
-            background-image: radial-gradient(circle at center, rgba(0,0,0,0.4), #000), url('masa.jpg');
-            background-size: cover; background-position: center;
-            font-family: 'Cinzel', serif; color: #dcdde1; user-select: none;
-        }
+        body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background-color: #0f0f0f; background-image: radial-gradient(circle at center, rgba(0,0,0,0.4), #000), url('masa.jpg'); background-size: cover; background-position: center; font-family: 'Cinzel', serif; color: #dcdde1; user-select: none; }
+        .glass-panel { background: rgba(18, 20, 16, 0.95); border: 1px solid #4b6b44; backdrop-filter: blur(8px); border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.8); }
+        
+        /* BUTTONS */
+        .floating-btn { position: fixed; left: 20px; z-index: 1000; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: grab; touch-action: none; transition: transform 0.1s, box-shadow 0.3s; background: linear-gradient(135deg, #2f3624, #0f120d); border: 2px solid #f1c40f; color: #f1c40f; box-shadow: 0 0 15px rgba(241, 196, 15, 0.3); }
+        .floating-btn:active { cursor: grabbing; transform: scale(0.95); } .floating-btn:hover { box-shadow: 0 0 25px rgba(241, 196, 15, 0.6); }
+        #soundToggleBtn { top: 180px; border-color: #7bed9f; color: #7bed9f; box-shadow: 0 0 15px rgba(123, 237, 159, 0.3); } #soundToggleBtn:hover { box-shadow: 0 0 25px rgba(123, 237, 159, 0.6); } #partyToggleBtn { top: 100px; }
 
-        .glass-panel {
-            background: rgba(18, 20, 16, 0.95); border: 1px solid #4b6b44;
-            backdrop-filter: blur(8px); border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.8);
-        }
-
-        /* --- BUTTONS --- */
-        .floating-btn {
-            position: fixed; left: 20px; z-index: 1000;
-            width: 60px; height: 60px; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 24px; cursor: grab; 
-            touch-action: none; transition: transform 0.1s, box-shadow 0.3s;
-            background: linear-gradient(135deg, #2f3624, #0f120d);
-            border: 2px solid #f1c40f; color: #f1c40f;
-            box-shadow: 0 0 15px rgba(241, 196, 15, 0.3);
-        }
-        .floating-btn:active { cursor: grabbing; transform: scale(0.95); }
-        .floating-btn:hover { box-shadow: 0 0 25px rgba(241, 196, 15, 0.6); }
-
-        #soundToggleBtn {
-            top: 180px; border-color: #7bed9f; color: #7bed9f;
-            box-shadow: 0 0 15px rgba(123, 237, 159, 0.3);
-        }
-        #soundToggleBtn:hover { box-shadow: 0 0 25px rgba(123, 237, 159, 0.6); }
-        #partyToggleBtn { top: 100px; }
-
-        /* --- DRAWERS --- */
-        .side-drawer {
-            position: fixed; left: -360px; top: 0; width: 340px; height: 100vh;
-            background: rgba(15, 15, 15, 0.98); border-right: 2px solid #4b6b44;
-            z-index: 140; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box;
-            padding-top: 80px; padding-bottom: 100px; overflow-y: auto;
-            box-shadow: 10px 0 50px rgba(0,0,0,0.8);
-        }
+        /* DRAWERS */
+        .side-drawer { position: fixed; left: -360px; top: 0; width: 340px; height: 100vh; background: rgba(15, 15, 15, 0.98); border-right: 2px solid #4b6b44; z-index: 140; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; padding-top: 80px; padding-bottom: 100px; overflow-y: auto; box-shadow: 10px 0 50px rgba(0,0,0,0.8); }
         .side-drawer.open { left: 0; }
         .drawer-header { font-size: 18px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;}
         .reset-btn { font-size: 10px; color: #c0392b; cursor: pointer; border: 1px solid #c0392b; padding: 3px 6px; border-radius: 4px; }
 
-        /* --- SOUND CARD & EDITABLE NAMES --- */
-        .sound-list { display: flex; flex-direction: column; gap: 15px; }
-        .hidden-input { display: none; }
-        
-        .sound-card {
-            background: rgba(255,255,255,0.03); border: 1px solid #4b6b44;
-            border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;
-            transition: all 0.3s;
-        }
-        .sound-card:hover { border-color: #7bed9f; background: rgba(75, 107, 68, 0.1); }
-        .sound-card.playing { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.1); }
-        .sound-card.playing .sb-btn { color: #f1c40f; }
-        .sound-card.playing .status-icon { animation: pulseIcon 1s infinite; }
-
-        .sb-btn { 
-            width: 100%; padding: 5px; 
-            background: transparent; border: none;
-            color: #7f8fa6; cursor: pointer;
-            display: flex; align-items: center; justify-content: space-between; 
-        }
-        .sb-btn.loaded { color: #dcdde1; }
-
+        /* SOUND CARD */
+        .sound-list { display: flex; flex-direction: column; gap: 15px; } .hidden-input { display: none; }
+        .sound-card { background: rgba(255,255,255,0.03); border: 1px solid #4b6b44; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: all 0.3s; }
+        .sound-card:hover { border-color: #7bed9f; background: rgba(75, 107, 68, 0.1); } .sound-card.playing { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.1); } .sound-card.playing .sb-btn { color: #f1c40f; } .sound-card.playing .status-icon { animation: pulseIcon 1s infinite; }
+        .sb-btn { width: 100%; padding: 5px; background: transparent; border: none; color: #7f8fa6; cursor: pointer; display: flex; align-items: center; justify-content: space-between; } .sb-btn.loaded { color: #dcdde1; }
         .btn-content { display: flex; align-items: center; gap: 10px; flex-grow: 1; }
-        
-        /* DÜZENLENEBİLİR İSİM GİRİŞİ */
-        .sound-name-input {
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid transparent;
-            color: inherit;
-            font-family: 'Lato', sans-serif;
-            font-weight: bold;
-            font-size: 14px;
-            width: 100%;
-            transition: border-color 0.2s;
-        }
-        .sound-name-input:focus {
-            outline: none;
-            border-bottom: 1px solid #7bed9f;
-        }
-
-        /* Mini Slider */
-        .mini-vol-container { display: flex; align-items: center; gap: 5px; opacity: 0.5; transition: opacity 0.3s; }
-        .sound-card.playing .mini-vol-container { opacity: 1; }
+        .sound-name-input { background: transparent; border: none; border-bottom: 1px solid transparent; color: inherit; font-family: 'Lato', sans-serif; font-weight: bold; font-size: 14px; width: 100%; transition: border-color 0.2s; } .sound-name-input:focus { outline: none; border-bottom: 1px solid #7bed9f; }
+        .mini-vol-container { display: flex; align-items: center; gap: 5px; opacity: 0.5; transition: opacity 0.3s; } .sound-card.playing .mini-vol-container { opacity: 1; }
         .mini-vol-icon { font-size: 10px; color: #7bed9f; width: 15px; }
-        input[type=range].mini-slider { -webkit-appearance: none; width: 100%; height: 3px; background: #2f3624; border-radius: 2px; cursor: pointer; }
-        input[type=range].mini-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 10px; width: 10px; border-radius: 50%; background: #dcdde1; margin-top: -3.5px; }
-        input[type=range].mini-slider:hover::-webkit-slider-thumb { background: #f1c40f; transform: scale(1.2); }
+        input[type=range].mini-slider { -webkit-appearance: none; width: 100%; height: 3px; background: #2f3624; border-radius: 2px; cursor: pointer; } input[type=range].mini-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 10px; width: 10px; border-radius: 50%; background: #dcdde1; margin-top: -3.5px; } input[type=range].mini-slider:hover::-webkit-slider-thumb { background: #f1c40f; transform: scale(1.2); }
+        .stop-btn { margin-top: 20px; background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; color: #e74c3c; justify-content: center; padding: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; } .stop-btn:hover { background: rgba(192, 57, 43, 0.8); color: white; }
 
-        .stop-btn { margin-top: 20px; background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; color: #e74c3c; justify-content: center; padding: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .stop-btn:hover { background: rgba(192, 57, 43, 0.8); color: white; }
-
-        /* --- CHARACTER CARD --- */
+        /* CHARACTER CARD */
         .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .char-header { display: flex; gap: 10px; align-items: center; }
-        .char-avatar-container { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #555; overflow: hidden; position: relative; cursor: pointer; flex-shrink: 0; background: #222; display: flex; justify-content: center; align-items: center; }
-        .char-avatar-container img { width: 100%; height: 100%; object-fit: cover; }
-        .char-details { flex-grow: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-        .inp-name { background: transparent; border: none; color: #f1c40f; font-family: 'Cinzel', serif; font-weight: bold; font-size: 16px; width: 100%; border-bottom: 1px solid transparent; }
-        .inp-sub { background: transparent; border: none; color: #a4b0be; font-family: 'Lato', sans-serif; font-size: 12px; width: 100%; margin-bottom: 5px;}
-        .stat-row { display: flex; gap: 4px; justify-content: space-between; }
-        .stat-box { display: flex; align-items: center; justify-content: center; gap: 2px; padding: 2px; border-radius: 4px; flex: 1; min-width: 0; }
+        .char-header { display: flex; gap: 10px; align-items: center; } .char-avatar-container { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #555; overflow: hidden; position: relative; cursor: pointer; flex-shrink: 0; background: #222; display: flex; justify-content: center; align-items: center; } .char-avatar-container img { width: 100%; height: 100%; object-fit: cover; }
+        .char-details { flex-grow: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; } .inp-name { background: transparent; border: none; color: #f1c40f; font-family: 'Cinzel', serif; font-weight: bold; font-size: 16px; width: 100%; border-bottom: 1px solid transparent; } .inp-sub { background: transparent; border: none; color: #a4b0be; font-family: 'Lato', sans-serif; font-size: 12px; width: 100%; margin-bottom: 5px;}
+        .stat-row { display: flex; gap: 4px; justify-content: space-between; } .stat-box { display: flex; align-items: center; justify-content: center; gap: 2px; padding: 2px; border-radius: 4px; flex: 1; min-width: 0; }
         .box-hp { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; } .box-lvl { background: rgba(41, 128, 185, 0.2); border: 1px solid #2980b9; } .box-gold { background: rgba(241, 196, 15, 0.1); border: 1px solid #f39c12; }
-        .label-hp { font-size: 9px; color: #e74c3c; font-weight: bold; } .label-lvl { font-size: 9px; color: #3498db; font-weight: bold; } .label-gold { font-size: 10px; color: #f1c40f; }
-        .stat-input { width: 100%; max-width: 30px; background: transparent; border: none; color: #fff; text-align: center; font-weight: bold; font-family: 'Lato', sans-serif; font-size: 12px; padding: 0; }
-        .toggle-section { font-size: 11px; cursor: pointer; text-align: center; padding: 5px; border-radius: 4px; margin-top: 5px; display: flex; justify-content: center; align-items: center; gap: 5px; font-weight: bold; font-family: 'Lato', sans-serif; }
-        .content-section { display: none; flex-direction: column; gap: 5px; padding-top: 5px; margin-bottom: 5px; }
-        .content-section.show { display: flex; animation: slideDown 0.3s ease; }
-        .inv-toggle { color: #7bed9f; background: rgba(46, 204, 113, 0.1); border: 1px solid rgba(46, 204, 113, 0.2); }
-        .inv-item { background: rgba(0,0,0,0.3); border: none; color: #dcdde1; padding: 5px; font-family: 'Lato', sans-serif; font-size: 11px; border-radius: 3px; }
-        .abil-toggle { color: #d6a2e8; background: rgba(155, 89, 182, 0.1); border: 1px solid rgba(155, 89, 182, 0.2); }
-        .abil-row { display: flex; flex-direction: column; gap: 2px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px; border-left: 2px solid #9b59b6; }
-        .abil-title { background: transparent; border: none; color: #e0bbef; font-weight: bold; font-size: 12px; font-family: 'Lato', sans-serif; width: 100%; }
-        .abil-desc { background: transparent; border: none; color: #a4b0be; font-size: 11px; font-family: 'Lato', sans-serif; width: 100%; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2px; }
+        .label-hp { font-size: 9px; color: #e74c3c; font-weight: bold; } .label-lvl { font-size: 9px; color: #3498db; font-weight: bold; } .label-gold { font-size: 10px; color: #f1c40f; } .stat-input { width: 100%; max-width: 30px; background: transparent; border: none; color: #fff; text-align: center; font-weight: bold; font-family: 'Lato', sans-serif; font-size: 12px; padding: 0; }
+        .toggle-section { font-size: 11px; cursor: pointer; text-align: center; padding: 5px; border-radius: 4px; margin-top: 5px; display: flex; justify-content: center; align-items: center; gap: 5px; font-weight: bold; font-family: 'Lato', sans-serif; } .content-section { display: none; flex-direction: column; gap: 5px; padding-top: 5px; margin-bottom: 5px; } .content-section.show { display: flex; animation: slideDown 0.3s ease; }
+        .inv-toggle { color: #7bed9f; background: rgba(46, 204, 113, 0.1); border: 1px solid rgba(46, 204, 113, 0.2); } .inv-item { background: rgba(0,0,0,0.3); border: none; color: #dcdde1; padding: 5px; font-family: 'Lato', sans-serif; font-size: 11px; border-radius: 3px; }
+        .abil-toggle { color: #d6a2e8; background: rgba(155, 89, 182, 0.1); border: 1px solid rgba(155, 89, 182, 0.2); } .abil-row { display: flex; flex-direction: column; gap: 2px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px; border-left: 2px solid #9b59b6; }
+        .abil-title { background: transparent; border: none; color: #e0bbef; font-weight: bold; font-size: 12px; font-family: 'Lato', sans-serif; width: 100%; } .abil-desc { background: transparent; border: none; color: #a4b0be; font-size: 11px; font-family: 'Lato', sans-serif; width: 100%; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2px; }
         .card-actions { display: flex; justify-content: flex-end; margin-top: 5px; } .del-btn { color: #555; font-size: 10px; cursor: pointer; transition: color 0.2s; } .del-btn:hover { color: #c0392b; }
         .add-char-btn { width: 100%; padding: 10px; background: linear-gradient(90deg, #2f3624, #4b6b44); border: 1px solid #7bed9f; color: #fff; font-family: 'Cinzel', serif; cursor: pointer; margin-top: 10px; border-radius: 4px; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } } @keyframes pulseIcon { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* Media Bar & Scene */
-        .media-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(10, 10, 10, 0.95); border-top: 1px solid #4b6b44; display: flex; align-items: center; justify-content: center; padding: 0 20px; z-index: 200; box-shadow: 0 -10px 30px rgba(0,0,0,0.8); transition: bottom 0.3s; }
-        .media-bar.hidden { bottom: -60px; }
+        /* LAYOUT & SCENE */
+        .media-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(10, 10, 10, 0.95); border-top: 1px solid #4b6b44; display: flex; align-items: center; justify-content: center; padding: 0 20px; z-index: 200; box-shadow: 0 -10px 30px rgba(0,0,0,0.8); transition: bottom 0.3s; } .media-bar.hidden { bottom: -60px; }
         .media-toggle-btn { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); width: 40px; height: 25px; background: rgba(10, 10, 10, 0.95); border: 1px solid #4b6b44; border-bottom: none; border-radius: 8px 8px 0 0; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #7bed9f; font-size: 12px; }
-        .track-info { width: 150px; color: #f1c40f; font-size: 12px; text-align: right; margin-right: 15px; }
-        .progress-container { flex-grow: 1; max-width: 500px; display: flex; align-items: center; gap: 10px; }
-        .time-display { font-family: 'Lato', monospace; font-size: 10px; color: #a4b0be; width: 80px; text-align: center; }
+        .track-info { width: 150px; color: #f1c40f; font-size: 12px; text-align: right; margin-right: 15px; } .progress-container { flex-grow: 1; max-width: 500px; display: flex; align-items: center; gap: 10px; } .time-display { font-family: 'Lato', monospace; font-size: 10px; color: #a4b0be; width: 80px; text-align: center; }
         input[type=range].progress-slider { -webkit-appearance: none; width: 100%; height: 4px; background: #2f3624; border-radius: 2px; cursor: pointer; } input[type=range].progress-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 12px; border-radius: 50%; background: #7bed9f; margin-top: -4px; }
-        
-        .log-panel { position: fixed; right: 20px; bottom: 100px; width: 200px; height: 200px; padding: 10px; z-index: 90; display: flex; flex-direction: column; }
-        .panel-header { font-size: 12px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 5px; margin-bottom: 5px; letter-spacing: 1px; }
-        .log-list { overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column-reverse; gap: 5px; font-family: 'Lato', sans-serif; font-size: 12px; }
-        .log-entry { padding: 5px; border-radius: 4px; background: rgba(255,255,255,0.05); display: flex; justify-content: space-between; }
-        .log-time { color: #7f8fa6; font-size: 10px; } .log-crit { border-left: 3px solid #f1c40f; color: #f1c40f; background: rgba(241, 196, 15, 0.1); } .log-fail { border-left: 3px solid #e74c3c; color: #e74c3c; background: rgba(231, 76, 60, 0.1); }
-        .scene { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; perspective: 1000px; }
-        .dice-container { width: 250px; height: 250px; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); filter: drop-shadow(0 30px 40px rgba(0,0,0,0.8)); }
-        .toad-svg { width: 100%; height: 100%; filter: contrast(1.15) saturate(1.1); }
-        .rune-container { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%) translateZ(35px); width: 90px; height: 80px; display: flex; justify-content: center; align-items: center; z-index: 10; }
-        .magic-circle { position: absolute; width: 100%; height: 100%; border: 3px dotted rgba(158, 212, 123, 0.4); border-radius: 50%; animation: rotateCircle 15s linear infinite; }
-        .dice-number { font-size: 46px; font-weight: 900; color: #e1e6e2; text-shadow: 0 2px 4px #000, 0 0 20px rgba(106, 176, 76, 0.4); z-index: 11; pointer-events: none; }
-        button.roll-btn { margin-top: 40px; padding: 12px 50px; font-family: 'Cinzel', serif; font-size: 20px; font-weight: 800; color: #dcdde1; background: linear-gradient(180deg, #3a423b 0%, #1a1d1a 100%); border: 1px solid #57606f; border-radius: 4px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s ease; }
-        button.roll-btn:hover { color: #fff; background: linear-gradient(180deg, #4b6b44 0%, #2f3624 100%); transform: translateY(-2px); }
-        button.roll-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .rolling .dice-container { animation: shakeDice 0.6s ease-in-out infinite; } .rolling .dice-number { display: none; } .rolling .magic-circle { border-color: #fff; box-shadow: 0 0 30px #fff; }
-        @keyframes shakeDice { 0% { transform: rotateX(0) translateY(0); } 25% { transform: rotateX(10deg) rotateY(-10deg) rotateZ(2deg); } 50% { transform: rotateX(-5deg) rotateY(10deg); } 75% { transform: rotateX(5deg) rotateY(-5deg); } 100% { transform: rotateX(0); } }
-        @keyframes rotateCircle { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .crit-success { color: #f1c40f !important; text-shadow: 0 0 30px #f1c40f; } .crit-fail { color: #e74c3c !important; text-shadow: 0 0 30px #c0392b; }
-        .controls { position: fixed; right: 20px; top: 20px; padding: 15px; display: flex; flex-direction: column; gap: 15px; width: 50px; align-items: center; z-index: 100; }
-        input[type=range].vertical-slider { -webkit-appearance: none; width: 80px; height: 4px; background: transparent; transform: rotate(-90deg); cursor: pointer; margin: 35px 0; }
-        input[type=range].vertical-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 12px; border-radius: 50%; background: #dcdde1; margin-top: -4px; box-shadow: 0 0 5px white; }
-        input[type=range].vertical-slider::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #4b6b44; border-radius: 2px; }
+        .log-panel { position: fixed; right: 20px; bottom: 100px; width: 200px; height: 200px; padding: 10px; z-index: 90; display: flex; flex-direction: column; } .panel-header { font-size: 12px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 5px; margin-bottom: 5px; letter-spacing: 1px; } .log-list { overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column-reverse; gap: 5px; font-family: 'Lato', sans-serif; font-size: 12px; } .log-entry { padding: 5px; border-radius: 4px; background: rgba(255,255,255,0.05); display: flex; justify-content: space-between; } .log-time { color: #7f8fa6; font-size: 10px; } .log-crit { border-left: 3px solid #f1c40f; color: #f1c40f; background: rgba(241, 196, 15, 0.1); } .log-fail { border-left: 3px solid #e74c3c; color: #e74c3c; background: rgba(231, 76, 60, 0.1); }
+        .controls { position: fixed; right: 20px; top: 20px; padding: 15px; display: flex; flex-direction: column; gap: 15px; width: 50px; align-items: center; z-index: 100; } input[type=range].vertical-slider { -webkit-appearance: none; width: 80px; height: 4px; background: transparent; transform: rotate(-90deg); cursor: pointer; margin: 35px 0; } input[type=range].vertical-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 12px; border-radius: 50%; background: #dcdde1; margin-top: -4px; box-shadow: 0 0 5px white; } input[type=range].vertical-slider::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #4b6b44; border-radius: 2px; }
+        .scene { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; perspective: 1000px; } .dice-container { width: 250px; height: 250px; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); filter: drop-shadow(0 30px 40px rgba(0,0,0,0.8)); } .toad-svg { width: 100%; height: 100%; filter: contrast(1.15) saturate(1.1); } .rune-container { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%) translateZ(35px); width: 90px; height: 80px; display: flex; justify-content: center; align-items: center; z-index: 10; } .magic-circle { position: absolute; width: 100%; height: 100%; border: 3px dotted rgba(158, 212, 123, 0.4); border-radius: 50%; animation: rotateCircle 15s linear infinite; } .dice-number { font-size: 46px; font-weight: 900; color: #e1e6e2; text-shadow: 0 2px 4px #000, 0 0 20px rgba(106, 176, 76, 0.4); z-index: 11; pointer-events: none; } button.roll-btn { margin-top: 40px; padding: 12px 50px; font-family: 'Cinzel', serif; font-size: 20px; font-weight: 800; color: #dcdde1; background: linear-gradient(180deg, #3a423b 0%, #1a1d1a 100%); border: 1px solid #57606f; border-radius: 4px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s ease; } button.roll-btn:hover { color: #fff; background: linear-gradient(180deg, #4b6b44 0%, #2f3624 100%); transform: translateY(-2px); } button.roll-btn:disabled { opacity: 0.6; cursor: not-allowed; } .rolling .dice-container { animation: shakeDice 0.6s ease-in-out infinite; } .rolling .dice-number { display: none; } .rolling .magic-circle { border-color: #fff; box-shadow: 0 0 30px #fff; } @keyframes shakeDice { 0% { transform: rotateX(0) translateY(0); } 25% { transform: rotateX(10deg) rotateY(-10deg) rotateZ(2deg); } 50% { transform: rotateX(-5deg) rotateY(10deg); } 75% { transform: rotateX(5deg) rotateY(-5deg); } 100% { transform: rotateX(0); } } @keyframes rotateCircle { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .crit-success { color: #f1c40f !important; text-shadow: 0 0 30px #f1c40f; } .crit-fail { color: #e74c3c !important; text-shadow: 0 0 30px #c0392b; }
     </style>
 </head>
 <body>
@@ -178,17 +71,14 @@
 
     <div class="side-drawer" id="soundDrawer">
         <div class="drawer-header" style="color:#7bed9f; border-color:#7bed9f;"><span>ATMOSFER</span></div>
-        <div class="sound-list" id="soundList">
-            </div>
+        <div class="sound-list" id="soundList"></div>
         <div class="stop-btn" onclick="stopAllMusic()"><i class="fas fa-stop"></i> TÜMÜNÜ DURDUR</div>
     </div>
 
     <div class="controls glass-panel">
-        <i class="fas fa-music" style="color:#7bed9f"></i>
-        <input type="range" class="vertical-slider" min="0" max="100" value="50" oninput="setMusicVol(this.value)">
+        <i class="fas fa-music" style="color:#7bed9f"></i> <input type="range" class="vertical-slider" min="0" max="100" value="50" oninput="setMusicVol(this.value)">
         <div style="width: 100%; height: 1px; background: #4b6b44; margin: 5px 0;"></div>
-        <i class="fas fa-dice-d20" style="color:#7bed9f"></i>
-        <input type="range" class="vertical-slider" min="0" max="100" value="60" oninput="setSfxVol(this.value)">
+        <i class="fas fa-dice-d20" style="color:#7bed9f"></i> <input type="range" class="vertical-slider" min="0" max="100" value="60" oninput="setSfxVol(this.value)">
     </div>
 
     <div class="log-panel glass-panel"><div class="panel-header">ZAR GEÇMİŞİ</div><div class="log-list" id="diceLog"></div></div>
@@ -211,168 +101,75 @@
         <button class="roll-btn" id="btn" onclick="roll()">ZARI AT</button>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        function toggleMediaBar() { const bar = document.getElementById('mediaBar'); const icon = document.getElementById('mediaIcon'); bar.classList.toggle('hidden'); icon.className = bar.classList.contains('hidden') ? 'fas fa-chevron-up' : 'fas fa-chevron-down'; }
-        function enableDrag(e,t){const n=document.getElementById(e);let o=!1,l=!1,s,d,a,c;n.addEventListener("mousedown",e=>{o=!0,l=!1,s=e.clientX,d=e.clientY;const t=n.getBoundingClientRect();a=t.left,c=t.top,n.style.cursor="grabbing"}),window.addEventListener("mousemove",e=>{if(!o)return;const t=e.clientX-s,r=e.clientY-d;(Math.abs(t)>3||Math.abs(r)>3)&&(l=!0),n.style.left=a+t+"px",n.style.top=c+r+"px"}),window.addEventListener("mouseup",()=>{if(!o)return;o=!1,n.style.cursor="grab";if(!l&&t){document.querySelectorAll(".side-drawer").forEach(e=>{e.id!==t&&e.classList.remove("open")}),document.getElementById(t).classList.toggle("open")}})}
-        enableDrag('partyToggleBtn', 'partyDrawer'); enableDrag('soundToggleBtn', 'soundDrawer');
+        const socket = io(); // Sunucuya bağlan
 
-        // --- SOUNDBOARD SYSTEM WITH CUSTOM NAMES ---
-        const sounds = {
-            rain: { id:'rain', name:'YAĞMUR', url:null, loaded:false, audio:null, volume:0.5, icon:'fa-cloud-showers-heavy' },
-            forest: { id:'forest', name:'ORMAN', url:null, loaded:false, audio:null, volume:0.5, icon:'fa-tree' },
-            tavern: { id:'tavern', name:'HAN', url:null, loaded:false, audio:null, volume:0.5, icon:'fa-beer' },
-            battle: { id:'battle', name:'SAVAŞ', url:null, loaded:false, audio:null, volume:0.5, icon:'fa-skull' }
-        };
-        let lastActiveAudio = null;
-
-        window.addEventListener('DOMContentLoaded', () => {
-            // İsimleri yükle
-            const savedNames = localStorage.getItem('dnd_sound_names');
-            if(savedNames) {
-                const namesObj = JSON.parse(savedNames);
-                Object.keys(namesObj).forEach(k => { if(sounds[k]) sounds[k].name = namesObj[k]; });
-            }
-            renderSoundboard();
-            
-            // Karakterleri yükle
-            const savedParty = localStorage.getItem('dnd_party_v5');
-            if (savedParty) { partyData = JSON.parse(savedParty); renderParty(); }
+        // Sunucudan gelen zarları dinle
+        socket.on('herkes_icin_zar', (veri) => {
+            addLog(veri.sonuc, veri.tur, veri.zaman);
         });
 
-        function saveSoundName(key, newName) {
-            sounds[key].name = newName;
-            const namesToSave = {};
-            Object.keys(sounds).forEach(k => namesToSave[k] = sounds[k].name);
-            localStorage.setItem('dnd_sound_names', JSON.stringify(namesToSave));
-            // Eğer çalıyorsa media barı güncelle
-            if(lastActiveAudio === sounds[key].audio) {
-                document.getElementById('trackNameDisplay').innerText = newName;
-            }
-        }
+        // --- DRAG DROP ---
+        function enableDrag(e,t){const n=document.getElementById(e);let o=!1,l=!1,s,d,a,c;n.addEventListener("mousedown",e=>{o=!0,l=!1,s=e.clientX,d=e.clientY;const t=n.getBoundingClientRect();a=t.left,c=t.top,n.style.cursor="grabbing"}),window.addEventListener("mousemove",e=>{if(!o)return;const t=e.clientX-s,r=e.clientY-d;(Math.abs(t)>3||Math.abs(r)>3)&&(l=!0),n.style.left=a+t+"px",n.style.top=c+r+"px"}),window.addEventListener("mouseup",()=>{if(!o)return;o=!1,n.style.cursor="grab";if(!l&&t){document.querySelectorAll(".side-drawer").forEach(e=>{e.id!==t&&e.classList.remove("open")}),document.getElementById(t).classList.toggle("open")}})}
+        enableDrag('partyToggleBtn', 'partyDrawer'); enableDrag('soundToggleBtn', 'soundDrawer');
+        function toggleMediaBar() { const bar = document.getElementById('mediaBar'); const icon = document.getElementById('mediaIcon'); bar.classList.toggle('hidden'); icon.className = bar.classList.contains('hidden') ? 'fas fa-chevron-up' : 'fas fa-chevron-down'; }
 
-        function renderSoundboard() {
-            const list = document.getElementById('soundList');
-            list.innerHTML = '';
-            Object.values(sounds).forEach(sound => {
-                const html = `
-                <div class="sound-card" id="card-${sound.id}">
-                    <input type="file" id="file-${sound.id}" class="hidden-input" accept="audio/*" onchange="fileLoaded('${sound.id}', this)">
-                    <div class="sb-btn" id="btn-${sound.id}" onclick="handleBtnClick('${sound.id}', event)">
-                        <div class="btn-content">
-                            <i class="fas ${sound.icon}"></i>
-                            <input type="text" class="sound-name-input" value="${sound.name}" onclick="event.stopPropagation()" oninput="saveSoundName('${sound.id}', this.value)">
-                        </div>
-                        <i class="fas fa-plus status-icon" id="icon-${sound.id}"></i>
-                    </div>
-                    <div class="mini-vol-container">
-                        <i class="fas fa-volume-down mini-vol-icon"></i>
-                        <input type="range" class="mini-slider" min="0" max="100" value="50" oninput="setTrackVolume('${sound.id}', this.value)">
-                    </div>
-                </div>`;
-                list.insertAdjacentHTML('beforeend', html);
-            });
-        }
-
-        function handleBtnClick(key, e) {
-            // Eğer inputa tıklandıysa çalma (zaten stopPropagation var ama garanti olsun)
-            if(e.target.tagName === 'INPUT') return;
-            
-            if (!sounds[key].loaded) { document.getElementById('file-' + key).click(); } 
-            else { toggleTrack(key); }
-        }
-
-        function fileLoaded(key, input) {
-            const file = input.files[0];
-            if (file) {
-                sounds[key].url = URL.createObjectURL(file);
-                sounds[key].loaded = true;
-                sounds[key].audio = new Audio(sounds[key].url);
-                sounds[key].audio.loop = true;
-                sounds[key].audio.volume = sounds[key].volume;
-                
-                document.getElementById('btn-' + key).classList.add('loaded');
-                document.getElementById('icon-' + key).className = 'fas fa-check';
-                
-                sounds[key].audio.addEventListener('timeupdate', () => {
-                    if (lastActiveAudio === sounds[key].audio) { updateMediaBar(sounds[key].audio, sounds[key].name); }
-                });
-                toggleTrack(key);
-            }
-        }
-
-        function toggleTrack(key) {
-            const track = sounds[key];
-            if (!track.audio) return;
-
-            if (track.audio.paused) {
-                track.audio.play();
-                document.getElementById('card-' + key).classList.add('playing');
-                document.getElementById('icon-' + key).className = 'fas fa-volume-up status-icon';
-                lastActiveAudio = track.audio;
-                document.getElementById('trackNameDisplay').innerText = track.name;
-            } else {
-                track.audio.pause();
-                document.getElementById('card-' + key).classList.remove('playing');
-                document.getElementById('icon-' + key).className = 'fas fa-check';
-            }
-        }
-
-        function setTrackVolume(key, val) {
-            const vol = val / 100;
-            sounds[key].volume = vol;
-            if (sounds[key].audio) sounds[key].audio.volume = vol;
-        }
-
-        function stopAllMusic() {
-            Object.keys(sounds).forEach(key => {
-                if (sounds[key].audio) { sounds[key].audio.pause(); sounds[key].audio.currentTime = 0; }
-                document.getElementById('card-' + key).classList.remove('playing');
-                if(sounds[key].loaded) document.getElementById('icon-' + key).className = 'fas fa-check';
-            });
-            document.getElementById('trackNameDisplay').innerText = "SESSİZLİK";
-        }
-
-        function updateMediaBar(audio, name) {
-            const slider = document.getElementById('progressSlider');
-            if(!isNaN(audio.duration)) { slider.max = Math.floor(audio.duration); document.getElementById('totalDuration').innerText = formatTime(audio.duration); }
-            slider.value = Math.floor(audio.currentTime);
-            document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
-        }
+        // --- SOUNDBOARD ---
+        const sounds = { rain: { id:'rain', name:'YAĞMUR', url:null, loaded:false, audio:null, volume:0.5, icon:'fa-cloud-showers-heavy' }, forest: { id:'forest', name:'ORMAN', url:null, loaded:false, audio:null, volume:0.5, icon:'fa-tree' }, tavern: { id:'tavern', name:'HAN', url:null, loaded:false, audio:null, volume:0.5, icon:'fa-beer' }, battle: { id:'battle', name:'SAVAŞ', url:null, loaded:false, audio:null, volume:0.5, icon:'fa-skull' } };
+        let lastActiveAudio = null;
+        window.addEventListener('DOMContentLoaded', () => { const savedNames = localStorage.getItem('dnd_sound_names'); if(savedNames) { const namesObj = JSON.parse(savedNames); Object.keys(namesObj).forEach(k => { if(sounds[k]) sounds[k].name = namesObj[k]; }); } renderSoundboard(); const savedParty = localStorage.getItem('dnd_party_v5'); if (savedParty) { partyData = JSON.parse(savedParty); renderParty(); } });
+        function saveSoundName(key, newName) { sounds[key].name = newName; const namesToSave = {}; Object.keys(sounds).forEach(k => namesToSave[k] = sounds[k].name); localStorage.setItem('dnd_sound_names', JSON.stringify(namesToSave)); if(lastActiveAudio === sounds[key].audio) { document.getElementById('trackNameDisplay').innerText = newName; } }
+        function renderSoundboard() { const list = document.getElementById('soundList'); list.innerHTML = ''; Object.values(sounds).forEach(sound => { const html = `<div class="sound-card" id="card-${sound.id}"><input type="file" id="file-${sound.id}" class="hidden-input" accept="audio/*" onchange="fileLoaded('${sound.id}', this)"><div class="sb-btn" id="btn-${sound.id}" onclick="handleBtnClick('${sound.id}', event)"><div class="btn-content"><i class="fas ${sound.icon}"></i><input type="text" class="sound-name-input" value="${sound.name}" onclick="event.stopPropagation()" oninput="saveSoundName('${sound.id}', this.value)"></div><i class="fas fa-plus status-icon" id="icon-${sound.id}"></i></div><div class="mini-vol-container"><i class="fas fa-volume-down mini-vol-icon"></i><input type="range" class="mini-slider" min="0" max="100" value="50" oninput="setTrackVolume('${sound.id}', this.value)"></div></div>`; list.insertAdjacentHTML('beforeend', html); }); }
+        function handleBtnClick(key, e) { if(e.target.tagName === 'INPUT') return; if (!sounds[key].loaded) { document.getElementById('file-' + key).click(); } else { toggleTrack(key); } }
+        function fileLoaded(key, input) { const file = input.files[0]; if (file) { sounds[key].url = URL.createObjectURL(file); sounds[key].loaded = true; sounds[key].audio = new Audio(sounds[key].url); sounds[key].audio.loop = true; sounds[key].audio.volume = sounds[key].volume; document.getElementById('btn-' + key).classList.add('loaded'); document.getElementById('icon-' + key).className = 'fas fa-check'; sounds[key].audio.addEventListener('timeupdate', () => { if (lastActiveAudio === sounds[key].audio) { updateMediaBar(sounds[key].audio, sounds[key].name); } }); toggleTrack(key); } }
+        function toggleTrack(key) { const track = sounds[key]; if (!track.audio) return; if (track.audio.paused) { track.audio.play(); document.getElementById('card-' + key).classList.add('playing'); document.getElementById('icon-' + key).className = 'fas fa-volume-up status-icon'; lastActiveAudio = track.audio; document.getElementById('trackNameDisplay').innerText = track.name; } else { track.audio.pause(); document.getElementById('card-' + key).classList.remove('playing'); document.getElementById('icon-' + key).className = 'fas fa-check'; } }
+        function setTrackVolume(key, val) { const vol = val / 100; sounds[key].volume = vol; if (sounds[key].audio) sounds[key].audio.volume = vol; }
+        function stopAllMusic() { Object.keys(sounds).forEach(key => { if (sounds[key].audio) { sounds[key].audio.pause(); sounds[key].audio.currentTime = 0; } document.getElementById('card-' + key).classList.remove('playing'); if(sounds[key].loaded) document.getElementById('icon-' + key).className = 'fas fa-check'; }); document.getElementById('trackNameDisplay').innerText = "SESSİZLİK"; }
+        function updateMediaBar(audio, name) { const slider = document.getElementById('progressSlider'); if(!isNaN(audio.duration)) { slider.max = Math.floor(audio.duration); document.getElementById('totalDuration').innerText = formatTime(audio.duration); } slider.value = Math.floor(audio.currentTime); document.getElementById('currentTime').innerText = formatTime(audio.currentTime); }
         function seekAudio(value) { if (lastActiveAudio) lastActiveAudio.currentTime = value; }
         function formatTime(s) { if(isNaN(s)) return "00:00"; const m=Math.floor(s/60); const sc=Math.floor(s%60); return (m<10?"0"+m:m)+":"+(sc<10?"0"+sc:sc); }
 
-        // --- CHARACTER SYSTEM ---
-        let partyData = [];
-        function saveData() { localStorage.setItem('dnd_party_v5', JSON.stringify(partyData)); }
-        function resetPartyData() { if(confirm("Tüm verileri silmek istediğine emin misin?")) { localStorage.removeItem('dnd_party_v5'); partyData = []; renderParty(); } }
-        function addCharacter() { const newChar = { id: Date.now(), name: '', subtitle: '', hp: 10, level: 1, gold: 0, avatar: null, inventory: ['', '', ''], abilities: [] }; partyData.push(newChar); saveData(); renderParty(); setTimeout(() => { const drawer = document.getElementById('partyDrawer'); drawer.scrollTop = drawer.scrollHeight; }, 100); }
-        function deleteCharacter(id) { if(confirm("Silmek istediğine emin misin?")) { partyData = partyData.filter(c => c.id !== id); saveData(); renderParty(); } }
-        function updateCharData(id, key, value, index = null) { const char = partyData.find(c => c.id === id); if (char) { if (key === 'inventory' && index !== null) { char.inventory[index] = value; } else { char[key] = value; } saveData(); } }
-        function updateAbilityData(id, abilIdx, field, value) { const char = partyData.find(c => c.id === id); if (char && char.abilities[abilIdx]) { char.abilities[abilIdx][field] = value; saveData(); } }
-        function handleImageUpload(id, input) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const char = partyData.find(c => c.id === id); if (char) { char.avatar = e.target.result; saveData(); renderParty(); } }; reader.readAsDataURL(file); }
-        function toggleSection(id) { document.getElementById(id).classList.toggle('show'); }
-        function addInventorySlot(id) { const char = partyData.find(c => c.id === id); char.inventory.push(''); saveData(); renderParty(); setTimeout(() => document.getElementById('inv-'+id).classList.add('show'), 50); }
-        function addAbilitySlot(id) { const char = partyData.find(c => c.id === id); if (!char.abilities) char.abilities = []; char.abilities.push({title: '', desc: ''}); saveData(); renderParty(); setTimeout(() => document.getElementById('abil-'+id).classList.add('show'), 50); }
-        function renderParty() {
-            const container = document.getElementById('characterList'); container.innerHTML = '';
-            partyData.forEach(char => {
-                const hasAvatar = char.avatar ? true : false;
-                let inventoryHtml = ''; char.inventory.forEach((item, idx) => { inventoryHtml += `<input type="text" class="inv-item" placeholder="Eşya..." value="${item}" oninput="updateCharData(${char.id}, 'inventory', this.value, ${idx})">`; });
-                let abilitiesHtml = ''; if (!char.abilities) char.abilities = []; char.abilities.forEach((abil, idx) => { abilitiesHtml += `<div class="abil-row"><input type="text" class="abil-title" placeholder="Yetenek Adı" value="${abil.title}" oninput="updateAbilityData(${char.id}, ${idx}, 'title', this.value)"><input type="text" class="abil-desc" placeholder="Açıklama" value="${abil.desc}" oninput="updateAbilityData(${char.id}, ${idx}, 'desc', this.value)"></div>`; });
-                const html = `<div class="char-card" id="card-${char.id}"><div class="char-header"><input type="file" id="file-${char.id}" class="hidden-input" accept="image/*" onchange="handleImageUpload(${char.id}, this)"><div class="char-avatar-container" onclick="document.getElementById('file-${char.id}').click()">${hasAvatar ? `<img src="${char.avatar}">` : `<i class="fas fa-user"></i>`}</div><div class="char-details"><input type="text" class="inp-name" placeholder="İsim" value="${char.name}" oninput="updateCharData(${char.id}, 'name', this.value)"><input type="text" class="inp-sub" placeholder="Irk / Sınıf" value="${char.subtitle}" oninput="updateCharData(${char.id}, 'subtitle', this.value)"><div class="stat-row"><div class="stat-box box-hp"><span class="label-hp">HP</span><input type="number" class="stat-input" value="${char.hp}" oninput="updateCharData(${char.id}, 'hp', this.value)"></div><div class="stat-box box-lvl"><span class="label-lvl">LVL</span><input type="number" class="stat-input" value="${char.level || 1}" oninput="updateCharData(${char.id}, 'level', this.value)"></div><div class="stat-box box-gold"><span class="label-gold"><i class="fas fa-coins"></i></span><input type="number" class="stat-input" value="${char.gold || 0}" oninput="updateCharData(${char.id}, 'gold', this.value)"></div></div></div></div><div class="toggle-section inv-toggle" onclick="toggleSection('inv-${char.id}')"><i class="fas fa-shopping-bag"></i> ÇANTA <i class="fas fa-chevron-down"></i></div><div class="content-section" id="inv-${char.id}">${inventoryHtml}<button class="add-btn-small" style="color:#7bed9f;" onclick="addInventorySlot(${char.id})">+ Eşya Ekle</button></div><div class="toggle-section abil-toggle" onclick="toggleSection('abil-${char.id}')"><i class="fas fa-bolt"></i> YETENEKLER <i class="fas fa-chevron-down"></i></div><div class="content-section" id="abil-${char.id}">${abilitiesHtml}<button class="add-btn-small" style="color:#d6a2e8;" onclick="addAbilitySlot(${char.id})">+ Yetenek Ekle</button></div><div class="card-actions"><span class="del-btn" onclick="deleteCharacter(${char.id})">Sil</span></div></div>`;
-                container.insertAdjacentHTML('beforeend', html);
-            });
-        }
+        // --- CHARACTERS ---
+        let partyData = []; function saveData() { localStorage.setItem('dnd_party_v5', JSON.stringify(partyData)); } function resetPartyData() { if(confirm("Tüm verileri silmek istediğine emin misin?")) { localStorage.removeItem('dnd_party_v5'); partyData = []; renderParty(); } } function addCharacter() { const newChar = { id: Date.now(), name: '', subtitle: '', hp: 10, level: 1, gold: 0, avatar: null, inventory: ['', '', ''], abilities: [] }; partyData.push(newChar); saveData(); renderParty(); setTimeout(() => { const drawer = document.getElementById('partyDrawer'); drawer.scrollTop = drawer.scrollHeight; }, 100); } function deleteCharacter(id) { if(confirm("Silmek istediğine emin misin?")) { partyData = partyData.filter(c => c.id !== id); saveData(); renderParty(); } } function updateCharData(id, key, value, index = null) { const char = partyData.find(c => c.id === id); if (char) { if (key === 'inventory' && index !== null) { char.inventory[index] = value; } else { char[key] = value; } saveData(); } } function updateAbilityData(id, abilIdx, field, value) { const char = partyData.find(c => c.id === id); if (char && char.abilities[abilIdx]) { char.abilities[abilIdx][field] = value; saveData(); } } function handleImageUpload(id, input) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const char = partyData.find(c => c.id === id); if (char) { char.avatar = e.target.result; saveData(); renderParty(); } }; reader.readAsDataURL(file); } function toggleSection(id) { document.getElementById(id).classList.toggle('show'); } function addInventorySlot(id) { const char = partyData.find(c => c.id === id); char.inventory.push(''); saveData(); renderParty(); setTimeout(() => document.getElementById('inv-'+id).classList.add('show'), 50); } function addAbilitySlot(id) { const char = partyData.find(c => c.id === id); if (!char.abilities) char.abilities = []; char.abilities.push({title: '', desc: ''}); saveData(); renderParty(); setTimeout(() => document.getElementById('abil-'+id).classList.add('show'), 50); } function renderParty() { const container = document.getElementById('characterList'); container.innerHTML = ''; partyData.forEach(char => { const hasAvatar = char.avatar ? true : false; let inventoryHtml = ''; char.inventory.forEach((item, idx) => { inventoryHtml += `<input type="text" class="inv-item" placeholder="Eşya..." value="${item}" oninput="updateCharData(${char.id}, 'inventory', this.value, ${idx})">`; }); let abilitiesHtml = ''; if (!char.abilities) char.abilities = []; char.abilities.forEach((abil, idx) => { abilitiesHtml += `<div class="abil-row"><input type="text" class="abil-title" placeholder="Yetenek Adı" value="${abil.title}" oninput="updateAbilityData(${char.id}, ${idx}, 'title', this.value)"><input type="text" class="abil-desc" placeholder="Açıklama" value="${abil.desc}" oninput="updateAbilityData(${char.id}, ${idx}, 'desc', this.value)"></div>`; }); const html = `<div class="char-card" id="card-${char.id}"><div class="char-header"><input type="file" id="file-${char.id}" class="hidden-input" accept="image/*" onchange="handleImageUpload(${char.id}, this)"><div class="char-avatar-container" onclick="document.getElementById('file-${char.id}').click()">${hasAvatar ? `<img src="${char.avatar}">` : `<i class="fas fa-user"></i>`}</div><div class="char-details"><input type="text" class="inp-name" placeholder="İsim" value="${char.name}" oninput="updateCharData(${char.id}, 'name', this.value)"><input type="text" class="inp-sub" placeholder="Irk / Sınıf" value="${char.subtitle}" oninput="updateCharData(${char.id}, 'subtitle', this.value)"><div class="stat-row"><div class="stat-box box-hp"><span class="label-hp">HP</span><input type="number" class="stat-input" value="${char.hp}" oninput="updateCharData(${char.id}, 'hp', this.value)"></div><div class="stat-box box-lvl"><span class="label-lvl">LVL</span><input type="number" class="stat-input" value="${char.level || 1}" oninput="updateCharData(${char.id}, 'level', this.value)"></div><div class="stat-box box-gold"><span class="label-gold"><i class="fas fa-coins"></i></span><input type="number" class="stat-input" value="${char.gold || 0}" oninput="updateCharData(${char.id}, 'gold', this.value)"></div></div></div></div><div class="toggle-section inv-toggle" onclick="toggleSection('inv-${char.id}')"><i class="fas fa-shopping-bag"></i> ÇANTA <i class="fas fa-chevron-down"></i></div><div class="content-section" id="inv-${char.id}">${inventoryHtml}<button class="add-btn-small" style="color:#7bed9f;" onclick="addInventorySlot(${char.id})">+ Eşya Ekle</button></div><div class="toggle-section abil-toggle" onclick="toggleSection('abil-${char.id}')"><i class="fas fa-bolt"></i> YETENEKLER <i class="fas fa-chevron-down"></i></div><div class="content-section" id="abil-${char.id}">${abilitiesHtml}<button class="add-btn-small" style="color:#d6a2e8;" onclick="addAbilitySlot(${char.id})">+ Yetenek Ekle</button></div><div class="card-actions"><span class="del-btn" onclick="deleteCharacter(${char.id})">Sil</span></div></div>`; container.insertAdjacentHTML('beforeend', html); }); }
 
-        // --- DICE & LOG SYSTEM ---
-        let audioCtx, sfxGain; let sfxVolume = 0.6;
+        // --- DICE & LOG & AUDIO ---
+        let audioCtx, sfxGain; let sfxVolume = 0.6; let musicVolume = 0.5;
         function initAudio() { if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; audioCtx = new AC(); sfxGain = audioCtx.createGain(); sfxGain.connect(audioCtx.destination); sfxGain.gain.value = sfxVolume; } if(audioCtx.state==='suspended') audioCtx.resume(); }
         function setSfxVol(val) { sfxVolume = val/100; if(sfxGain) sfxGain.gain.value = sfxVolume; }
+        function setMusicVol(val) { musicVolume = val/100; if(lastActiveAudio) lastActiveAudio.volume = musicVolume; }
         function playTone(f,t) { if(!audioCtx)return; const o=audioCtx.createOscillator(); o.type=t; o.frequency.setValueAtTime(f,audioCtx.currentTime); const g=audioCtx.createGain(); g.gain.setValueAtTime(0.2,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+1); o.connect(g); g.connect(sfxGain); o.start(); o.stop(audioCtx.currentTime+1); }
         function playNoise() { if(!audioCtx)return; const bs=audioCtx.sampleRate*0.5; const b=audioCtx.createBuffer(1,bs,audioCtx.sampleRate); const d=b.getChannelData(0); for(let i=0;i<bs;i++)d[i]=Math.random()*2-1; const n=audioCtx.createBufferSource(); n.buffer=b; const f=audioCtx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=400; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.5,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.15); n.connect(f); f.connect(g); g.connect(sfxGain); n.start(); }
-        function addLog(result, type) { const logContainer = document.getElementById('diceLog'); const now = new Date(); const timeStr = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0'); let colorClass = type === 'crit' ? 'log-crit' : type === 'fail' ? 'log-fail' : ''; const html = `<div class="log-entry ${colorClass}"><span class="log-time">${timeStr}</span><span>d20: <strong>${result}</strong></span></div>`; logContainer.insertAdjacentHTML('afterbegin', html); }
-        function roll() { initAudio(); const result = document.getElementById('result'); const btn = document.getElementById('btn'); btn.disabled = true; btn.innerText = "Kader..."; document.body.classList.add('rolling'); result.innerText = ''; result.className = 'dice-number'; let shakeInt = setInterval(playNoise, 150); setTimeout(() => { clearInterval(shakeInt); document.body.classList.remove('rolling'); const num = Math.floor(Math.random() * 20) + 1; result.innerText = num; if (num === 20) { result.classList.add('crit-success'); btn.style.borderColor = "#f1c40f"; [523, 659, 783].forEach(f => playTone(f, 'sine')); addLog(num, 'crit'); } else if (num === 1) { result.classList.add('crit-fail'); btn.style.borderColor = "#e74c3c"; playTone(150, 'sawtooth'); addLog(num, 'fail'); } else { btn.style.borderColor = "#7bed9f"; playTone(880, 'sine'); addLog(num, 'normal'); } btn.innerText = "ZARI AT"; btn.disabled = false; }, 800); }
-        function setMusicVol(val) { musicVolume = val/100; if(currentAudio) currentAudio.volume = musicVolume; }
+        
+        // GÜNCELLENMİŞ LOG FONKSİYONU
+        function addLog(result, type, customTime) { 
+            const logContainer = document.getElementById('diceLog'); 
+            const now = new Date(); 
+            const timeStr = customTime || (now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0')); 
+            let colorClass = type === 'crit' ? 'log-crit' : type === 'fail' ? 'log-fail' : ''; 
+            const html = `<div class="log-entry ${colorClass}"><span class="log-time">${timeStr}</span><span>d20: <strong>${result}</strong></span></div>`; 
+            logContainer.insertAdjacentHTML('afterbegin', html); 
+        }
+
+        // GÜNCELLENMİŞ ROLL FONKSİYONU
+        function roll() { 
+            initAudio(); const resultDisplay = document.getElementById('result'); const btn = document.getElementById('btn'); 
+            btn.disabled = true; btn.innerText = "Kader..."; document.body.classList.add('rolling'); resultDisplay.innerText = ''; resultDisplay.className = 'dice-number'; 
+            let shakeInt = setInterval(playNoise, 150); 
+            setTimeout(() => { 
+                clearInterval(shakeInt); document.body.classList.remove('rolling'); 
+                const num = Math.floor(Math.random() * 20) + 1; resultDisplay.innerText = num; 
+                let type = 'normal';
+                if (num === 20) { resultDisplay.classList.add('crit-success'); btn.style.borderColor = "#f1c40f"; [523, 659, 783].forEach(f => playTone(f, 'sine')); type = 'crit'; } 
+                else if (num === 1) { resultDisplay.classList.add('crit-fail'); btn.style.borderColor = "#e74c3c"; playTone(150, 'sawtooth'); type = 'fail'; } 
+                else { if (num >= 10) { btn.style.borderColor = "#7bed9f"; playTone(880, 'sine'); } else { btn.style.borderColor = "#57606f"; playTone(100, 'triangle'); } } 
+                
+                // SOCKET İLE GÖNDER
+                socket.emit('zar_atildi', { sonuc: num, tur: type, zaman: new Date().getHours() + ":" + new Date().getMinutes() });
+                
+                btn.innerText = "ZARI AT"; btn.disabled = false; 
+            }, 800); 
+        }
     </script>
 </body>
 </html>
