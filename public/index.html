@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Master V3.9 (DM Secret Log)</title>
+    <title>D&D Master V4.0 (Stable)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -16,8 +16,7 @@
         #dmToolsBtn { top: 90px; left: 20px; border-color: #e74c3c; color: #e74c3c; }
         #identityBtn { top: 160px; left: 20px; border-color: #3498db; color: #3498db; }
         #msgDmBtn { top: 230px; left: 20px; border-color: #0984e3; color: #0984e3; } 
-        /* YENİ: DM SECRET LOG BUTONU */
-        #dmLogBtn { top: 300px; left: 20px; border-color: #e84393; color: #e84393; display: none; } /* Başlangıçta gizli */
+        #dmLogBtn { top: 300px; left: 20px; border-color: #e84393; color: #e84393; display: none; }
 
         .side-drawer { position: fixed; left: -360px; top: 0; width: 340px; height: 100vh; background: rgba(15, 15, 15, 0.98); border-right: 2px solid #4b6b44; z-index: 1500; transition: left 0.3s ease; display: flex; flex-direction: column; padding: 20px; padding-top: 60px; box-shadow: 10px 0 50px rgba(0,0,0,0.8); overflow-y: auto; }
         .side-drawer.open { left: 0; }
@@ -53,7 +52,7 @@
         #winnerModal { border-color: #f1c40f; box-shadow: 0 0 50px #f1c40f; animation: popIn 0.5s ease; }
         #identityModal { border-color: #3498db; box-shadow: 0 0 50px #3498db; }
         
-        /* DM LOG MODAL STİLİ */
+        /* DM LOG STİLİ */
         #dmLogModal { width: 500px; max-width: 90%; height: 400px; border-color: #e84393; box-shadow: 0 0 50px #e84393; display:none; flex-direction:column; }
         #dmLogList { flex-grow: 1; overflow-y: auto; text-align: left; margin: 10px 0; border: 1px solid #333; padding: 10px; background: rgba(0,0,0,0.3); font-family: 'Lato', sans-serif; font-size: 13px; }
         .secret-entry { margin-bottom: 8px; padding: 5px; border-radius: 4px; border-left: 3px solid #555; }
@@ -83,7 +82,8 @@
         .magic-circle { position: absolute; width: 100%; height: 100%; border: 3px dotted rgba(158, 212, 123, 0.4); border-radius: 50%; animation: rotateCircle 15s linear infinite; } 
         .dice-number { 
             font-size: 46px; font-weight: 900; color: #e1e6e2; text-shadow: 0 2px 4px #000, 0 0 20px rgba(106, 176, 76, 0.4); 
-            z-index: 11; pointer-events: none; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 11; pointer-events: none;
+            width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; flex-direction: column;
         }
         .roller-name { font-size: 16px; color: #f1c40f; font-family: 'Cinzel', serif; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
         button.roll-btn { padding: 12px 50px; font-family: 'Cinzel', serif; font-size: 20px; font-weight: 800; color: #dcdde1; background: linear-gradient(180deg, #3a423b 0%, #1a1d1a 100%); border: 1px solid #57606f; border-radius: 4px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s ease; z-index: 20;} 
@@ -105,15 +105,14 @@
 
     <div id="partyToggleBtn" class="floating-btn" title="Karakterler"><i class="fas fa-users"></i></div>
     <div id="dmToolsBtn" class="floating-btn" title="DM Araçları"><i class="fas fa-dragon"></i></div>
-    <div id="identityBtn" class="floating-btn" title="Ben Kimim?" onclick="openIdentityModal()">
+    <div id="identityBtn" class="floating-btn" title="Ben Kimim?">
         <i class="fas fa-id-card"></i>
         <div id="currentIdentityDisplay">DM</div>
     </div>
-    <div id="msgDmBtn" class="floating-btn" title="DM'e Mesaj At" onclick="sendMsgToDM()">
+    <div id="msgDmBtn" class="floating-btn" title="DM'e Mesaj At">
         <i class="fas fa-envelope"></i>
     </div>
-    
-    <div id="dmLogBtn" class="floating-btn" title="DM Gizli Kayıtları" onclick="document.getElementById('dmLogModal').style.display='flex'">
+    <div id="dmLogBtn" class="floating-btn" title="DM Gizli Kayıtları">
         <i class="fas fa-book-dead"></i>
     </div>
 
@@ -205,13 +204,78 @@
         let currentTurnIndex = -1;
         let takenIdentities = [];
 
+        // --- GÜÇLENDİRİLMİŞ SÜRÜKLEME VE TIKLAMA MANTIĞI ---
+        function enableDrag(btnId, clickCallback) {
+            const btn = document.getElementById(btnId);
+            let isDragging = false;
+            let startX, startY, initLeft, initTop;
+            
+            btn.addEventListener('mousedown', (e) => {
+                // Sadece sol tık için çalışsın
+                if(e.button !== 0) return;
+                
+                isDragging = false; // Başlangıçta sürüklenmiyor kabul et
+                startX = e.clientX;
+                startY = e.clientY;
+                const rect = btn.getBoundingClientRect();
+                initLeft = rect.left;
+                initTop = rect.top;
+                
+                const onMouseMove = (ev) => {
+                    const dx = ev.clientX - startX;
+                    const dy = ev.clientY - startY;
+                    
+                    // 5 pikselden fazla hareket ederse SÜRÜKLEME başlar
+                    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                        isDragging = true;
+                    }
+                    
+                    if (isDragging) {
+                        btn.style.left = (initLeft + dx) + 'px';
+                        btn.style.top = (initTop + dy) + 'px';
+                    }
+                };
+                
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                    
+                    // Eğer hiç sürüklenmediyse, bu bir TIKLAMADIR
+                    if (!isDragging && clickCallback) {
+                        clickCallback();
+                    }
+                };
+                
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+        }
+
+        // BUTONLARA TIKLAMA FONKSİYONLARINI BURADA ATIYORUZ
+        enableDrag('partyToggleBtn', () => toggleDrawer('partyDrawer'));
+        enableDrag('dmToolsBtn', () => toggleDrawer('dmDrawer'));
+        enableDrag('identityBtn', () => openIdentityModal());
+        enableDrag('msgDmBtn', () => sendMsgToDM());
+        enableDrag('dmLogBtn', () => document.getElementById('dmLogModal').style.display='flex');
+
+        function toggleDrawer(id) {
+            document.querySelectorAll('.side-drawer').forEach(d => { if(d.id!==id) d.classList.remove('open'); });
+            document.getElementById(id).classList.toggle('open');
+        }
+
         function openIdentityModal() {
             const list = document.getElementById('identityList'); list.innerHTML = '';
-            list.insertAdjacentHTML('beforeend', `<div class="identity-option" onclick="selectIdentity(null)">DM (Oyun Yöneticisi)</div>`);
+            
+            // DM kontrolü (null)
+            let dmTaken = takenIdentities.includes(null) && myIdentityId !== null;
+            let dmClass = dmTaken ? 'taken' : '';
+            list.insertAdjacentHTML('beforeend', `<div class="identity-option ${dmClass}" onclick="${dmTaken ? '' : 'selectIdentity(null)'}">DM (Oyun Yöneticisi)${dmTaken ? ' (DOLU)' : ''}</div>`);
+            
             partyData.forEach(c => {
                 let takenClass = (takenIdentities.includes(c.id) && c.id !== myIdentityId) ? 'taken' : '';
                 let label = c.name + (takenClass ? ' (Dolu)' : '');
-                list.insertAdjacentHTML('beforeend', `<div class="identity-option ${takenClass}" onclick="selectIdentity(${c.id}, '${c.name}')">${label}</div>`);
+                // Eğer doluysa onclick fonksiyonunu boş bırak
+                list.insertAdjacentHTML('beforeend', `<div class="identity-option ${takenClass}" onclick="${takenClass ? '' : `selectIdentity(${c.id}, '${c.name}')`}">${label}</div>`);
             });
             document.getElementById('identityModal').style.display = 'block';
         }
@@ -223,25 +287,17 @@
             document.getElementById('currentIdentityDisplay').innerText = id === null ? "DM" : (name || "Bilinmiyor");
             document.getElementById('identityModal').style.display = 'none';
             socket.emit('claim_identity', { oldId: oldId, newId: id });
-            updateInterfaceForIdentity(); // Arayüzü güncelle
+            updateInterfaceForIdentity();
         }
 
-        // KİMLİĞE GÖRE BUTONLARI GİZLE/GÖSTER
         function updateInterfaceForIdentity() {
             const logBtn = document.getElementById('dmLogBtn');
             const msgBtn = document.getElementById('msgDmBtn');
             const dmTools = document.getElementById('dmToolsBtn');
-            
             if (myIdentityId === null) {
-                // DM Modu
-                logBtn.style.display = 'flex'; // Gizli logu gör
-                msgBtn.style.display = 'none'; // Kendime mesaj atmayayım
-                dmTools.style.display = 'flex';
+                logBtn.style.display = 'flex'; msgBtn.style.display = 'none'; dmTools.style.display = 'flex';
             } else {
-                // Oyuncu Modu
-                logBtn.style.display = 'none'; // Gizli logu gizle
-                msgBtn.style.display = 'flex';
-                dmTools.style.display = 'none';
+                logBtn.style.display = 'none'; msgBtn.style.display = 'flex'; dmTools.style.display = 'none';
             }
         }
 
@@ -263,27 +319,17 @@
         socket.on('party_update_client', (data) => { partyData = data; renderParty(); });
         socket.on('update_taken_identities', (list) => { takenIdentities = list; });
 
-        // --- YENİ: DM LOG GÜNCELLEMELERİ ---
         socket.on('dm_log_history_load', (history) => {
             const list = document.getElementById('dmLogList'); list.innerHTML = '';
             history.forEach(entry => addDmLogEntry(entry));
         });
-        socket.on('dm_log_update', (entry) => {
-            addDmLogEntry(entry);
-        });
+        socket.on('dm_log_update', (entry) => { addDmLogEntry(entry); });
         function addDmLogEntry(entry) {
             const list = document.getElementById('dmLogList');
             let cls = '';
-            if(entry.type === 'dm-sent') cls = 'secret-dm-sent';
-            else if(entry.type === 'dm-received') cls = 'secret-dm-received';
-            else cls = 'secret-p2p';
-            
-            const html = `<div class="secret-entry ${cls}">
-                <div style="font-size:10px; color:#aaa;">${entry.time} | <strong>${entry.sender}</strong> -> <strong>${entry.target}</strong></div>
-                <div style="margin-top:3px;">${entry.message}</div>
-            </div>`;
-            list.insertAdjacentHTML('beforeend', html);
-            list.scrollTop = list.scrollHeight;
+            if(entry.type === 'dm-sent') cls = 'secret-dm-sent'; else if(entry.type === 'dm-received') cls = 'secret-dm-received'; else cls = 'secret-p2p';
+            const html = `<div class="secret-entry ${cls}"><div style="font-size:10px; color:#aaa;">${entry.time} | <strong>${entry.sender}</strong> -> <strong>${entry.target}</strong></div><div style="margin-top:3px;">${entry.message}</div></div>`;
+            list.insertAdjacentHTML('beforeend', html); list.scrollTop = list.scrollHeight;
         }
 
         socket.on('herkes_icin_zar', (veri) => {
@@ -306,9 +352,7 @@
         
         socket.on('receive_whisper', (data) => {
              if(myIdentityId && myIdentityId == data.targetId) { 
-                 playClickSound(); 
-                 document.getElementById('whisperContent').innerText = data.message; 
-                 document.getElementById('whisperModal').style.display = 'block'; 
+                 playClickSound(); document.getElementById('whisperContent').innerText = data.message; document.getElementById('whisperModal').style.display = 'block'; 
              } else {
                  const logDiv = document.getElementById('diceLog');
                  const html = `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span>DM, <strong>${data.targetName}</strong> ile fısıldaşıyor...</span></div>`;
@@ -318,9 +362,7 @@
 
         socket.on('dm_receive_player_msg', (data) => {
             if (myIdentityId === null) {
-                playClickSound();
-                document.getElementById('whisperContent').innerText = `GÖNDEREN: ${data.sender}\n\n${data.message}`;
-                document.getElementById('whisperModal').style.display = 'block';
+                playClickSound(); document.getElementById('whisperContent').innerText = `GÖNDEREN: ${data.sender}\n\n${data.message}`; document.getElementById('whisperModal').style.display = 'block';
             } 
             const logDiv = document.getElementById('diceLog');
             const html = `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span><strong>${data.sender}</strong>, DM ile fısıldaşıyor...</span></div>`;
@@ -329,15 +371,12 @@
 
         socket.on('p2p_whisper_relay', (data) => {
             if (myIdentityId == data.targetId) {
-                playClickSound();
-                document.getElementById('whisperContent').innerText = `GÖNDEREN: ${data.senderName}\n\n${data.message}`;
-                document.getElementById('whisperModal').style.display = 'block';
+                playClickSound(); document.getElementById('whisperContent').innerText = `GÖNDEREN: ${data.senderName}\n\n${data.message}`; document.getElementById('whisperModal').style.display = 'block';
             }
             let logText = "";
             if (myIdentityId == data.senderId) logText = `Sen, <strong>${data.targetName}</strong> kişisine fısıldadın.`;
             else if (myIdentityId == data.targetId) logText = `<strong>${data.senderName}</strong> sana fısıldadı.`;
             else logText = `<strong>${data.senderName}</strong>, <strong>${data.targetName}</strong> ile fısıldaşıyor...`;
-
             const logDiv = document.getElementById('diceLog');
             const html = `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span>${logText}</span></div>`;
             logDiv.insertAdjacentHTML('afterbegin', html);
@@ -365,16 +404,11 @@
         function startMVPVote() { socket.emit('start_vote'); }
         function endMVPVote() { socket.emit('end_vote'); }
         function castVote(n) { socket.emit('cast_vote', n); document.getElementById('voteModal').style.display='none'; alert("Oyunuz alındı: " + n); }
-        
         function sendWhisper(targetId, targetName) {
-            const myName = getMyName();
-            const msg = prompt(`"${targetName}" kişisine ne fısıldamak istersin?`);
+            const myName = getMyName(); const msg = prompt(`"${targetName}" kişisine ne fısıldamak istersin?`);
             if (msg) {
-                if(myIdentityId === null) {
-                    socket.emit('dm_whisper', {targetId: targetId, targetName: targetName, message: msg});
-                } else {
-                    socket.emit('p2p_whisper', { senderId: myIdentityId, senderName: myName, targetId: targetId, targetName: targetName, message: msg });
-                }
+                if(myIdentityId === null) { socket.emit('dm_whisper', {targetId: targetId, targetName: targetName, message: msg}); } 
+                else { socket.emit('p2p_whisper', { senderId: myIdentityId, senderName: myName, targetId: targetId, targetName: targetName, message: msg }); }
             }
         }
 
@@ -440,22 +474,11 @@
         function changeAvatar(id){ const i=document.createElement('input'); i.type='file'; i.onchange=e=>{const r=new FileReader(); r.onload=ev=>{upd(id,'avatar',ev.target.result); renderParty();}; r.readAsDataURL(e.target.files[0]);}; i.click(); }
         function resetPartyData(){ if(confirm('Tüm karakterleri sil?')){partyData=[]; saveData(); renderParty();} }
         
-        function enableDrag(btnId, drawerId) {
-            const btn = document.getElementById(btnId); let isDragging = false, startX, startY, initLeft, initTop;
-            btn.addEventListener('mousedown', (e) => {
-                isDragging = false; startX = e.clientX; startY = e.clientY;
-                const rect = btn.getBoundingClientRect(); initLeft = rect.left; initTop = rect.top;
-                const onMouseMove = (ev) => { const dx = ev.clientX - startX; const dy = ev.clientY - startY; if(Math.abs(dx)>3 || Math.abs(dy)>3) isDragging = true; btn.style.left = (initLeft + dx) + 'px'; btn.style.top = (initTop + dy) + 'px'; };
-                const onMouseUp = () => { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); if (!isDragging && drawerId) { document.querySelectorAll('.side-drawer').forEach(d => { if(d.id!==drawerId) d.classList.remove('open'); }); document.getElementById(drawerId).classList.toggle('open'); } else if(!isDragging && !drawerId && (btnId === 'identityBtn' || btnId === 'msgDmBtn' || btnId === 'dmLogBtn')) { if(btnId==='identityBtn') openIdentityModal(); else if(btnId==='msgDmBtn') sendMsgToDM(); else document.getElementById('dmLogModal').style.display='flex'; } };
-                document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
-            });
-        }
-        enableDrag('partyToggleBtn', 'partyDrawer'); enableDrag('dmToolsBtn', 'dmDrawer'); enableDrag('identityBtn', null); enableDrag('msgDmBtn', null); enableDrag('dmLogBtn', null);
-
         window.onload=()=>{
             const myId = localStorage.getItem('dnd_my_identity');
             if(myId) { 
                 myIdentityId = myId;
+                // Yenileme olunca kimliği tekrar sahiplen
                 socket.emit('claim_identity', { oldId: null, newId: myId });
                 updateInterfaceForIdentity();
                 setTimeout(() => { const c = partyData.find(x => x.id == myId); if(c) document.getElementById('currentIdentityDisplay').innerText = c.name; }, 1000); 
