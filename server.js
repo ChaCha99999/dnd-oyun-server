@@ -22,47 +22,66 @@ app.get('/', (req, res) => {
 let serverPartyData = []; 
 let currentMapUrl = null; 
 let voteCounts = {}; 
-let takenIdentities = []; // Alınan kimliklerin listesi (ID'ler)
+let takenIdentities = []; 
+let dmLogHistory = []; // DM İÇİN GİZLİ LOG KAYITLARI
+
+// DM Loguna Ekleme Fonksiyonu
+function logToDM(type, sender, target, message) {
+    const logEntry = {
+        time: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
+        type: type, // 'dm-sent', 'dm-received', 'p2p'
+        sender: sender,
+        target: target,
+        message: message
+    };
+    dmLogHistory.push(logEntry);
+    // Tüm socketlere yolla ama sadece DM açabilecek
+    io.emit('dm_log_update', logEntry);
+}
 
 io.on('connection', (socket) => {
-  // 1. GİRİŞ VERİLERİ
+  // GİRİŞTE VERİLERİ YÜKLE
   socket.emit('party_update_client', serverPartyData);
   if (currentMapUrl) socket.emit('map_update_client', currentMapUrl);
-  socket.emit('update_taken_identities', takenIdentities); // Dolu kimlikleri gönder
+  socket.emit('update_taken_identities', takenIdentities);
+  socket.emit('dm_log_history_load', dmLogHistory); // Yeni giren DM ise geçmişi görsün
 
-  // 2. KİMLİK YÖNETİMİ (YENİ)
+  // KİMLİK
   socket.on('claim_identity', (data) => {
-      // data = { oldId: 123, newId: 456 }
-      // Eski kimliği serbest bırak
-      if (data.oldId !== null) {
-          takenIdentities = takenIdentities.filter(id => id !== data.oldId);
-      }
-      // Yeni kimliği kilitle (DM hariç)
-      if (data.newId !== null && !takenIdentities.includes(data.newId)) {
-          takenIdentities.push(data.newId);
-      }
-      // Herkese duyur
+      if (data.oldId !== null) takenIdentities = takenIdentities.filter(id => id !== data.oldId);
+      if (data.newId !== null && !takenIdentities.includes(data.newId)) takenIdentities.push(data.newId);
       io.emit('update_taken_identities', takenIdentities);
   });
 
-  // 3. OYUN İÇİ EYLEMLER
+  // OYUN İÇİ
   socket.on('zar_atildi', (veri) => socket.broadcast.emit('herkes_icin_zar', veri));
-  
   socket.on('party_update', (yeniVeri) => {
       serverPartyData = yeniVeri;
       socket.broadcast.emit('party_update_client', serverPartyData);
   });
-
   socket.on('map_change', (url) => { currentMapUrl = url; io.emit('map_update_client', url); });
 
-  // 4. İLETİŞİM
-  socket.on('dm_whisper', (d) => io.emit('receive_whisper', d));
+  // --- İLETİŞİM & LOGLAMA ---
   
-  socket.on('player_whisper', (data) => {
-      io.emit('dm_receive_player_msg', data); 
+  // DM -> Oyuncu
+  socket.on('dm_whisper', (d) => {
+      io.emit('receive_whisper', d);
+      logToDM('dm-sent', 'DM', d.targetName, d.message);
+  });
+  
+  // Oyuncu -> DM
+  socket.on('player_whisper', (d) => {
+      io.emit('dm_receive_player_msg', d);
+      logToDM('dm-received', d.sender, 'DM', d.message);
   });
 
-  // 5. ARAÇLAR
+  // Oyuncu -> Oyuncu
+  socket.on('p2p_whisper', (d) => {
+      io.emit('p2p_whisper_relay', d);
+      logToDM('p2p', d.senderName, d.targetName, d.message); // DM bunu da görür!
+  });
+
+  // ARAÇLAR
   socket.on('timer_start', (s) => io.emit('timer_update', s));
   socket.on('wheel_spin', (d) => io.emit('wheel_result', d));
   socket.on('start_vote', () => { voteCounts = {}; io.emit('show_vote_screen'); });
