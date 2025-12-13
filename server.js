@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
     }
 });
 
-// --- SUNUCU HAFIZASI ---
+// --- SERVER BELLEĞİ ---
 let serverPartyData = []; 
 let serverEnemies = [];
 let currentMapUrl = null; 
@@ -36,22 +36,23 @@ function logToDM(type, sender, target, message) {
 }
 
 io.on('connection', (socket) => {
-  // GİRİŞ VERİLERİ
+  // GİRİŞ PAKETİ
   socket.emit('party_update_client', serverPartyData);
   socket.emit('enemy_update_client', serverEnemies);
   if (currentMapUrl) socket.emit('map_update_client', currentMapUrl);
   socket.emit('update_taken_identities', takenIdentities);
   socket.emit('dm_log_history_load', dmLogHistory);
 
-  // KİMLİK YÖNETİMİ
+  // KİMLİK
   socket.on('claim_identity', (data) => {
       if (data.oldId !== undefined) takenIdentities = takenIdentities.filter(id => id !== data.oldId);
       if (data.newId && !takenIdentities.includes(data.newId)) takenIdentities.push(data.newId);
       io.emit('update_taken_identities', takenIdentities);
   });
 
-  // OYUN İÇİ
+  // OYUN
   socket.on('zar_atildi', (veri) => socket.broadcast.emit('herkes_icin_zar', veri));
+  
   socket.on('party_update', (yeniVeri) => {
       serverPartyData = yeniVeri;
       socket.broadcast.emit('party_update_client', serverPartyData);
@@ -59,7 +60,12 @@ io.on('connection', (socket) => {
   
   socket.on('enemy_update', (enemies) => {
       serverEnemies = enemies;
-      io.emit('enemy_update_client', serverEnemies);
+      io.emit('enemy_update_client', serverEnemies); // Herkese düşmanları yay
+  });
+
+  // GÖRSEL HASAR EFEKTİ (YENİ)
+  socket.on('show_damage_effect', (data) => {
+      io.emit('trigger_damage_effect', data); // {targetId, amount, type}
   });
 
   socket.on('map_change', (url) => { currentMapUrl = url; io.emit('map_update_client', url); });
