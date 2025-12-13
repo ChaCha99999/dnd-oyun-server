@@ -3,29 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Master V3.5 (Player to DM)</title>
+    <title>D&D Master V3.6 (Centered Dice Result)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* --- TEMEL --- */
         body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background-color: #0f0f0f; background-image: radial-gradient(circle at center, rgba(0,0,0,0.4), #000), url('masa.jpg'); background-size: cover; background-position: center; font-family: 'Cinzel', serif; color: #dcdde1; user-select: none; }
         .glass-panel { background: rgba(18, 20, 16, 0.95); border: 1px solid #4b6b44; backdrop-filter: blur(8px); border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.8); }
-
-        /* --- BUTONLAR --- */
         .floating-btn { position: fixed; z-index: 2000; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: grab; background: linear-gradient(135deg, #2f3624, #0f120d); border: 2px solid #555; color: #aaa; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: transform 0.1s; }
         .floating-btn:active { cursor: grabbing; transform: scale(0.95); } .floating-btn:hover { color: #fff; border-color: #fff; }
         #partyToggleBtn { top: 20px; left: 20px; border-color: #f1c40f; color: #f1c40f; }
         #dmToolsBtn { top: 90px; left: 20px; border-color: #e74c3c; color: #e74c3c; }
         #identityBtn { top: 160px; left: 20px; border-color: #3498db; color: #3498db; }
-        /* YENİ: DM'e Mesaj At Butonu (Mavi Mektup) */
         #msgDmBtn { top: 230px; left: 20px; border-color: #0984e3; color: #0984e3; } 
-
-        /* --- PANELLER --- */
         .side-drawer { position: fixed; left: -360px; top: 0; width: 340px; height: 100vh; background: rgba(15, 15, 15, 0.98); border-right: 2px solid #4b6b44; z-index: 1500; transition: left 0.3s ease; display: flex; flex-direction: column; padding: 20px; padding-top: 60px; box-shadow: 10px 0 50px rgba(0,0,0,0.8); overflow-y: auto; }
         .side-drawer.open { left: 0; }
         .drawer-header { font-size: 18px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;}
-
-        /* --- KARAKTER KARTI --- */
         .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; transition: 0.3s; }
         .char-card.active-turn { border: 2px solid #2ecc71; box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); background: rgba(46, 204, 113, 0.1); transform: scale(1.02); z-index: 10; }
         .char-header { display: flex; gap: 10px; align-items: center; } 
@@ -38,14 +31,9 @@
         .hp-bar-container { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-top: 4px; border: 1px solid #444; }
         .hp-bar-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.3s ease, background-color 0.3s ease; }
         .card-actions { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.1);} .icon-btn { cursor: pointer; color: #666; font-size: 14px; padding: 5px; transition: 0.2s; } .icon-btn:hover { color: #fff; }
-
-        /* --- DM TOOLS --- */
-        .dm-tool-row { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .dm-tool-title { font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: bold; }
+        .dm-tool-row { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; } .dm-tool-title { font-size: 14px; color: #e74c3c; margin-bottom: 10px; font-weight: bold; }
         .dm-btn { width: 100%; padding: 10px; margin-top: 5px; background: #333; border: 1px solid #555; color: #ddd; cursor: pointer; font-family: 'Lato', sans-serif; border-radius: 4px; transition: 0.2s; } .dm-btn:hover { background: #444; border-color: #e74c3c; color: #fff; }
         .dm-input { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: 'Lato', sans-serif;}
-
-        /* --- VISUALS --- */
         #wheelOverlayContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 6000; justify-content: center; align-items: center; flex-direction: column; }
         .wheel-container { position: relative; width: 300px; height: 300px; }
         .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #dcdde1; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: conic-gradient(#e74c3c 0% 12.5%, #f1c40f 12.5% 25%, #3498db 25% 37.5%, #9b59b6 37.5% 50%, #2ecc71 50% 62.5%, #e67e22 62.5% 75%, #1abc9c 75% 87.5%, #95a5a6 87.5% 100%); transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1); transform: rotate(0deg); }
@@ -54,7 +42,6 @@
         #wheelResultText { margin-top: 30px; font-size: 28px; color: #f1c40f; font-weight: bold; opacity: 0; transition: opacity 0.5s; text-align: center; }
         #timerOverlay { display: none; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); font-size: 80px; font-weight: 900; color: #e74c3c; text-shadow: 0 0 20px red; z-index: 3000; pointer-events: none; font-family: 'Courier New', monospace; letter-spacing: 5px; animation: pulseTimer 1s infinite; }
         @keyframes pulseTimer { 0% { opacity: 1; transform: translateX(-50%) scale(1); } 50% { opacity: 0.8; transform: translateX(-50%) scale(0.95); } 100% { opacity: 1; transform: translateX(-50%) scale(1); } }
-        
         #whisperModal, #voteModal, #winnerModal, #identityModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a1a; border: 2px solid #9b59b6; border-radius: 10px; z-index: 4000; box-shadow: 0 0 50px #9b59b6; text-align: center; padding: 20px; width: 350px; }
         #voteModal { top: 0; left: 0; transform: none; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; flex-direction: column; border: none; border-radius: 0; }
         .vote-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; width: 80%; max-width: 600px; margin-top: 20px; }
@@ -64,8 +51,6 @@
         .identity-option { padding: 10px; margin: 5px 0; background: #222; border: 1px solid #444; color: #fff; cursor: pointer; transition: 0.2s; } .identity-option:hover { background: #3498db; border-color: #3498db; }
         #currentIdentityDisplay { font-size: 10px; position: absolute; bottom: -20px; width: 100%; text-align: center; color: #3498db; pointer-events: none;}
         @keyframes popIn { 0% { transform: translate(-50%, -50%) scale(0.5); } 80% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
-
-        /* Log Panel */
         .log-panel { position: fixed; right: 20px; bottom: 20px; width: 220px; max-height: 300px; height: auto; padding: 10px; z-index: 1000; display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .log-panel.collapsed { height: 40px !important; overflow: hidden; opacity: 0.7; }
         .panel-header { font-size: 12px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 5px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
@@ -83,7 +68,15 @@
         .toad-svg { width: 100%; height: 100%; filter: contrast(1.15) saturate(1.1); } 
         .rune-container { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%) translateZ(35px); width: 90px; height: 80px; display: flex; justify-content: center; align-items: center; z-index: 10; } 
         .magic-circle { position: absolute; width: 100%; height: 100%; border: 3px dotted rgba(158, 212, 123, 0.4); border-radius: 50%; animation: rotateCircle 15s linear infinite; } 
-        .dice-number { font-size: 46px; font-weight: 900; color: #e1e6e2; text-shadow: 0 2px 4px #000, 0 0 20px rgba(106, 176, 76, 0.4); z-index: 11; pointer-events: none; } 
+        
+        /* --- DÜZELTİLEN KISIM: ZAR SONUCUNU ORTALAMA --- */
+        .dice-number { 
+            font-size: 46px; font-weight: 900; color: #e1e6e2; text-shadow: 0 2px 4px #000, 0 0 20px rgba(106, 176, 76, 0.4); 
+            z-index: 11; pointer-events: none;
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+        }
+        
         .roller-name { font-size: 16px; color: #f1c40f; font-family: 'Cinzel', serif; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
         button.roll-btn { padding: 12px 50px; font-family: 'Cinzel', serif; font-size: 20px; font-weight: 800; color: #dcdde1; background: linear-gradient(180deg, #3a423b 0%, #1a1d1a 100%); border: 1px solid #57606f; border-radius: 4px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s ease; z-index: 20;} 
         button.roll-btn:disabled { opacity: 0.6; cursor: not-allowed; } 
@@ -157,6 +150,7 @@
         </div>
         <div class="log-list" id="diceLog"></div>
     </div>
+
     <div id="activeMapContainer"><img id="activeMapImg" src=""></div>
 
     <div class="scene">
@@ -193,7 +187,6 @@
         let myIdentityId = null;
         let currentTurnIndex = -1;
 
-        // --- IDENTITY & SEND MSG TO DM ---
         function openIdentityModal() {
             const list = document.getElementById('identityList'); list.innerHTML = '';
             list.insertAdjacentHTML('beforeend', `<div class="identity-option" onclick="selectIdentity(null)">DM (Oyun Yöneticisi)</div>`);
@@ -211,18 +204,15 @@
             return char ? char.name : "Bilinmiyor";
         }
         
-        // YENİ: DM'E MESAJ GÖNDERME FONKSİYONU
         function sendMsgToDM() {
             const myName = getMyName();
             const msg = prompt("DM'e ne fısıldamak istiyorsun?");
             if (msg) {
-                // Sunucuya gönder, sadece DM (null) alacak
                 socket.emit('player_whisper', { sender: myName, message: msg });
                 alert("Mesajın DM'e iletildi.");
             }
         }
 
-        // --- SOCKET LISTENERS ---
         socket.on('party_update_client', (data) => { partyData = data; renderParty(); });
         socket.on('herkes_icin_zar', (veri) => {
             const btn = document.getElementById('btn'); const resDiv = document.getElementById('result');
@@ -242,31 +232,24 @@
             else { div.style.display = 'none'; document.body.classList.remove('map-mode'); }
         });
         
-        // DM -> OYUNCU (WHISPER)
         socket.on('receive_whisper', (data) => {
              if(myIdentityId && myIdentityId == data.targetId) { 
                  playClickSound(); 
                  document.getElementById('whisperContent').innerText = data.message; 
                  document.getElementById('whisperModal').style.display = 'block'; 
              } else {
-                 // Loga dedikodu ekle
                  const logDiv = document.getElementById('diceLog');
                  const html = `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span>DM, <strong>${data.targetName}</strong> ile fısıldaşıyor...</span></div>`;
                  logDiv.insertAdjacentHTML('afterbegin', html);
              }
         });
 
-        // OYUNCU -> DM (DM GÖRÜR, DİĞERLERİ LOGDA GÖRÜR)
         socket.on('dm_receive_player_msg', (data) => {
-            // data = { sender: "Gandalf", message: "..." }
-            
-            // Eğer ben DM isem (ID: null), mesajı aç
             if (myIdentityId === null) {
                 playClickSound();
                 document.getElementById('whisperContent').innerText = `GÖNDEREN: ${data.sender}\n\n${data.message}`;
                 document.getElementById('whisperModal').style.display = 'block';
             } else if (data.sender !== getMyName()) {
-                // Ben DM değilsem ve gönderen ben değilsem, Loga dedikodu düş
                 const logDiv = document.getElementById('diceLog');
                 const html = `<div class="log-entry log-whisper"><span class="log-time">${new Date().getHours()}:${new Date().getMinutes()}</span><span><strong>${data.sender}</strong>, DM ile fısıldaşıyor...</span></div>`;
                 logDiv.insertAdjacentHTML('afterbegin', html);
