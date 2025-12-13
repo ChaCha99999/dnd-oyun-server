@@ -18,10 +18,8 @@ app.get('/', (req, res) => {
     }
 });
 
-// --- SUNUCU HAFIZASI ---
 let serverPartyData = []; 
 let currentMapUrl = null; 
-let voteCounts = {}; 
 let takenIdentities = []; 
 let dmLogHistory = [];
 
@@ -35,53 +33,31 @@ function logToDM(type, sender, target, message) {
 }
 
 io.on('connection', (socket) => {
-  // GİRİŞ VERİLERİ
   socket.emit('party_update_client', serverPartyData);
   if (currentMapUrl) socket.emit('map_update_client', currentMapUrl);
   socket.emit('update_taken_identities', takenIdentities);
   socket.emit('dm_log_history_load', dmLogHistory);
 
-  // KİMLİK SİSTEMİ (DÜZELTİLDİ)
   socket.on('claim_identity', (data) => {
-      // data = { oldId, newId }
-      
-      // 1. Eski kimliği listeden sil (Eğer varsa)
-      if (data.oldId) {
-          takenIdentities = takenIdentities.filter(id => id !== data.oldId);
-      }
-
-      // 2. Yeni kimliği listeye ekle (Eğer boş değilse ve listede yoksa)
-      if (data.newId && !takenIdentities.includes(data.newId)) {
-          takenIdentities.push(data.newId);
-      }
-
-      // 3. Herkese güncel listeyi duyur
+      if (data.oldId !== undefined) takenIdentities = takenIdentities.filter(id => id !== data.oldId);
+      if (data.newId && !takenIdentities.includes(data.newId)) takenIdentities.push(data.newId);
       io.emit('update_taken_identities', takenIdentities);
   });
 
-  // OYUN İÇİ
   socket.on('zar_atildi', (veri) => socket.broadcast.emit('herkes_icin_zar', veri));
   socket.on('party_update', (yeniVeri) => {
       serverPartyData = yeniVeri;
       socket.broadcast.emit('party_update_client', serverPartyData);
   });
   socket.on('map_change', (url) => { currentMapUrl = url; io.emit('map_update_client', url); });
-
-  // İLETİŞİM
   socket.on('dm_whisper', (d) => { io.emit('receive_whisper', d); logToDM('dm-sent', 'DM', d.targetName, d.message); });
   socket.on('player_whisper', (d) => { io.emit('dm_receive_player_msg', d); logToDM('dm-received', d.sender, 'DM', d.message); });
   socket.on('p2p_whisper', (d) => { io.emit('p2p_whisper_relay', d); logToDM('p2p', d.senderName, d.targetName, d.message); });
-
-  // ARAÇLAR
   socket.on('timer_start', (s) => io.emit('timer_update', s));
   socket.on('wheel_spin', (d) => io.emit('wheel_result', d));
-  socket.on('start_vote', () => { voteCounts = {}; io.emit('show_vote_screen'); });
-  socket.on('cast_vote', (name) => { if (!voteCounts[name]) voteCounts[name]=0; voteCounts[name]++; });
-  socket.on('end_vote', () => {
-      let winner = "Kimse", max = -1;
-      Object.keys(voteCounts).forEach(c => { if(voteCounts[c]>max){max=voteCounts[c]; winner=c;} });
-      io.emit('vote_result_announce', {winner, votes:max});
-  });
+  socket.on('start_vote', () => { io.emit('show_vote_screen'); });
+  socket.on('cast_vote', (name) => { }); 
+  socket.on('end_vote', () => { io.emit('vote_result_announce', {winner: 'Kazanan', votes: 0}); });
 });
 
 const PORT = process.env.PORT || 3000;
