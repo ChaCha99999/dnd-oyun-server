@@ -3,37 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D DM Master Screen (Online)</title>
+    <title>D&D DM Master Screen (Full Sync)</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background-color: #0f0f0f; background-image: radial-gradient(circle at center, rgba(0,0,0,0.4), #000), url('masa.jpg'); background-size: cover; background-position: center; font-family: 'Cinzel', serif; color: #dcdde1; user-select: none; }
         .glass-panel { background: rgba(18, 20, 16, 0.95); border: 1px solid #4b6b44; backdrop-filter: blur(8px); border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.8); }
-        
-        /* BUTTONS */
         .floating-btn { position: fixed; left: 20px; z-index: 1000; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: grab; touch-action: none; transition: transform 0.1s, box-shadow 0.3s; background: linear-gradient(135deg, #2f3624, #0f120d); border: 2px solid #f1c40f; color: #f1c40f; box-shadow: 0 0 15px rgba(241, 196, 15, 0.3); }
         .floating-btn:active { cursor: grabbing; transform: scale(0.95); } .floating-btn:hover { box-shadow: 0 0 25px rgba(241, 196, 15, 0.6); }
         #soundToggleBtn { top: 180px; border-color: #7bed9f; color: #7bed9f; box-shadow: 0 0 15px rgba(123, 237, 159, 0.3); } #soundToggleBtn:hover { box-shadow: 0 0 25px rgba(123, 237, 159, 0.6); } #partyToggleBtn { top: 100px; }
-
-        /* DRAWERS */
         .side-drawer { position: fixed; left: -360px; top: 0; width: 340px; height: 100vh; background: rgba(15, 15, 15, 0.98); border-right: 2px solid #4b6b44; z-index: 140; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; padding-top: 80px; padding-bottom: 100px; overflow-y: auto; box-shadow: 10px 0 50px rgba(0,0,0,0.8); }
-        .side-drawer.open { left: 0; }
-        .drawer-header { font-size: 18px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;}
+        .side-drawer.open { left: 0; } .drawer-header { font-size: 18px; color: #f1c40f; text-align: center; border-bottom: 1px solid #4b6b44; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;}
         .reset-btn { font-size: 10px; color: #c0392b; cursor: pointer; border: 1px solid #c0392b; padding: 3px 6px; border-radius: 4px; }
-
-        /* SOUND CARD */
         .sound-list { display: flex; flex-direction: column; gap: 15px; } .hidden-input { display: none; }
         .sound-card { background: rgba(255,255,255,0.03); border: 1px solid #4b6b44; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: all 0.3s; }
         .sound-card:hover { border-color: #7bed9f; background: rgba(75, 107, 68, 0.1); } .sound-card.playing { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.1); } .sound-card.playing .sb-btn { color: #f1c40f; } .sound-card.playing .status-icon { animation: pulseIcon 1s infinite; }
         .sb-btn { width: 100%; padding: 5px; background: transparent; border: none; color: #7f8fa6; cursor: pointer; display: flex; align-items: center; justify-content: space-between; } .sb-btn.loaded { color: #dcdde1; }
-        .btn-content { display: flex; align-items: center; gap: 10px; flex-grow: 1; }
-        .sound-name-input { background: transparent; border: none; border-bottom: 1px solid transparent; color: inherit; font-family: 'Lato', sans-serif; font-weight: bold; font-size: 14px; width: 100%; transition: border-color 0.2s; } .sound-name-input:focus { outline: none; border-bottom: 1px solid #7bed9f; }
+        .btn-content { display: flex; align-items: center; gap: 10px; flex-grow: 1; } .sound-name-input { background: transparent; border: none; border-bottom: 1px solid transparent; color: inherit; font-family: 'Lato', sans-serif; font-weight: bold; font-size: 14px; width: 100%; transition: border-color 0.2s; } .sound-name-input:focus { outline: none; border-bottom: 1px solid #7bed9f; }
         .mini-vol-container { display: flex; align-items: center; gap: 5px; opacity: 0.5; transition: opacity 0.3s; } .sound-card.playing .mini-vol-container { opacity: 1; }
-        .mini-vol-icon { font-size: 10px; color: #7bed9f; width: 15px; }
-        input[type=range].mini-slider { -webkit-appearance: none; width: 100%; height: 3px; background: #2f3624; border-radius: 2px; cursor: pointer; } input[type=range].mini-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 10px; width: 10px; border-radius: 50%; background: #dcdde1; margin-top: -3.5px; } input[type=range].mini-slider:hover::-webkit-slider-thumb { background: #f1c40f; transform: scale(1.2); }
+        .mini-vol-icon { font-size: 10px; color: #7bed9f; width: 15px; } input[type=range].mini-slider { -webkit-appearance: none; width: 100%; height: 3px; background: #2f3624; border-radius: 2px; cursor: pointer; } input[type=range].mini-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 10px; width: 10px; border-radius: 50%; background: #dcdde1; margin-top: -3.5px; } input[type=range].mini-slider:hover::-webkit-slider-thumb { background: #f1c40f; transform: scale(1.2); }
         .stop-btn { margin-top: 20px; background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; color: #e74c3c; justify-content: center; padding: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; } .stop-btn:hover { background: rgba(192, 57, 43, 0.8); color: white; }
-
-        /* CHARACTER CARD */
         .char-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; }
         .char-header { display: flex; gap: 10px; align-items: center; } .char-avatar-container { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #555; overflow: hidden; position: relative; cursor: pointer; flex-shrink: 0; background: #222; display: flex; justify-content: center; align-items: center; } .char-avatar-container img { width: 100%; height: 100%; object-fit: cover; }
         .char-details { flex-grow: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; } .inp-name { background: transparent; border: none; color: #f1c40f; font-family: 'Cinzel', serif; font-weight: bold; font-size: 16px; width: 100%; border-bottom: 1px solid transparent; } .inp-sub { background: transparent; border: none; color: #a4b0be; font-family: 'Lato', sans-serif; font-size: 12px; width: 100%; margin-bottom: 5px;}
@@ -47,8 +36,6 @@
         .card-actions { display: flex; justify-content: flex-end; margin-top: 5px; } .del-btn { color: #555; font-size: 10px; cursor: pointer; transition: color 0.2s; } .del-btn:hover { color: #c0392b; }
         .add-char-btn { width: 100%; padding: 10px; background: linear-gradient(90deg, #2f3624, #4b6b44); border: 1px solid #7bed9f; color: #fff; font-family: 'Cinzel', serif; cursor: pointer; margin-top: 10px; border-radius: 4px; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } } @keyframes pulseIcon { 0% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        /* LAYOUT & SCENE */
         .media-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(10, 10, 10, 0.95); border-top: 1px solid #4b6b44; display: flex; align-items: center; justify-content: center; padding: 0 20px; z-index: 200; box-shadow: 0 -10px 30px rgba(0,0,0,0.8); transition: bottom 0.3s; } .media-bar.hidden { bottom: -60px; }
         .media-toggle-btn { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); width: 40px; height: 25px; background: rgba(10, 10, 10, 0.95); border: 1px solid #4b6b44; border-bottom: none; border-radius: 8px 8px 0 0; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #7bed9f; font-size: 12px; }
         .track-info { width: 150px; color: #f1c40f; font-size: 12px; text-align: right; margin-right: 15px; } .progress-container { flex-grow: 1; max-width: 500px; display: flex; align-items: center; gap: 10px; } .time-display { font-family: 'Lato', monospace; font-size: 10px; color: #a4b0be; width: 80px; text-align: center; }
@@ -105,44 +92,41 @@
     <script>
         const socket = io(); // Sunucuya bağlan
 
-       // Sunucudan gelen zarları dinle
-socket.on('herkes_icin_zar', (veri) => {
-    // 1. Log kaydını her durumda ekle
-    addLog(veri.sonuc, veri.tur, veri.zaman);
-
-    const btn = document.getElementById('btn');
-    
-    // 2. GÖRSEL GÜNCELLEME:
-    // Eğer butona basan ben değilsem (Button disabled değilse), animasyonu oynat
-    // (Ben bastıysam zaten roll() fonksiyonu animasyonu yapıyor, çakışmasın)
-    if (!btn.disabled) {
-        const resultDisplay = document.getElementById('result');
-        
-        // Zarı sallamaya başla
-        document.body.classList.add('rolling');
-        resultDisplay.innerText = ''; 
-        playNoise(); // Sallama sesi
-
-        // Biraz bekleyip sonucu göster (Animasyon süresi)
-        setTimeout(() => {
-            document.body.classList.remove('rolling');
-            resultDisplay.innerText = veri.sonuc;
-
-            // Rengi ayarla (Kritik vs.)
-            resultDisplay.className = 'dice-number'; 
-            if (veri.tur === 'crit') resultDisplay.classList.add('crit-success');
-            else if (veri.tur === 'fail') resultDisplay.classList.add('crit-fail');
-
-            // Sonuç sesini çal
-            if (veri.tur === 'crit') [523, 659, 783].forEach(f => playTone(f, 'sine'));
-            else if (veri.tur === 'fail') playTone(150, 'sawtooth');
-            else {
-                if (veri.sonuc >= 10) playTone(880, 'sine');
-                else playTone(100, 'triangle');
+        // 1. ZAR GELDİĞİNDE
+        socket.on('herkes_icin_zar', (veri) => {
+            // Log ekle
+            addLog(veri.sonuc, veri.tur, veri.zaman);
+            
+            // Eğer butona basan ben değilsem, animasyonu oynat
+            const btn = document.getElementById('btn');
+            if (!btn.disabled) {
+                const resultDisplay = document.getElementById('result');
+                document.body.classList.add('rolling');
+                resultDisplay.innerText = ''; 
+                playNoise();
+                setTimeout(() => {
+                    document.body.classList.remove('rolling');
+                    resultDisplay.innerText = veri.sonuc;
+                    resultDisplay.className = 'dice-number'; 
+                    if (veri.tur === 'crit') resultDisplay.classList.add('crit-success');
+                    else if (veri.tur === 'fail') resultDisplay.classList.add('crit-fail');
+                    
+                    if (veri.tur === 'crit') [523, 659, 783].forEach(f => playTone(f, 'sine'));
+                    else if (veri.tur === 'fail') playTone(150, 'sawtooth');
+                    else {
+                        if (veri.sonuc >= 10) playTone(880, 'sine');
+                        else playTone(100, 'triangle');
+                    }
+                }, 800);
             }
-        }, 800); // 0.8 saniye bekle
-    }
-});
+        });
+
+        // 2. KARAKTER GÜNCELLEMESİ GELDİĞİNDE
+        socket.on('party_update_client', (yeniVeri) => {
+            partyData = yeniVeri;
+            localStorage.setItem('dnd_party_v5', JSON.stringify(partyData));
+            renderParty();
+        });
 
         // --- DRAG DROP ---
         function enableDrag(e,t){const n=document.getElementById(e);let o=!1,l=!1,s,d,a,c;n.addEventListener("mousedown",e=>{o=!0,l=!1,s=e.clientX,d=e.clientY;const t=n.getBoundingClientRect();a=t.left,c=t.top,n.style.cursor="grabbing"}),window.addEventListener("mousemove",e=>{if(!o)return;const t=e.clientX-s,r=e.clientY-d;(Math.abs(t)>3||Math.abs(r)>3)&&(l=!0),n.style.left=a+t+"px",n.style.top=c+r+"px"}),window.addEventListener("mouseup",()=>{if(!o)return;o=!1,n.style.cursor="grab";if(!l&&t){document.querySelectorAll(".side-drawer").forEach(e=>{e.id!==t&&e.classList.remove("open")}),document.getElementById(t).classList.toggle("open")}})}
@@ -164,8 +148,27 @@ socket.on('herkes_icin_zar', (veri) => {
         function seekAudio(value) { if (lastActiveAudio) lastActiveAudio.currentTime = value; }
         function formatTime(s) { if(isNaN(s)) return "00:00"; const m=Math.floor(s/60); const sc=Math.floor(s%60); return (m<10?"0"+m:m)+":"+(sc<10?"0"+sc:sc); }
 
-        // --- CHARACTERS ---
-        let partyData = []; function saveData() { localStorage.setItem('dnd_party_v5', JSON.stringify(partyData)); } function resetPartyData() { if(confirm("Tüm verileri silmek istediğine emin misin?")) { localStorage.removeItem('dnd_party_v5'); partyData = []; renderParty(); } } function addCharacter() { const newChar = { id: Date.now(), name: '', subtitle: '', hp: 10, level: 1, gold: 0, avatar: null, inventory: ['', '', ''], abilities: [] }; partyData.push(newChar); saveData(); renderParty(); setTimeout(() => { const drawer = document.getElementById('partyDrawer'); drawer.scrollTop = drawer.scrollHeight; }, 100); } function deleteCharacter(id) { if(confirm("Silmek istediğine emin misin?")) { partyData = partyData.filter(c => c.id !== id); saveData(); renderParty(); } } function updateCharData(id, key, value, index = null) { const char = partyData.find(c => c.id === id); if (char) { if (key === 'inventory' && index !== null) { char.inventory[index] = value; } else { char[key] = value; } saveData(); } } function updateAbilityData(id, abilIdx, field, value) { const char = partyData.find(c => c.id === id); if (char && char.abilities[abilIdx]) { char.abilities[abilIdx][field] = value; saveData(); } } function handleImageUpload(id, input) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const char = partyData.find(c => c.id === id); if (char) { char.avatar = e.target.result; saveData(); renderParty(); } }; reader.readAsDataURL(file); } function toggleSection(id) { document.getElementById(id).classList.toggle('show'); } function addInventorySlot(id) { const char = partyData.find(c => c.id === id); char.inventory.push(''); saveData(); renderParty(); setTimeout(() => document.getElementById('inv-'+id).classList.add('show'), 50); } function addAbilitySlot(id) { const char = partyData.find(c => c.id === id); if (!char.abilities) char.abilities = []; char.abilities.push({title: '', desc: ''}); saveData(); renderParty(); setTimeout(() => document.getElementById('abil-'+id).classList.add('show'), 50); } function renderParty() { const container = document.getElementById('characterList'); container.innerHTML = ''; partyData.forEach(char => { const hasAvatar = char.avatar ? true : false; let inventoryHtml = ''; char.inventory.forEach((item, idx) => { inventoryHtml += `<input type="text" class="inv-item" placeholder="Eşya..." value="${item}" oninput="updateCharData(${char.id}, 'inventory', this.value, ${idx})">`; }); let abilitiesHtml = ''; if (!char.abilities) char.abilities = []; char.abilities.forEach((abil, idx) => { abilitiesHtml += `<div class="abil-row"><input type="text" class="abil-title" placeholder="Yetenek Adı" value="${abil.title}" oninput="updateAbilityData(${char.id}, ${idx}, 'title', this.value)"><input type="text" class="abil-desc" placeholder="Açıklama" value="${abil.desc}" oninput="updateAbilityData(${char.id}, ${idx}, 'desc', this.value)"></div>`; }); const html = `<div class="char-card" id="card-${char.id}"><div class="char-header"><input type="file" id="file-${char.id}" class="hidden-input" accept="image/*" onchange="handleImageUpload(${char.id}, this)"><div class="char-avatar-container" onclick="document.getElementById('file-${char.id}').click()">${hasAvatar ? `<img src="${char.avatar}">` : `<i class="fas fa-user"></i>`}</div><div class="char-details"><input type="text" class="inp-name" placeholder="İsim" value="${char.name}" oninput="updateCharData(${char.id}, 'name', this.value)"><input type="text" class="inp-sub" placeholder="Irk / Sınıf" value="${char.subtitle}" oninput="updateCharData(${char.id}, 'subtitle', this.value)"><div class="stat-row"><div class="stat-box box-hp"><span class="label-hp">HP</span><input type="number" class="stat-input" value="${char.hp}" oninput="updateCharData(${char.id}, 'hp', this.value)"></div><div class="stat-box box-lvl"><span class="label-lvl">LVL</span><input type="number" class="stat-input" value="${char.level || 1}" oninput="updateCharData(${char.id}, 'level', this.value)"></div><div class="stat-box box-gold"><span class="label-gold"><i class="fas fa-coins"></i></span><input type="number" class="stat-input" value="${char.gold || 0}" oninput="updateCharData(${char.id}, 'gold', this.value)"></div></div></div></div><div class="toggle-section inv-toggle" onclick="toggleSection('inv-${char.id}')"><i class="fas fa-shopping-bag"></i> ÇANTA <i class="fas fa-chevron-down"></i></div><div class="content-section" id="inv-${char.id}">${inventoryHtml}<button class="add-btn-small" style="color:#7bed9f;" onclick="addInventorySlot(${char.id})">+ Eşya Ekle</button></div><div class="toggle-section abil-toggle" onclick="toggleSection('abil-${char.id}')"><i class="fas fa-bolt"></i> YETENEKLER <i class="fas fa-chevron-down"></i></div><div class="content-section" id="abil-${char.id}">${abilitiesHtml}<button class="add-btn-small" style="color:#d6a2e8;" onclick="addAbilitySlot(${char.id})">+ Yetenek Ekle</button></div><div class="card-actions"><span class="del-btn" onclick="deleteCharacter(${char.id})">Sil</span></div></div>`; container.insertAdjacentHTML('beforeend', html); }); }
+        // --- CHARACTERS (MULTI-SYNC) ---
+        let partyData = []; 
+        
+        // 3. VERİ GÖNDERME FONKSİYONU
+        function saveData(shouldEmit = true) { 
+            localStorage.setItem('dnd_party_v5', JSON.stringify(partyData)); 
+            if (shouldEmit) {
+                socket.emit('party_update', partyData); // SUNUCUYA GÖNDER
+            }
+        }
+        
+        function resetPartyData() { if(confirm("Tüm verileri silmek istediğine emin misin?")) { localStorage.removeItem('dnd_party_v5'); partyData = []; renderParty(); saveData(); } } 
+        function addCharacter() { const newChar = { id: Date.now(), name: '', subtitle: '', hp: 10, level: 1, gold: 0, avatar: null, inventory: ['', '', ''], abilities: [] }; partyData.push(newChar); saveData(); renderParty(); setTimeout(() => { const drawer = document.getElementById('partyDrawer'); drawer.scrollTop = drawer.scrollHeight; }, 100); } 
+        function deleteCharacter(id) { if(confirm("Silmek istediğine emin misin?")) { partyData = partyData.filter(c => c.id !== id); saveData(); renderParty(); } } 
+        function updateCharData(id, key, value, index = null) { const char = partyData.find(c => c.id === id); if (char) { if (key === 'inventory' && index !== null) { char.inventory[index] = value; } else { char[key] = value; } saveData(); } } 
+        function updateAbilityData(id, abilIdx, field, value) { const char = partyData.find(c => c.id === id); if (char && char.abilities[abilIdx]) { char.abilities[abilIdx][field] = value; saveData(); } } 
+        function handleImageUpload(id, input) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const char = partyData.find(c => c.id === id); if (char) { char.avatar = e.target.result; saveData(); renderParty(); } }; reader.readAsDataURL(file); } 
+        function toggleSection(id) { document.getElementById(id).classList.toggle('show'); } 
+        function addInventorySlot(id) { const char = partyData.find(c => c.id === id); char.inventory.push(''); saveData(); renderParty(); setTimeout(() => document.getElementById('inv-'+id).classList.add('show'), 50); } 
+        function addAbilitySlot(id) { const char = partyData.find(c => c.id === id); if (!char.abilities) char.abilities = []; char.abilities.push({title: '', desc: ''}); saveData(); renderParty(); setTimeout(() => document.getElementById('abil-'+id).classList.add('show'), 50); } 
+        function renderParty() { const container = document.getElementById('characterList'); container.innerHTML = ''; partyData.forEach(char => { const hasAvatar = char.avatar ? true : false; let inventoryHtml = ''; char.inventory.forEach((item, idx) => { inventoryHtml += `<input type="text" class="inv-item" placeholder="Eşya..." value="${item}" oninput="updateCharData(${char.id}, 'inventory', this.value, ${idx})">`; }); let abilitiesHtml = ''; if (!char.abilities) char.abilities = []; char.abilities.forEach((abil, idx) => { abilitiesHtml += `<div class="abil-row"><input type="text" class="abil-title" placeholder="Yetenek Adı" value="${abil.title}" oninput="updateAbilityData(${char.id}, ${idx}, 'title', this.value)"><input type="text" class="abil-desc" placeholder="Açıklama" value="${abil.desc}" oninput="updateAbilityData(${char.id}, ${idx}, 'desc', this.value)"></div>`; }); const html = `<div class="char-card" id="card-${char.id}"><div class="char-header"><input type="file" id="file-${char.id}" class="hidden-input" accept="image/*" onchange="handleImageUpload(${char.id}, this)"><div class="char-avatar-container" onclick="document.getElementById('file-${char.id}').click()">${hasAvatar ? `<img src="${char.avatar}">` : `<i class="fas fa-user"></i>`}</div><div class="char-details"><input type="text" class="inp-name" placeholder="İsim" value="${char.name}" oninput="updateCharData(${char.id}, 'name', this.value)"><input type="text" class="inp-sub" placeholder="Irk / Sınıf" value="${char.subtitle}" oninput="updateCharData(${char.id}, 'subtitle', this.value)"><div class="stat-row"><div class="stat-box box-hp"><span class="label-hp">HP</span><input type="number" class="stat-input" value="${char.hp}" oninput="updateCharData(${char.id}, 'hp', this.value)"></div><div class="stat-box box-lvl"><span class="label-lvl">LVL</span><input type="number" class="stat-input" value="${char.level || 1}" oninput="updateCharData(${char.id}, 'level', this.value)"></div><div class="stat-box box-gold"><span class="label-gold"><i class="fas fa-coins"></i></span><input type="number" class="stat-input" value="${char.gold || 0}" oninput="updateCharData(${char.id}, 'gold', this.value)"></div></div></div></div><div class="toggle-section inv-toggle" onclick="toggleSection('inv-${char.id}')"><i class="fas fa-shopping-bag"></i> ÇANTA <i class="fas fa-chevron-down"></i></div><div class="content-section" id="inv-${char.id}">${inventoryHtml}<button class="add-btn-small" style="color:#7bed9f;" onclick="addInventorySlot(${char.id})">+ Eşya Ekle</button></div><div class="toggle-section abil-toggle" onclick="toggleSection('abil-${char.id}')"><i class="fas fa-bolt"></i> YETENEKLER <i class="fas fa-chevron-down"></i></div><div class="content-section" id="abil-${char.id}">${abilitiesHtml}<button class="add-btn-small" style="color:#d6a2e8;" onclick="addAbilitySlot(${char.id})">+ Yetenek Ekle</button></div><div class="card-actions"><span class="del-btn" onclick="deleteCharacter(${char.id})">Sil</span></div></div>`; container.insertAdjacentHTML('beforeend', html); }); }
 
         // --- DICE & LOG & AUDIO ---
         let audioCtx, sfxGain; let sfxVolume = 0.6; let musicVolume = 0.5;
@@ -175,7 +178,6 @@ socket.on('herkes_icin_zar', (veri) => {
         function playTone(f,t) { if(!audioCtx)return; const o=audioCtx.createOscillator(); o.type=t; o.frequency.setValueAtTime(f,audioCtx.currentTime); const g=audioCtx.createGain(); g.gain.setValueAtTime(0.2,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+1); o.connect(g); g.connect(sfxGain); o.start(); o.stop(audioCtx.currentTime+1); }
         function playNoise() { if(!audioCtx)return; const bs=audioCtx.sampleRate*0.5; const b=audioCtx.createBuffer(1,bs,audioCtx.sampleRate); const d=b.getChannelData(0); for(let i=0;i<bs;i++)d[i]=Math.random()*2-1; const n=audioCtx.createBufferSource(); n.buffer=b; const f=audioCtx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=400; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.5,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.15); n.connect(f); f.connect(g); g.connect(sfxGain); n.start(); }
         
-        // GÜNCELLENMİŞ LOG FONKSİYONU
         function addLog(result, type, customTime) { 
             const logContainer = document.getElementById('diceLog'); 
             const now = new Date(); 
@@ -185,7 +187,6 @@ socket.on('herkes_icin_zar', (veri) => {
             logContainer.insertAdjacentHTML('afterbegin', html); 
         }
 
-        // GÜNCELLENMİŞ ROLL FONKSİYONU
         function roll() { 
             initAudio(); const resultDisplay = document.getElementById('result'); const btn = document.getElementById('btn'); 
             btn.disabled = true; btn.innerText = "Kader..."; document.body.classList.add('rolling'); resultDisplay.innerText = ''; resultDisplay.className = 'dice-number'; 
@@ -198,7 +199,6 @@ socket.on('herkes_icin_zar', (veri) => {
                 else if (num === 1) { resultDisplay.classList.add('crit-fail'); btn.style.borderColor = "#e74c3c"; playTone(150, 'sawtooth'); type = 'fail'; } 
                 else { if (num >= 10) { btn.style.borderColor = "#7bed9f"; playTone(880, 'sine'); } else { btn.style.borderColor = "#57606f"; playTone(100, 'triangle'); } } 
                 
-                // SOCKET İLE GÖNDER
                 socket.emit('zar_atildi', { sonuc: num, tur: type, zaman: new Date().getHours() + ":" + new Date().getMinutes() });
                 
                 btn.innerText = "ZARI AT"; btn.disabled = false; 
@@ -207,4 +207,3 @@ socket.on('herkes_icin_zar', (veri) => {
     </script>
 </body>
 </html>
-
