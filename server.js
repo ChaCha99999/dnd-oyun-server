@@ -5,6 +5,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 const path = require('path');
+const fs = require('fs'); // Dosya sistemi modülü
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
@@ -18,12 +19,39 @@ app.get('/', (req, res) => {
     }
 });
 
-// --- BELLEK ---
+// --- SUNUCU HAFIZASI & YEDEKLEME ---
+const BACKUP_FILE = 'backup.json';
 let serverPartyData = []; 
-let serverEnemies = []; // Düşmanlar geri geldi
+let serverEnemies = []; 
 let currentMapUrl = null; 
 let takenIdentities = []; 
 let dmLogHistory = [];
+
+// YEDEKTEN YÜKLE
+if (fs.existsSync(BACKUP_FILE)) {
+    try {
+        const rawData = fs.readFileSync(BACKUP_FILE);
+        const data = JSON.parse(rawData);
+        serverPartyData = data.party || [];
+        serverEnemies = data.enemies || [];
+        currentMapUrl = data.map || null;
+        console.log("Yedek yüklendi!");
+    } catch (e) {
+        console.error("Yedek yüklenemedi:", e);
+    }
+}
+
+// YEDEĞE KAYDET
+function saveBackup() {
+    const data = {
+        party: serverPartyData,
+        enemies: serverEnemies,
+        map: currentMapUrl
+    };
+    fs.writeFile(BACKUP_FILE, JSON.stringify(data, null, 2), (err) => {
+        if (err) console.error("Yedekleme hatası:", err);
+    });
+}
 
 function logToDM(type, sender, target, message) {
     const logEntry = {
@@ -37,7 +65,7 @@ function logToDM(type, sender, target, message) {
 io.on('connection', (socket) => {
   // GİRİŞ
   socket.emit('party_update_client', serverPartyData);
-  socket.emit('enemy_update_client', serverEnemies); // Düşmanları gönder
+  socket.emit('enemy_update_client', serverEnemies);
   if (currentMapUrl) socket.emit('map_update_client', currentMapUrl);
   socket.emit('update_taken_identities', takenIdentities);
   socket.emit('dm_log_history_load', dmLogHistory);
@@ -54,16 +82,21 @@ io.on('connection', (socket) => {
   
   socket.on('party_update', (yeniVeri) => {
       serverPartyData = yeniVeri;
+      saveBackup(); // KAYDET
       socket.broadcast.emit('party_update_client', serverPartyData);
   });
-
-  // DÜŞMAN GÜNCELLEME (YENİ)
+  
   socket.on('enemy_update', (enemies) => {
       serverEnemies = enemies;
+      saveBackup(); // KAYDET
       io.emit('enemy_update_client', serverEnemies);
   });
 
-  socket.on('map_change', (url) => { currentMapUrl = url; io.emit('map_update_client', url); });
+  socket.on('map_change', (url) => { 
+      currentMapUrl = url; 
+      saveBackup(); // KAYDET
+      io.emit('map_update_client', url); 
+  });
 
   // İLETİŞİM
   socket.on('dm_whisper', (d) => { io.emit('receive_whisper', d); logToDM('dm-sent', 'DM', d.targetName, d.message); });
